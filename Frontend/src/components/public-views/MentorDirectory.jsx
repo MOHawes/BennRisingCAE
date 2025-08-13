@@ -11,38 +11,6 @@ import "swiper/css";
 import { API_VIEW_MENTORS } from "../../constants/endpoints";
 
 const MentorDirectory = (props) => {
-  // Placeholder data for looping
-  // const mentorData = [
-  //   {
-  //     id: 1,
-  //     imageUrl:
-  //       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  //     title: "Mentor 1",
-  //     description: "This is a placeholder description for Mentor 1.",
-  //   },
-  //   {
-  //     id: 2,
-  //     imageUrl:
-  //       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  //     title: "Mentor 2",
-  //     description: "This is a placeholder description for Mentor 2.",
-  //   },
-  //   {
-  //     id: 3,
-  //     imageUrl:
-  //       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  //     title: "Mentor 3",
-  //     description: "This is a placeholder description for Mentor 3.",
-  //   },
-  //   {
-  //     id: 4,
-  //     imageUrl:
-  //       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  //     title: "Mentor 4",
-  //     description: "This is a placeholder description for Mentor 4.",
-  //   },
-  // ];
-
   // State to hold mentor data
   const [mentorData, setMentorData] = useState([]);
 
@@ -84,22 +52,25 @@ const MentorDirectory = (props) => {
     <>
       {/* Swiper Carousel */}
       <Swiper
-  direction="vertical"
-  spaceBetween={20}
-  slidesPerView={2}
-  mousewheel={true}
-  pagination={{
-    clickable: true,
-  }}
-  className="h-[1150px] w-full"
+        direction="vertical"
+        spaceBetween={20}
+        slidesPerView={2}
+        mousewheel={true}
+        pagination={{
+          clickable: true,
+        }}
+        className="h-[1150px] w-full"
       >
         {mentorData.map((mentor) => (
-          
-          <SwiperSlide key={mentor.id} className="flex items-center justify-center h-[500px]">
+          <SwiperSlide
+            key={mentor.id}
+            className="flex items-center justify-center h-[500px]"
+          >
             <CardPreview
               firstName={mentor.firstName}
               lastName={mentor.lastName}
-              profilePhoto={mentor.profilePhoto}
+              profilePhoto1={mentor.profilePhoto1}
+              profilePhoto2={mentor.profilePhoto2}
               interests={mentor.interests}
               projectCategory={mentor.projectCategory}
               questionToAsk={mentor.questionToAsk}

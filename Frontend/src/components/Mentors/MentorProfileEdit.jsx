@@ -11,12 +11,17 @@ const MentorProfileEdit = (props) => {
   const [updatedBio, setUpdatedBio] = useState("");
   // Update Question
   const [updatedQuestionToAsk, setUpdatedQuestionToAsk] = useState("");
-  // s3 image handling
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState("");
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState("");
+  // s3 image handling for two photos
+  const [selectedImage1, setSelectedImage1] = useState(null);
+  const [selectedImage2, setSelectedImage2] = useState(null);
+  const [imagePreview1, setImagePreview1] = useState(null);
+  const [imagePreview2, setImagePreview2] = useState(null);
+  const [isUploading1, setIsUploading1] = useState(false);
+  const [isUploading2, setIsUploading2] = useState(false);
+  const [uploadStatus1, setUploadStatus1] = useState("");
+  const [uploadStatus2, setUploadStatus2] = useState("");
+  const [profilePhotoUrl1, setProfilePhotoUrl1] = useState("");
+  const [profilePhotoUrl2, setProfilePhotoUrl2] = useState("");
   // Interests section
   const [selectedInterests, setSelectedInterests] = useState(
     props.mentor.interests || []
@@ -39,29 +44,56 @@ const MentorProfileEdit = (props) => {
     "Politics",
   ];
 
-  // Handle image selection
-  const handleImageSelect = (e) => {
+  // Handle image selection for photo 1
+  const handleImageSelect1 = (e) => {
     const file = e.target.files[0];
 
     if (file) {
-      setSelectedImage(file);
+      setSelectedImage1(file);
 
       // image preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview1(reader.result);
       };
       reader.readAsDataURL(file);
 
       // Reset uploadstatus message
-      setUploadStatus("");
+      setUploadStatus1("");
     }
   };
 
-  // Upload image to S3
-  const uploadImage = async () => {
+  // Handle image selection for photo 2
+  const handleImageSelect2 = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setSelectedImage2(file);
+
+      // image preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview2(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Reset uploadstatus message
+      setUploadStatus2("");
+    }
+  };
+
+  // Upload image to S3 (generic function)
+  const uploadImage = async (
+    selectedImage,
+    setIsUploading,
+    setUploadStatus,
+    setProfilePhotoUrl,
+    photoNumber
+  ) => {
     if (!selectedImage) {
-      setUploadStatus("Please select an image first");
+      setUploadStatus(
+        `Please select an image for team member ${photoNumber} first`
+      );
       return;
     }
 
@@ -141,7 +173,7 @@ const MentorProfileEdit = (props) => {
     }
 
     try {
-      console.log("Submmit Clicked");
+      console.log("Submit Clicked");
       // Headers
       let myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
@@ -156,7 +188,8 @@ const MentorProfileEdit = (props) => {
       if (updatedEmail) body.email = updatedEmail;
       if (updatedBio) body.bio = updatedBio;
       if (updatedQuestionToAsk) body.questionToAsk = updatedQuestionToAsk;
-      if (profilePhotoUrl) body.profilePhoto = profilePhotoUrl;
+      if (profilePhotoUrl1) body.profilePhoto1 = profilePhotoUrl1;
+      if (profilePhotoUrl2) body.profilePhoto2 = profilePhotoUrl2;
 
       console.log("Selected interests:", selectedInterests);
       // Only update if 4 interests selected
@@ -195,9 +228,12 @@ const MentorProfileEdit = (props) => {
       setUpdatedEmail("");
       setUpdatedBio("");
       setUpdatedQuestionToAsk("");
-      setSelectedImage(null);
-      setImagePreview(null);
-      setProfilePhotoUrl("");
+      setSelectedImage1(null);
+      setSelectedImage2(null);
+      setImagePreview1(null);
+      setImagePreview2(null);
+      setProfilePhotoUrl1("");
+      setProfilePhotoUrl2("");
       setSelectedInterests([]);
 
       // Close form and refresh with new data
@@ -336,62 +372,135 @@ const MentorProfileEdit = (props) => {
               )}
             </div>
 
-            {/* Profile Photo Upload Section */}
-            <label className="label-text font-bold text-lg text-center mb-2 mt-4">
-              Upload Profile Photo:
-            </label>
-            <div className="flex flex-col items-center w-full max-w-xl pb-6">
-              {/* Show image preview (circle) */}
-              {imagePreview && (
-                <div className="mb-4">
-                  <img
-                    src={imagePreview}
-                    alt="Profile Preview"
-                    className="w-32 h-32 object-cover rounded-full"
+            {/* Profile Photos Upload Section - Two Photos */}
+            <div className="w-full max-w-xl">
+              <label className="label-text font-bold text-lg text-center mb-4 mt-4 block">
+                Upload Team Member Photos:
+              </label>
+
+              <div className="flex flex-col md:flex-row gap-6 justify-center">
+                {/* Team Member 1 Photo */}
+                <div className="flex flex-col items-center">
+                  <p className="text-md font-semibold mb-2">Team Member 1</p>
+                  {/* Show image preview (circle) */}
+                  {imagePreview1 && (
+                    <div className="mb-4">
+                      <img
+                        src={imagePreview1}
+                        alt="Team Member 1 Preview"
+                        className="w-32 h-32 object-cover rounded-full"
+                      />
+                    </div>
+                  )}
+
+                  {/* file selection */}
+                  <input
+                    className="file-input file-input-bordered w-full max-w-xs mb-4"
+                    onChange={handleImageSelect1}
+                    id="profilePhotoUpdate1"
+                    name="profilePhoto1"
+                    type="file"
+                    accept="image/*"
                   />
+
+                  {/* Upload button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      uploadImage(
+                        selectedImage1,
+                        setIsUploading1,
+                        setUploadStatus1,
+                        setProfilePhotoUrl1,
+                        1
+                      )
+                    }
+                    disabled={!selectedImage1 || isUploading1}
+                    className="btn btn-primary mb-2"
+                  >
+                    {isUploading1 ? "Uploading..." : "Upload Photo 1"}
+                  </button>
+
+                  {/* Status message */}
+                  {uploadStatus1 && (
+                    <p
+                      className={`text-sm ${
+                        uploadStatus1.includes("failed")
+                          ? "text-red-500"
+                          : uploadStatus1.includes("successful")
+                          ? "text-green-500"
+                          : "text-blue-500"
+                      }`}
+                    >
+                      {uploadStatus1}
+                    </p>
+                  )}
                 </div>
-              )}
 
-              {/* file selection */}
-              <input
-                className="file-input file-input-bordered w-full max-w-xl mb-4"
-                onChange={handleImageSelect}
-                id="profilePhotoUpdate"
-                name="profilePhoto"
-                type="file"
-                accept="image/*"
-              />
+                {/* Team Member 2 Photo */}
+                <div className="flex flex-col items-center">
+                  <p className="text-md font-semibold mb-2">Team Member 2</p>
+                  {/* Show image preview (circle) */}
+                  {imagePreview2 && (
+                    <div className="mb-4">
+                      <img
+                        src={imagePreview2}
+                        alt="Team Member 2 Preview"
+                        className="w-32 h-32 object-cover rounded-full"
+                      />
+                    </div>
+                  )}
 
-              {/* Upload button */}
-              <button
-                type="button"
-                onClick={uploadImage}
-                disabled={!selectedImage || isUploading}
-                className="btn btn-primary mb-2"
-              >
-                {isUploading ? "Uploading..." : "Upload Photo"}
-              </button>
+                  {/* file selection */}
+                  <input
+                    className="file-input file-input-bordered w-full max-w-xs mb-4"
+                    onChange={handleImageSelect2}
+                    id="profilePhotoUpdate2"
+                    name="profilePhoto2"
+                    type="file"
+                    accept="image/*"
+                  />
 
-              {/* Status message */}
-              {uploadStatus && (
-                <p
-                  className={`text-sm ${
-                    uploadStatus.includes("failed")
-                      ? "text-red-500"
-                      : uploadStatus.includes("successful")
-                      ? "text-green-500"
-                      : "text-blue-500"
-                  }`}
-                >
-                  {uploadStatus}
-                </p>
-              )}
+                  {/* Upload button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      uploadImage(
+                        selectedImage2,
+                        setIsUploading2,
+                        setUploadStatus2,
+                        setProfilePhotoUrl2,
+                        2
+                      )
+                    }
+                    disabled={!selectedImage2 || isUploading2}
+                    className="btn btn-primary mb-2"
+                  >
+                    {isUploading2 ? "Uploading..." : "Upload Photo 2"}
+                  </button>
+
+                  {/* Status message */}
+                  {uploadStatus2 && (
+                    <p
+                      className={`text-sm ${
+                        uploadStatus2.includes("failed")
+                          ? "text-red-500"
+                          : uploadStatus2.includes("successful")
+                          ? "text-green-500"
+                          : "text-blue-500"
+                      }`}
+                    >
+                      {uploadStatus2}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="w-full flex justify-center">
               <button
                 type="button"
-                className="btn btn-soft btn-primary text-lg mt-4"
+                className="btn btn-soft btn-primary text-lg mt-6"
                 onClick={handleSubmit}
               >
                 Update Profile
