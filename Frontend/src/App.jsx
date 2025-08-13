@@ -23,19 +23,25 @@ import ConsentSubmitted from "./components/Consent/ConsentSubmitted";
 import GenericConsentPage from "./components/Consent/GenericConsentPage";
 
 function App() {
-  //state variable for token and initialize to the value of the token stored in local storage
+  // State variable for token and initialize to the value of the token stored in local storage
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  //updateToken to update token state variable and store the token in the local storage
+  // Update token function to update token state variable and store the token in the local storage
   function updateToken(newToken) {
     setToken(newToken);
-    localStorage.setItem("token", newToken);
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+    } else {
+      // Clear everything when logging out
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
   }
 
-  //useEffect hook that will run the component mounts. useEffect should check if token is stored in local storage and update the token state variable if a token is stored
-
+  // useEffect hook that will run when the component mounts
+  // useEffect should check if token is stored in local storage and update the token state variable if a token is stored
   useEffect(() => {
-    let storedToken = localStorage.getItem("token");
+    const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
     }
@@ -47,27 +53,32 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage token={token} />} />
         <Route path="/mentors" element={<MentorsPage token={token} />} />
-        <Route path="/mentees" element={<MenteePage token={token} />} />{" "}
+        <Route path="/mentees" element={<MenteePage token={token} />} />
         {/* Added route for mentees */}
-        <Route path="/mentorMatchList" element={<MentorMatchList />} />
-        <Route path="/updateProfile" element={<MentorProfile />} />
-        <Route path="/mentor" element={<MentorDashboard token={token} />} />
-        <Route path="/mentee" element={<MenteeDashboard token={token} />} />
-        <Route path="/admin" element={<AdminDashboard token={token} />} />
-        <Route path="/logout" element={<Logout setToken={setToken} />} />
-        <Route
-          path="/adminMentorList"
-          element={<AdminMentorList token={token} />}
-        />
         <Route
           path="/mentorMatchList"
           element={<MentorMatchList token={token} />}
         />
         <Route
+          path="/updateProfile"
+          element={<MentorProfile token={token} />}
+        />
+        <Route path="/mentor" element={<MentorDashboard token={token} />} />
+        <Route path="/mentee" element={<MenteeDashboard token={token} />} />
+        <Route path="/admin" element={<AdminDashboard token={token} />} />
+        <Route path="/logout" element={<Logout setToken={updateToken} />} />
+        <Route
+          path="/adminMentorList"
+          element={<AdminMentorList token={token} />}
+        />
+        <Route
           path="/mentorPendingRequest"
           element={<MentorPendingRequest token={token} />}
         />
-        <Route path="/menteePreview" element={<MenteePreview />} />
+        <Route
+          path="/menteePreview"
+          element={<MenteePreview token={token} />}
+        />
         <Route path="/signup" element={<Auth updateToken={updateToken} />} />
         <Route
           path="/login"

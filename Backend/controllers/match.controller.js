@@ -28,6 +28,27 @@ router.get("/consent-info/:matchRequestId", async (req, res) => {
   try {
     const { matchRequestId } = req.params;
 
+    // Handle test case for development
+    if (
+      matchRequestId === "test-match-id" ||
+      matchRequestId === "test-match-request-id"
+    ) {
+      // Return mock data for testing
+      return res.status(200).json({
+        menteeName: "Test Student",
+        mentorName: "Test Mentor",
+        projectCategory: "Science",
+        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours from now
+      });
+    }
+
+    // For real match requests, validate ObjectId
+    if (!matchRequestId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid match request ID format",
+      });
+    }
+
     const matchRequest = await MatchRequest.findById(matchRequestId)
       .populate("menteeId", "firstName lastName")
       .populate("mentorId", "firstName lastName projectCategory");
@@ -222,6 +243,34 @@ router.post("/consent/:matchRequestId", async (req, res) => {
     const { matchRequestId } = req.params;
     const { approved, guardianName, childName, guardianEmail, guardianPhone } =
       req.body;
+
+    // Handle test case for development
+    if (
+      matchRequestId === "test-match-id" ||
+      matchRequestId === "test-match-request-id"
+    ) {
+      // Simulate successful submission for testing
+      console.log("Test consent form submitted:", {
+        approved,
+        guardianName,
+        childName,
+        guardianEmail,
+        guardianPhone,
+      });
+
+      return res.status(200).json({
+        message: approved
+          ? "Test consent approved successfully"
+          : "Test consent declined successfully",
+      });
+    }
+
+    // For real match requests, validate ObjectId
+    if (!matchRequestId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid match request ID format",
+      });
+    }
 
     const matchRequest = await MatchRequest.findById(matchRequestId)
       .populate("menteeId")
