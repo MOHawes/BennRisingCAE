@@ -6,7 +6,8 @@ import MentorProfileEdit from "./MentorProfileEdit.jsx";
 const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
   const [mentor, setMentor] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [imageError1, setImageError1] = useState(false);
+  const [imageError2, setImageError2] = useState(false);
 
   const fetchMentorData = async () => {
     try {
@@ -24,19 +25,22 @@ const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
       console.log("Mentor data:", data);
       setMentor(data.user || data);
 
-      // Check if the profile is complete
+      // Check if the profile is complete - now requires both photos
       const requiredFields = [
         "firstName",
         "lastName",
-        "profilePhoto",
+        "profilePhoto1",
+        "profilePhoto2",
         "bio",
-        "email, interests",
+        "email",
+        "interests",
       ];
       const isComplete = requiredFields.every((field) => data.user[field]);
-      onProfileUpdate(isComplete); // Trigger parent update with completeness status
+      onProfileUpdate(isComplete);
 
-      // Reset image error when we get updated data is found
-      setImageError(false);
+      // Reset image errors when we get updated data
+      setImageError1(false);
+      setImageError2(false);
     } catch (error) {
       console.error("Error fetching mentor data:", error);
     }
@@ -47,9 +51,14 @@ const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
   }, [token]);
 
   // Handle image loading errors
-  const handleImageError = () => {
-    console.log("Image failed to load");
-    setImageError(true);
+  const handleImageError1 = () => {
+    console.log("Image 1 failed to load");
+    setImageError1(true);
+  };
+
+  const handleImageError2 = () => {
+    console.log("Image 2 failed to load");
+    setImageError2(true);
   };
 
   if (!mentor) return <div className="text-center mt-10">Loading...</div>;
@@ -102,20 +111,37 @@ const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
             {mentor.projectCategory}
           </span>
         </div>
-        {/* Profile Photo  */}
-        <div className="flex justify-center items-center px-4 pt-6">
-          <img
-            src={
-              // Use profile photo if provided or use placeholder
-              imageError || !mentor.profilePhoto
-                ? "../../../assets/blank-profile-picture-973460_1280.png"
-                : mentor.profilePhoto
-            }
-            alt={`${mentor.firstName} ${mentor.lastName}`}
-            className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-cover rounded-md"
-            onError={handleImageError}
-          />
+
+        {/* Profile Photos - Two side by side */}
+        <div className="flex justify-center items-center px-4 pt-6 gap-4">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">Team Member 1</p>
+            <img
+              src={
+                imageError1 || !mentor.profilePhoto1
+                  ? "../../../assets/blank-profile-picture-973460_1280.png"
+                  : mentor.profilePhoto1
+              }
+              alt={`${mentor.firstName} ${mentor.lastName} - Team Member 1`}
+              className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-cover rounded-md"
+              onError={handleImageError1}
+            />
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">Team Member 2</p>
+            <img
+              src={
+                imageError2 || !mentor.profilePhoto2
+                  ? "../../../assets/blank-profile-picture-973460_1280.png"
+                  : mentor.profilePhoto2
+              }
+              alt={`${mentor.firstName} ${mentor.lastName} - Team Member 2`}
+              className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-cover rounded-md"
+              onError={handleImageError2}
+            />
+          </div>
         </div>
+
         {/* Interest List */}
         <div className="flex flex-col items-center text-center py-4">
           <p className="font-bold text-xl text-gray-700 mb-1">Interests:</p>

@@ -12,6 +12,8 @@ const bcrypt = require("bcrypt");
 const Mentor = require("../models/mentor.model");
 const Mentee = require("../models/mentee.model");
 const Admin = require("../models/admin.model");
+// Import email service
+const { sendWelcomeEmail } = require("../services/emailService");
 
 // ! Register user route
 // Endpoint: http://localhost:4000/user/register
@@ -118,6 +120,20 @@ router.post("/register", async (req, res) => {
     //  Save the new user in the database and store the response in a variable (saved user)
     const newUser = await user.save();
 
+    // Send welcome email to new mentees
+    if (userType === "Mentee") {
+      try {
+        await sendWelcomeEmail(
+          newUser.email,
+          `${newUser.firstName} ${newUser.lastName}`
+        );
+        console.log("Welcome email sent successfully");
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Don't fail the registration if email fails
+      }
+    }
+
     // Create JWT token
     const token = jwt.sign({ id: newUser._id, userType: userType }, "secret", {
       expiresIn: "7d",
@@ -222,6 +238,8 @@ router.put(
         password,
         bio,
         profilePhoto,
+        profilePhoto1,
+        profilePhoto2,
         interests,
         questionToAsk,
         projectCategory,
@@ -240,9 +258,20 @@ router.put(
       if (password !== undefined && password.trim() !== "")
         updatedInfo.password = bcrypt.hashSync(password, 10);
       if (bio !== undefined && bio.trim() !== "") updatedInfo.bio = bio;
+
+      // Handle both old single photo and new two-photo system
       if (profilePhoto !== undefined && profilePhoto.trim() !== "")
         updatedInfo.profilePhoto = profilePhoto;
-      if (interests !== undefined && Array.isArray(interests) && interests.length > 0) 
+      if (profilePhoto1 !== undefined && profilePhoto1.trim() !== "")
+        updatedInfo.profilePhoto1 = profilePhoto1;
+      if (profilePhoto2 !== undefined && profilePhoto2.trim() !== "")
+        updatedInfo.profilePhoto2 = profilePhoto2;
+
+      if (
+        interests !== undefined &&
+        Array.isArray(interests) &&
+        interests.length > 0
+      )
         updatedInfo.interests = interests;
       if (questionToAsk !== undefined && questionToAsk.trim() !== "")
         updatedInfo.questionToAsk = questionToAsk;
@@ -271,6 +300,8 @@ router.put(
           email: updatedMentor.email,
           bio: updatedMentor.bio,
           profilePhoto: updatedMentor.profilePhoto,
+          profilePhoto1: updatedMentor.profilePhoto1,
+          profilePhoto2: updatedMentor.profilePhoto2,
           interests: updatedMentor.interests,
           questionToAsk: updatedMentor.questionToAsk,
           projectCategory: updatedMentor.projectCategory,
@@ -318,7 +349,11 @@ router.put(
         updatedInfo.password = bcrypt.hashSync(password, 10);
       if (guardianEmail !== undefined && guardianEmail.trim() !== "")
         updatedInfo.guardianEmail = guardianEmail;
-      if (interests !== undefined && Array.isArray(interests) && interests.length > 0) 
+      if (
+        interests !== undefined &&
+        Array.isArray(interests) &&
+        interests.length > 0
+      )
         updatedInfo.interests = interests;
 
       // Update the mentee in database
@@ -404,6 +439,8 @@ router.get("/mentor/view-all", async (req, res) => {
       interests: mentor.interests || "",
       questionToAsk: mentor.questionToAsk || "",
       profilePhoto: mentor.profilePhoto || "",
+      profilePhoto1: mentor.profilePhoto1 || "",
+      profilePhoto2: mentor.profilePhoto2 || "",
       projectCategory: mentor.projectCategory || "",
     }));
 
@@ -431,21 +468,32 @@ router.put("/completion", validateSession, async (req, res) => {
     // ! If user is mentor, update MENTOR specific profile fields
     if (req.userType === "Mentor") {
       // Extract mentor fields from req.body
-      const { bio, profilePhoto, interests, questionToAsk, projectCategory } =
-        req.body;
+      const {
+        bio,
+        profilePhoto,
+        profilePhoto1,
+        profilePhoto2,
+        interests,
+        questionToAsk,
+        projectCategory,
+      } = req.body;
 
       profileInfo = {
         bio: bio || "",
         profilePhoto: profilePhoto || "",
+        profilePhoto1: profilePhoto1 || "",
+        profilePhoto2: profilePhoto2 || "",
         interests: interests || "",
         questionToAsk: questionToAsk || "",
         projectCategory: projectCategory || "",
       };
 
       // Check if all required fields are completed, if not set isProfileComplete = false
+      // Now requiring both photos for complete profile
       if (
         !bio ||
-        !profilePhoto ||
+        !profilePhoto1 ||
+        !profilePhoto2 ||
         !interests ||
         !questionToAsk ||
         !projectCategory
@@ -495,7 +543,7 @@ router.put("/profile-photo", validateSession, async (req, res) => {
     const id = req.user._id;
 
     //  2. get image URL from req.body
-    const { profilePhoto } = req.body;
+    const { profilePhoto, profilePhoto1, profilePhoto2 } = req.body;
 
     // Check that user is a mentor before updating
     if (req.userType !== "Mentor") {
@@ -503,25 +551,35 @@ router.put("/profile-photo", validateSession, async (req, res) => {
         message: "Only mentors need to upload a profile photo",
       });
     }
-    // if no photo url is found, return error
-    if (!profilePhoto) {
+
+    // Build update object based on which photos are provided
+    const updateData = {};
+    if (profilePhoto) updateData.profilePhoto = profilePhoto;
+    if (profilePhoto1) updateData.profilePhoto1 = profilePhoto1;
+    if (profilePhoto2) updateData.profilePhoto2 = profilePhoto2;
+
+    // if no photo urls are found, return error
+    if (Object.keys(updateData).length === 0) {
       return res
         .status(400)
         .json({ message: "Photo seems to be missing! Try again" });
     }
 
     // Update user info with profilePhoto (findByIdAndUpdate)
-    const updatedMentor = await Mentor.findByIdAndUpdate(
-      id,
-      { profilePhoto: profilePhoto },
-      { new: true }
-    );
+    const updatedMentor = await Mentor.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     // if no user found, give error
     if (!updatedMentor) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({ message: `route works` });
+    res.status(200).json({
+      message: `Profile photo(s) updated successfully`,
+      profilePhoto: updatedMentor.profilePhoto,
+      profilePhoto1: updatedMentor.profilePhoto1,
+      profilePhoto2: updatedMentor.profilePhoto2,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -556,6 +614,8 @@ router.get("/mentor/profile", validateSession, async (req, res) => {
         email: mentor.email,
         bio: mentor.bio || "",
         profilePhoto: mentor.profilePhoto || "",
+        profilePhoto1: mentor.profilePhoto1 || "",
+        profilePhoto2: mentor.profilePhoto2 || "",
         interests: mentor.interests || "",
         questionToAsk: mentor.questionToAsk || "",
         projectCategory: mentor.projectCategory || "",

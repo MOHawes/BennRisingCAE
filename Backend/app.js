@@ -6,7 +6,7 @@ const app = express();
 const userController = require("./controllers/user.controller");
 const matchController = require("./controllers/match.controller");
 const adminController = require("./controllers/admin.controller");
-
+const { sendTestEmailSuite } = require("./services/emailService");
 
 // ! Connecting to the Database
 mongoose.connect(process.env.MONGO_URI);
@@ -18,7 +18,6 @@ app.use(express.json());
 
 // add cors before routes
 app.use(cors());
-
 
 //  *** TODO Controller Routes BELOW ***
 app.use("/user", userController);
@@ -42,6 +41,35 @@ app.get("/geturl", async (req, res) => {
     res.status(500).json({ message: "Failed to generate image upload URL" });
   }
 });
+
+// Test endpoint for emails (only available in development)
+if (process.env.NODE_ENV !== "production") {
+  app.get("/test/emails", async (req, res) => {
+    try {
+      if (process.env.EMAIL_TEST_MODE !== "true") {
+        return res.status(400).json({
+          message:
+            "Email test mode is not enabled. Set EMAIL_TEST_MODE=true in .env",
+        });
+      }
+
+      console.log("Running email test suite...");
+      const results = await sendTestEmailSuite();
+
+      res.status(200).json({
+        message: "Test emails sent successfully",
+        testEmail: process.env.TEST_EMAIL_ADDRESS,
+        results: results,
+      });
+    } catch (error) {
+      console.error("Error sending test emails:", error);
+      res.status(500).json({
+        message: "Error sending test emails",
+        error: error.message,
+      });
+    }
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`server is running on port: ${PORT}, listening on ${HOST}`);

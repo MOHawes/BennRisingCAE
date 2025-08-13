@@ -4,6 +4,14 @@ export const navMenu = [
         href: "/",
     },
     {
+        name: "Team Coordinators",
+        href: "/mentors",
+    },
+    {
+        name: "Mentees",
+        href: "/mentees",
+    },
+    {
         name: "Parents",
         href: "/parents",
     },

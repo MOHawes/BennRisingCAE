@@ -2,6 +2,8 @@ import "./App.css";
 import React, { useState, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
+import MentorsPage from "./pages/MentorPage"; // Mentor import path
+import MenteePage from "./pages/MenteePage"; // Added Mentee import
 import Navbar from "./components/public-views/Navbar";
 import Footer from "./components/public-views/Footer";
 import Auth from "./components/auth/Auth";
@@ -16,6 +18,9 @@ import AdminDashboard from "./components/Admin/AdminDashboard";
 import AdminMentorList from "./components/Admin/Mentor-List/AdminMentorList";
 import Login from "./components/auth/login-section/login";
 import Logout from "./components/auth/Logout";
+import ParentConsentForm from "./components/Consent/ParentConsentForm";
+import ConsentSubmitted from "./components/Consent/ConsentSubmitted";
+import GenericConsentPage from "./components/Consent/GenericConsentPage";
 
 function App() {
   //state variable for token and initialize to the value of the token stored in local storage
@@ -38,21 +43,18 @@ function App() {
 
   return (
     <>
-      <Navbar token={token}/>
+      <Navbar token={token} />
       <Routes>
-        <Route path="/" element={<HomePage token={token}/>} />
-        {/* <Route path="/mentor" element={<MentorDashboard />} /> */}
-        {/* <Route path="/mentee" element={<MenteeDashboard />} /> */}
-        {/* <Route path="/adminDashboard" element={<AdminDashboard />} /> */}
+        <Route path="/" element={<HomePage token={token} />} />
+        <Route path="/mentors" element={<MentorsPage token={token} />} />
+        <Route path="/mentees" element={<MenteePage token={token} />} />{" "}
+        {/* Added route for mentees */}
         <Route path="/mentorMatchList" element={<MentorMatchList />} />
         <Route path="/updateProfile" element={<MentorProfile />} />
         <Route path="/mentor" element={<MentorDashboard token={token} />} />
-        <Route path="/mentee" element={<MenteeDashboard token={token}/>} />
-        <Route path="/admin" element={<AdminDashboard token={token}/>} />
-        <Route path="/logout" element={<Logout setToken={setToken}/>} />
-        {/* <Route path="/updateProfile" element={<MentorProfile />} /> */}
-        {/* <Route path="/createMentor" element={<CreateMentor />} /> */}
-        
+        <Route path="/mentee" element={<MenteeDashboard token={token} />} />
+        <Route path="/admin" element={<AdminDashboard token={token} />} />
+        <Route path="/logout" element={<Logout setToken={setToken} />} />
         <Route
           path="/adminMentorList"
           element={<AdminMentorList token={token} />}
@@ -66,15 +68,18 @@ function App() {
           element={<MentorPendingRequest token={token} />}
         />
         <Route path="/menteePreview" element={<MenteePreview />} />
-        {/* Commented out because using in route /mentor instead (see above) */}
-        {/* <Route path="/mentorDashboard" element={<MentorDashboard />} /> */}
         <Route path="/signup" element={<Auth updateToken={updateToken} />} />
-        <Route path="/login" element={<Login token={token} updateToken={updateToken}  />} />
+        <Route
+          path="/login"
+          element={<Login token={token} updateToken={updateToken} />}
+        />
+        <Route
+          path="/consent/:matchRequestId"
+          element={<ParentConsentForm />}
+        />
+        <Route path="/consent-submitted" element={<ConsentSubmitted />} />
+        <Route path="/consent-info" element={<GenericConsentPage />} />
       </Routes>
-      {/* <div className="content-body">
-        {!token && <Auth updateToken={updateToken} />}
-        {token && <MainIndex token={token} />}
-      </div> */}
       <Footer />
     </>
   );

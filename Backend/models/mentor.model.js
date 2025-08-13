@@ -41,9 +41,21 @@ const MentorSchema = new mongoose.Schema({
       ref: "Mentee",
     },
   ],
+
+  // Two profile photos for team members
+  profilePhoto1: {
+    type: String, // URL for uploaded photo - Team Member 1
+    required: false,
+  },
+  profilePhoto2: {
+    type: String, // URL for uploaded photo - Team Member 2
+    required: false,
+  },
+
+  // Keeping the old field for backward compatibility during migration
   profilePhoto: {
-    type: String, // URL for uploaded photo
-    required: false, // Changed from true to false after initial push
+    type: String, // URL for uploaded photo (deprecated - use profilePhoto1 and profilePhoto2)
+    required: false,
   },
 
   bio: {
