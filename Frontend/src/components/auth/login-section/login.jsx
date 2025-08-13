@@ -42,10 +42,13 @@ const Login = (props) => {
       console.log(data);
       props.updateToken(data.token);
 
+      // Store user info in localStorage for navbar
+      localStorage.setItem("user", JSON.stringify(data.user));
+
       //route to userType login
       if (data.user.userType === "Admin") {
         // window.location.href = "/admin"; // Redirect to admin dashboard
-        navigate("/admin");;
+        navigate("/admin");
         alert(`Login Successful! as ${data.user.userType}`); // Show success message
       } else if (data.user.userType === "Mentor") {
         // window.location.href = "/mentor"; // Redirect to mentor page
@@ -60,6 +63,7 @@ const Login = (props) => {
       }
     } catch (error) {
       console.log(error);
+      alert("Login Failed! Check your email and password."); // Show error on catch
     }
   }
   return (

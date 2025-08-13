@@ -60,7 +60,41 @@ router.post("/mentor/create", validateSession, validateAdmin, async (req, res) =
     res.json({ message: error.message });
   }
 });
+// POST /admin/create-admin
+router.post("/create-admin", validateSession, validateAdmin, async (req, res) => {
+  try {
+    const { firstName, lastName, email, password } = req.body;
 
+    // Check if admin already exists
+    const existingAdmin = await Admin.findOne({ email: email });
+    if (existingAdmin) {
+      return res.status(400).json({ message: "Admin with this email already exists" });
+    }
+
+    // Create new admin
+    const newAdmin = new Admin({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: bcrypt.hashSync(password, 10),
+    });
+
+    await newAdmin.save();
+
+    res.status(201).json({
+      message: "New admin successfully created!",
+      admin: {
+        id: newAdmin._id,
+        firstName: newAdmin.firstName,
+        lastName: newAdmin.lastName,
+        email: newAdmin.email,
+        userType: "Admin",
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 // ! ADD VALIDATE SESSION
 // TODO PUT /admin/mentor/update/:id
 router.put("/mentor/update/:id", validateSession, validateAdmin, async (req, res) => {

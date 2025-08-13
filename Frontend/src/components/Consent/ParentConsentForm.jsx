@@ -13,10 +13,23 @@ const ParentConsentForm = () => {
   
   // Form fields
   const [parentName, setParentName] = useState('');
-  const [childName, setChildName] = useState('');
-  const [parentEmail, setParentEmail] = useState('');
   const [parentPhone, setParentPhone] = useState('');
   const [consentDecision, setConsentDecision] = useState('');
+  const [pdfViewed, setPdfViewed] = useState(false);
+  
+  // Extract first name from menteeName
+  const menteeFirstName = matchInfo?.menteeName?.split(' ')[0] || '';
+  
+  // PDF URL - Update this with your actual PDF location
+  // Option 1: If PDF is in public folder
+  const pdfUrl = '/consent-form.pdf';
+  
+  // Option 2: If you need to import from assets (uncomment and use)
+  // import consentPdf from '../../assets/consent-form.pdf';
+  // const pdfUrl = consentPdf;
+  
+  // Option 3: External URL
+  // const pdfUrl = 'https://example.com/path-to-consent-form.pdf';
   
   // Fetch match request info on load
   useEffect(() => {
@@ -41,12 +54,27 @@ const ParentConsentForm = () => {
     }
   };
   
+  // Handle checkbox selection (only one at a time)
+  const handleConsentChange = (value) => {
+    // If clicking the same checkbox, uncheck it
+    if (consentDecision === value) {
+      setConsentDecision('');
+    } else {
+      setConsentDecision(value);
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
-    if (!parentName || !childName || !parentEmail || !parentPhone || !consentDecision) {
+    if (!parentName || !parentPhone || !consentDecision) {
       setError('Please fill in all fields and select a consent option');
+      return;
+    }
+    
+    if (!pdfViewed) {
+      setError('Please confirm that you have viewed the consent form PDF');
       return;
     }
     
@@ -61,8 +89,8 @@ const ParentConsentForm = () => {
         },
         body: JSON.stringify({
           guardianName: parentName,
-          childName: childName,
-          guardianEmail: parentEmail,
+          childName: matchInfo?.menteeName || 'Not provided', // Use the mentee name from matchInfo
+          guardianEmail: 'placeholder@email.com', // Since we already have it
           guardianPhone: parentPhone,
           approved: consentDecision === 'approve'
         })
@@ -113,7 +141,7 @@ const ParentConsentForm = () => {
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -140,9 +168,75 @@ const ParentConsentForm = () => {
           </div>
         )}
         
+        {/* PDF Viewer Section - Thumbnail */}
+        <div className="bg-amber-50 border-2 border-amber-300 shadow-md rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-4">
+            {/* PDF Thumbnail */}
+            <div className="flex-shrink-0">
+              <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+                <iframe
+                  src={pdfUrl}
+                  width="120"
+                  height="150"
+                  title="Consent Form PDF"
+                  className="pointer-events-none"
+                  scrolling="no"
+                >
+                  <div className="w-[120px] h-[150px] bg-gray-100 flex items-center justify-center">
+                    <span className="text-gray-400 text-4xl">📄</span>
+                  </div>
+                </iframe>
+              </div>
+            </div>
+            
+            {/* PDF Info and Links */}
+            <div className="flex-grow">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-amber-900">
+                  Program Consent Form (PDF)
+                </h3>
+                <span className="text-xs text-amber-700 font-medium bg-amber-200 px-2 py-1 rounded">
+                  Required Reading
+                </span>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-3">
+                Please review the full consent form before proceeding.
+              </p>
+              
+              <div className="flex gap-4 text-sm">
+                <a 
+                  href={pdfUrl} 
+                  className="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  🔗 Open PDF
+                </a>
+                <a 
+                  href={pdfUrl} 
+                  download
+                  className="inline-flex items-center px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                >
+                  ⬇️ Download
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         {/* Consent Form */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Welcome message with mentee's first name */}
+            {menteeFirstName && (
+              <div className="text-center mb-4">
+                <p className="text-lg text-gray-700">
+                  Please complete this consent form for <strong>{menteeFirstName}</strong>'s participation in the Bennington Rising Program.
+                </p>
+              </div>
+            )}
+            
             {/* Parent/Guardian Name */}
             <div>
               <label htmlFor="parentName" className="block text-sm font-medium text-gray-700">
@@ -153,36 +247,6 @@ const ParentConsentForm = () => {
                 id="parentName"
                 value={parentName}
                 onChange={(e) => setParentName(e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
-            {/* Child's Name */}
-            <div>
-              <label htmlFor="childName" className="block text-sm font-medium text-gray-700">
-                Child's name:
-              </label>
-              <input
-                type="text"
-                id="childName"
-                value={childName}
-                onChange={(e) => setChildName(e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
-            {/* Parent Email */}
-            <div>
-              <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700">
-                Parent/guardian email address:
-              </label>
-              <input
-                type="email"
-                id="parentEmail"
-                value={parentEmail}
-                onChange={(e) => setParentEmail(e.target.value)}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
                 required
               />
@@ -204,34 +268,53 @@ const ParentConsentForm = () => {
               />
             </div>
             
-            {/* Consent Decision */}
+            {/* PDF Viewed Confirmation */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <label className="flex items-start cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={pdfViewed}
+                  onChange={(e) => setPdfViewed(e.target.checked)}
+                  className="mt-1 mr-3 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700">
+                  I confirm that I have reviewed the Bennington Rising Program consent form PDF above
+                </span>
+              </label>
+            </div>
+            
+            {/* Consent Decision with colored checkboxes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Check one of the following:
               </label>
-              <div className="space-y-2">
-                <label className="flex items-start">
+              <div className="space-y-3">
+                {/* Approve checkbox - Green */}
+                <label className="flex items-start cursor-pointer hover:bg-green-50 p-2 rounded-md transition-colors">
                   <input
-                    type="radio"
-                    name="consent"
-                    value="approve"
-                    onChange={(e) => setConsentDecision(e.target.value)}
-                    className="mt-1 mr-2"
-                    required
+                    type="checkbox"
+                    checked={consentDecision === 'approve'}
+                    onChange={() => handleConsentChange('approve')}
+                    className="mt-1 mr-3 h-5 w-5 text-green-600 border-green-300 rounded focus:ring-green-500"
+                    style={{
+                      accentColor: '#16a34a'
+                    }}
                   />
                   <span className="text-sm text-gray-700">
                     I approve my child's participation in the Bennington Rising Program
                   </span>
                 </label>
                 
-                <label className="flex items-start">
+                {/* Decline checkbox - Red */}
+                <label className="flex items-start cursor-pointer hover:bg-red-50 p-2 rounded-md transition-colors">
                   <input
-                    type="radio"
-                    name="consent"
-                    value="decline"
-                    onChange={(e) => setConsentDecision(e.target.value)}
-                    className="mt-1 mr-2"
-                    required
+                    type="checkbox"
+                    checked={consentDecision === 'decline'}
+                    onChange={() => handleConsentChange('decline')}
+                    className="mt-1 mr-3 h-5 w-5 text-red-600 border-red-300 rounded focus:ring-red-500"
+                    style={{
+                      accentColor: '#dc2626'
+                    }}
                   />
                   <span className="text-sm text-gray-700">
                     I do not approve of my child's participation in the Bennington Rising Program
