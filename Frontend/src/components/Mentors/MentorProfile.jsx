@@ -93,13 +93,13 @@ const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
 
       {/* Mentor Info Card */}
       <div className="bg-sky-50 rounded-2xl shadow-lg p-4 sm:p-6 space-y-4">
-        {/* Mentor's first and last name */}
+        {/* Team Members Names with & */}
         <div className="text-center">
           <h1
             className="text-gray-900 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center underline"
             style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.15)" }}
           >
-            {mentor.firstName + " " + mentor.lastName}
+            {mentor.firstName} & {mentor.lastName}
           </h1>
         </div>
         <div className="flex items-center justify-center">
@@ -122,7 +122,7 @@ const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
                   ? "../../../assets/blank-profile-picture-973460_1280.png"
                   : mentor.profilePhoto1
               }
-              alt={`${mentor.firstName} ${mentor.lastName} - Team Member 1`}
+              alt={`${mentor.firstName} - Team Member 1`}
               className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-cover rounded-md"
               onError={handleImageError1}
             />
@@ -135,7 +135,7 @@ const MentorProfile = ({ token, onProfileUpdate, profileComplete }) => {
                   ? "../../../assets/blank-profile-picture-973460_1280.png"
                   : mentor.profilePhoto2
               }
-              alt={`${mentor.firstName} ${mentor.lastName} - Team Member 2`}
+              alt={`${mentor.lastName} - Team Member 2`}
               className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-cover rounded-md"
               onError={handleImageError2}
             />

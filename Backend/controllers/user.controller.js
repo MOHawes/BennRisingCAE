@@ -108,8 +108,8 @@ router.post("/register", async (req, res) => {
         lastName: lastName,
         email: email,
         password: bcrypt.hashSync(password, 10),
-        guardianEmail: "placeholder@placeholder.com",
-        school: "Grace Christian School",
+        guardianEmail: guardianEmail || "placeholder@placeholder.com",
+        school: school,
         ageCheck: true,
         interests: interests,
         project: project,
@@ -588,45 +588,72 @@ router.put("/profile-photo", validateSession, async (req, res) => {
 // !ROUTE to view single MENTOR's profile by id
 // ENDPOINT: http://localhost:4000/user/mentor/profile
 // Request Type: GET
-router.get("/mentor/profile", validateSession, async (req, res) => {
-  try {
-    // Get the Mentor's id from token
-    const id = req.user._id;
+router.get(
+  "/mentor/profile",
+  validateSession,
+  validateMentor,
+  async (req, res) => {
+    try {
+      // Get the Mentor's id from token
+      const id = req.user._id;
 
-    // Make sure userType = Mentor
-    if (req.userType !== "Mentor") {
-      return res
-        .status(403)
-        .json({ message: "You must be a mentor to view this page" });
+      // Make sure userType = Mentor
+      if (req.userType !== "Mentor") {
+        return res
+          .status(403)
+          .json({ message: "You must be a mentor to view this page" });
+      }
+
+      // If userType is Mentor, find their data from their id
+      // Populate the approvedMentees to get full mentee details
+      const mentor = await Mentor.findById(id).populate(
+        "approvedMentees",
+        "firstName lastName email school interests project"
+      );
+
+      // If the mentor has approved mentees, get their answers too
+      let menteeWithAnswer = null;
+      if (mentor.approvedMentees && mentor.approvedMentees.length > 0) {
+        // Get the answer for the first (and only) approved mentee
+        const Answer = require("../models/match.model");
+        const answer = await Answer.findOne({
+          menteeId: mentor.approvedMentees[0]._id,
+          mentorId: mentor._id,
+        });
+
+        // Combine mentee data with their answer
+        menteeWithAnswer = {
+          ...mentor.approvedMentees[0].toObject(),
+          answer: answer ? answer.menteeAnswer : "No answer found",
+        };
+      }
+
+      // Respond with mentor profile info if successful"
+      // return empty string if field was left empty
+      res.status(200).json({
+        message: `${mentor.firstName} ${mentor.lastName}'s profile found sucessfully`,
+        user: {
+          mentorId: mentor._id,
+          firstName: mentor.firstName,
+          lastName: mentor.lastName,
+          email: mentor.email,
+          bio: mentor.bio || "",
+          profilePhoto: mentor.profilePhoto || "",
+          profilePhoto1: mentor.profilePhoto1 || "",
+          profilePhoto2: mentor.profilePhoto2 || "",
+          interests: mentor.interests || "",
+          questionToAsk: mentor.questionToAsk || "",
+          projectCategory: mentor.projectCategory || "",
+          menteeRequests: mentor.menteeRequests || [], // arrray not a string
+          approvedMentees: mentor.approvedMentees || [], // array not a string
+          approvedMenteeDetails: menteeWithAnswer, // Add the full mentee details with answer
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
-
-    // If userType is Mentor, find their data from their id
-    const mentor = await Mentor.findById(id);
-
-    // Respond with mentor profile info if successful"
-    // return empty string if field was left empty
-    res.status(200).json({
-      message: `${mentor.firstName} ${mentor.lastName}'s profile found sucessfully`,
-      user: {
-        mentorId: mentor._id,
-        firstName: mentor.firstName,
-        lastName: mentor.lastName,
-        email: mentor.email,
-        bio: mentor.bio || "",
-        profilePhoto: mentor.profilePhoto || "",
-        profilePhoto1: mentor.profilePhoto1 || "",
-        profilePhoto2: mentor.profilePhoto2 || "",
-        interests: mentor.interests || "",
-        questionToAsk: mentor.questionToAsk || "",
-        projectCategory: mentor.projectCategory || "",
-        menteeRequests: mentor.menteeRequests || [], // arrray not a string
-        approvedMentees: mentor.approvedMentees || [], // array not a string
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // !ROUTE to view single MENTEE's profile by ID:
 // ENDPOINT: http://localhost:4000/user/mentee/profile

@@ -6,7 +6,22 @@ import { API_LOGIN } from "../../../constants/endpoints";
 const Login = (props) => {
   const [email, setEmail] = useState("student@example.com");
   const [password, setPassword] = useState("password123");
+  const [showMessage, setShowMessage] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success"); // success or error
   const navigate = useNavigate();
+
+  // Function to show message and auto hide
+  const showNotification = (msg, type = "success") => {
+    setMessage(msg);
+    setMessageType(type);
+    setShowMessage(true);
+
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      setShowMessage(false);
+    }, 3000);
+  };
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -40,34 +55,72 @@ const Login = (props) => {
 
       // Update Token from the App.jsx file
       console.log(data);
-      props.updateToken(data.token);
 
-      // Store user info in localStorage for navbar
-      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.token) {
+        props.updateToken(data.token);
 
-      //route to userType login
-      if (data.user.userType === "Admin") {
-        // window.location.href = "/admin"; // Redirect to admin dashboard
-        navigate("/admin");
-        alert(`Login Successful! as ${data.user.userType}`); // Show success message
-      } else if (data.user.userType === "Mentor") {
-        // window.location.href = "/mentor"; // Redirect to mentor page
-        navigate("/mentor");
-        alert(`Login Successful! as ${data.user.userType}`); // Show success message
-      } else if (data.user.userType === "Mentee") {
-        // window.location.href = "/mentee"; // Redirect to mentee page
-        navigate("/mentee");
-        alert(`Login Successful! as ${data.user.userType}`); // Show success message
+        // Store user info in localStorage for welcome message
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        //route to userType login
+        if (data.user.userType === "Admin") {
+          showNotification(
+            `Login Successful! as ${data.user.userType}`,
+            "success"
+          );
+          setTimeout(() => {
+            navigate("/admin");
+          }, 1500); // Navigate after 1.5 seconds
+        } else if (data.user.userType === "Mentor") {
+          showNotification(
+            `Login Successful! as ${data.user.userType}`,
+            "success"
+          );
+          setTimeout(() => {
+            navigate("/mentor");
+          }, 1500);
+        } else if (data.user.userType === "Mentee") {
+          showNotification(
+            `Login Successful! as ${data.user.userType}`,
+            "success"
+          );
+          setTimeout(() => {
+            navigate("/mentee");
+          }, 1500);
+        }
       } else {
-        alert("Login Failed! Check your email and password."); // Show error
+        showNotification(
+          "Login Failed! Check your email and password.",
+          "error"
+        );
       }
     } catch (error) {
       console.log(error);
-      alert("Login Failed! Check your email and password."); // Show error on catch
+      showNotification("Something went wrong. Please try again.", "error");
     }
   }
+
   return (
     <>
+      {/* Notification Message */}
+      {showMessage && (
+        <div
+          className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-opacity duration-500 ${
+            showMessage ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div
+            className={`px-6 py-3 rounded-md shadow-lg text-white ${
+              messageType === "success" ? "bg-green-600" : "bg-red-600"
+            }`}
+          >
+            {message}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col items-center justify-center p-4 h-[80vh]">
         <div className="bg-sky-100 w-full max-w-[34.375rem] max-h-fit rounded-sm shadow-2xl text-black">
           <div className="flex flex-col justify-center p-5 rounded-sm">
