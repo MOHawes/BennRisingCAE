@@ -17,7 +17,7 @@ const MenteeProfile = ({ token }) => {
         },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch mentee data");
+      if (!response.ok) throw new Error("Failed to fetch fellow data");
 
       const data = await response.json();
       console.log(data);
@@ -25,7 +25,7 @@ const MenteeProfile = ({ token }) => {
       // Adjust this depending on the shape of your backend response
       setMentee(data.user || data);
     } catch (error) {
-      console.error("Error fetching mentee data:", error);
+      console.error("Error fetching fellow data:", error);
     }
   };
 

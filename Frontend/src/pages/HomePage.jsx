@@ -94,7 +94,7 @@ const HomePage = (props) => {
                 </div>
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
                   <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                    Instructions for mentees
+                    Instructions for Fellows
                   </h2>
                   <div className="text-left">
                     <ul className="list-disc list-inside space-y-2 text-white">
