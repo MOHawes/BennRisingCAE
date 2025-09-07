@@ -86,8 +86,8 @@ const MentorDashboard = (props) => {
               onClick={togglePreview}
             >
               {showMenteePreview
-                ? "Hide Matched Mentee "
-                : "View Matched Mentee"}
+                ? "Hide Matched Fellow "
+                : "View Matched Fellow"}
             </button>
             {showMenteePreview && (
               <div className="p-4 mt-4 rounded-md w-full md:w-[90%] shadow bg-sky-50">

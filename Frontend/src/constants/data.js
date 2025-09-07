@@ -8,7 +8,7 @@ export const navMenu = [
         href: "/mentors",
     },
     {
-        name: "Mentees",
+        name: "Fellows",
         href: "/mentees",
     },
     {
@@ -25,4 +25,4 @@ export const navMenu = [
     }
 ]
 
-export const interests = ["Music", "Technology", "Sports", "Outdoor activities", "Books and writing", "Art", "Exercising", "Food", "Gaming", "Pets and animals", "Gardening", "Cars", "Politics"];
+export const interests = ["Music", "Technology", "Sports", "Outdoor activities", "Books and writing", "Art", "Exercising", "Food", "Gaming", "Pets and animals", "Gardening", "Cars", "Politics","Movies"];

@@ -7,7 +7,7 @@ const MenteePage = (props) => {
       <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#1b0a5f] mb-4">
-            Mentees:
+            Fellows:
           </h1>
         
         </div>
