@@ -4,48 +4,36 @@ import MobileNav from "./MobileNav";
 
 function Navigationbar(props) {
   const { token } = props;
-  const [userInfo, setUserInfo] = useState(null);
+  const [userName, setUserName] = useState("");
+  const [userType, setUserType] = useState("");
 
-  // Get user info from localStorage
+  // Get user info from localStorage when component mounts
   useEffect(() => {
     if (token) {
-      try {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser && storedUser !== "undefined") {
-          setUserInfo(JSON.parse(storedUser));
+      // Try to get user info from localStorage
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        setUserType(user.userType || "");
+
+        // Set name based on user type
+        if (user.userType === "Mentor") {
+          // For mentors, show Team Member 1 & Team Member 2
+          setUserName(`${user.firstName} & ${user.lastName}`);
+        } else {
+          // For mentees and admins, show First Last
+          setUserName(`${user.firstName} ${user.lastName}`);
         }
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
-        // Clear invalid data
-        localStorage.removeItem("user");
       }
-    } else {
-      setUserInfo(null);
     }
   }, [token]);
 
-  // Determine profile link based on user type
+  // Get profile link based on user type
   const getProfileLink = () => {
-    if (!userInfo) return "/";
-    switch (userInfo.userType) {
-      case "Mentor":
-        return "/mentor";
-      case "Mentee":
-        return "/mentee";
-      case "Admin":
-        return "/admin";
-      default:
-        return "/";
-    }
-  };
-
-  // Get welcome message based on user type
-  const getWelcomeMessage = () => {
-    if (!userInfo) return "";
-    if (userInfo.userType === "Mentor") {
-      return `Welcome, Team ${userInfo.lastName}!`;
-    }
-    return `Welcome, ${userInfo.firstName}!`;
+    if (userType === "Mentor") return "/mentor";
+    if (userType === "Mentee") return "/mentee";
+    if (userType === "Admin") return "/admin";
+    return "/";
   };
 
   return (
@@ -64,32 +52,29 @@ function Navigationbar(props) {
                   </a>
                 </li>
               ))}
-              <div className="ml-4 flex items-center gap-4">
+              <div className="ml-4 flex items-center space-x-4">
+                {/* Welcome message when logged in */}
+                {token && userName && (
+                  <span className="text-[#eab246] text-sm normal-case">
+                    Welcome, {userName}!
+                  </span>
+                )}
+
                 {!token ? (
                   <>
-                    <button className="bg-[#eab246] text-white uppercase px-6 py-2 rounded-md">
+                    <button className="bg-[#eab246] hover:bg-[#d4a03d] text-white uppercase px-6 py-2 rounded-md">
                       <a href="/signup">Sign Up</a>
                     </button>
-                    <button className="bg-[#eab246] text-white uppercase px-6 py-2 rounded-md">
+                    <button className="bg-[#eab246] hover:bg-[#d4a03d] text-white uppercase px-6 py-2 rounded-md">
                       <a href="/login">Login</a>
                     </button>
                   </>
                 ) : (
                   <>
-                    {/* Welcome message */}
-                    {userInfo && (
-                      <span className="text-[#eab246] font-medium normal-case">
-                        {getWelcomeMessage()}
-                      </span>
-                    )}
-
-                    {/* Profile link */}
-                    <button className="bg-[#6c50e1] text-white uppercase px-6 py-2 rounded-md hover:bg-[#8b70f1]">
+                    <button className="bg-[#6c50e1] hover:bg-[#5a42c0] text-white uppercase px-6 py-2 rounded-md">
                       <a href={getProfileLink()}>My Profile</a>
                     </button>
-
-                    {/* Logout button */}
-                    <button className="bg-[#eab246] text-white uppercase px-6 py-2 rounded-md">
+                    <button className="bg-[#eab246] hover:bg-[#d4a03d] text-white uppercase px-6 py-2 rounded-md">
                       <a href="/logout">Logout</a>
                     </button>
                   </>
@@ -98,7 +83,7 @@ function Navigationbar(props) {
             </ul>
           </div>
         </div>
-        <MobileNav token={token} userInfo={userInfo} />
+        <MobileNav />
       </div>
     </>
   );

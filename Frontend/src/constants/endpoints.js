@@ -10,7 +10,7 @@ export const API_DELETE_MENTOR = `${API}/user/delete`;
 
 export const API_VIEW_MENTOR_MATCH = `${API}/match/view-matches`;
 
-export const API_VIEW_PENDING_REQUESTS = `${API}/match/view-requests`;
+export const API_VIEW_PENDING_REQUESTS = `${API}/match/pending-requests`;
 
 export const API_MENTEE_PROFILE = `${API}/user/mentee/update`;
 
@@ -33,7 +33,7 @@ export const API_MENTOR_PROFILE_PREVIEW = `${API}/user/mentor/profile`;
 // Add the S3 upload URL endpoint
 export const API_GET_UPLOAD_URL = `${API}/geturl`;
 
-// New consent-related endpoints
+// !New! consent endpoints
 export const API_CONSENT_FORM_SUBMIT = `${API}/match/consent`;
 
 export const API_CONSENT_FORM_INFO = `${API}/match/consent-info`;
