@@ -1,4 +1,4 @@
-export const API = "http://localhost:4000";
+export const API = "https://bennrisingcae.onrender.com";
 
 export const API_LOGIN = `${API}/user/login`;
 

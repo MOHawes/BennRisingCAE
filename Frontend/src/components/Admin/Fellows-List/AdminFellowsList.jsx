@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API_VIEW_MENTEES } from "../../../constants/endpoints";
+import { API } from "../../../constants/endpoints";
 
 const AdminFellowsList = (props) => {
   const [fellows, setFellows] = useState([]);
@@ -40,15 +41,12 @@ const AdminFellowsList = (props) => {
   // Fetch consent form data for fellows
   async function fetchConsentData(fellowsList) {
     try {
-      const response = await fetch(
-        "http://localhost:4000/admin/fellows-consent-data",
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: props.token,
-          },
-        }
-      );
+        const response = await fetch(`${API}/admin/fellows-consent-data`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: props.token,
+        },
+      });
 
       if (response.ok) {
         const consentData = await response.json();
@@ -104,7 +102,7 @@ const AdminFellowsList = (props) => {
 
   // New functions for expand/collapse all
   const expandAll = () => {
-    const allFellowIds = new Set(fellowsWithConsent.map(fellow => fellow.id));
+    const allFellowIds = new Set(fellowsWithConsent.map((fellow) => fellow.id));
     setExpandedRows(allFellowIds);
   };
 
