@@ -19,11 +19,31 @@ db.once('open', () => {
 // (express.json()) will allows us to send a payload or request object to our server, and our routes will be able to parse it.
 app.use(express.json());
 
-// add cors before routes
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true
-}));
+// FIXED CORS CONFIGURATION
+const corsOptions = {
+  origin: [
+    'https://bennrisinglive.vercel.app',  // REMOVED trailing slash
+    'http://localhost:5173',              // Local development
+    'http://localhost:3000',              // Alternative local port
+    'https://bennrisinglive.vercel.app/', // Keep this as backup (with slash)
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin'
+  ]
+};
+
+// Apply CORS middleware BEFORE other routes
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 //  *** TODO Controller Routes BELOW ***
 app.use("/user", userController);
@@ -44,7 +64,8 @@ app.get("/", (req, res) => {
   res.status(200).json({ 
     message: "Bennington Rising Backend API is running!",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    corsOrigins: corsOptions.origin  // Debug info
   });
 });
 
@@ -91,4 +112,5 @@ if (process.env.NODE_ENV !== "production") {
 app.listen(PORT, HOST, () => {
   console.log(`Server is running on port: ${PORT}, listening on ${HOST}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`CORS configured for origins:`, corsOptions.origin);
 });
