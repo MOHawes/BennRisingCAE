@@ -46,7 +46,7 @@ const MentorDirectory = (props) => {
     // response object
     let data = await response.json();
     //set the state variable to the data
-    console.log(data.mentors);
+    console.log("Mentor data with team status:", data.mentors);
 
     setMentorData(data.mentors);
   }
@@ -90,6 +90,22 @@ const MentorDirectory = (props) => {
     }
   }, [userType]);
 
+  // this will refresh mentor data when page regains focus
+  // so if a team gets full in another tab, it will update here
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("Page regained focus, refreshing mentor data...");
+      fetchMentorData();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    // cleanup function to remove event listener
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+
   useEffect(() => {
     console.log(
       "Mentor IDs:",
@@ -100,6 +116,10 @@ const MentorDirectory = (props) => {
   // Handle successful match request
   const handleMatchRequestSuccess = (mentorId) => {
     setRequestedMentorId(mentorId);
+    // refresh mentor data to update team full status
+    setTimeout(() => {
+      fetchMentorData();
+    }, 1000); // wait a second then refresh to show updated status
   };
 
   return (
@@ -117,13 +137,16 @@ const MentorDirectory = (props) => {
       >
         {mentorData.map((mentor) => {
           // Check if this mentor already has a match
+          // A mentor has a match if they have any approved mentees or isTeamFull is true
           const mentorHasMatch =
-            mentor.approvedMentees && mentor.approvedMentees.length > 0;
+            mentor.isTeamFull ||
+            (mentor.approvedMentees && mentor.approvedMentees.length > 0);
 
           return (
             <SwiperSlide
               key={mentor.id}
               className={`flex items-center justify-center h-[500px] ${
+                // Only dim if user is mentee AND has active request to different mentor
                 requestedMentorId &&
                 requestedMentorId !== mentor.id &&
                 userType === "Mentee"
@@ -144,7 +167,7 @@ const MentorDirectory = (props) => {
                 isRequested={requestedMentorId === mentor.id}
                 hasActiveRequest={!!requestedMentorId}
                 onRequestSuccess={handleMatchRequestSuccess}
-                mentorHasMatch={mentorHasMatch}
+                mentorHasMatch={mentorHasMatch} // Pass if team is full
                 isMentee={userType === "Mentee"}
               />
             </SwiperSlide>

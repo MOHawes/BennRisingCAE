@@ -92,6 +92,30 @@ const MentorSchema = new mongoose.Schema({
     enum: ["video", "science"],
     required: false,
   },
+
+  // Add team capacity fields to track if team is full
+  teamCapacity: {
+    type: Number,
+    default: 1, // Each team can have 1 fellow
+    required: false,
+  },
+  isTeamFull: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
+});
+
+// Add a method to check if team is full
+MentorSchema.methods.checkIfTeamFull = function () {
+  // If approved mentees length is >= team capacity, team is full
+  return this.approvedMentees.length >= this.teamCapacity;
+};
+
+// Update isTeamFull whenever approvedMentees changes
+MentorSchema.pre("save", function (next) {
+  this.isTeamFull = this.checkIfTeamFull();
+  next();
 });
 
 module.exports = mongoose.model("Mentor", MentorSchema);

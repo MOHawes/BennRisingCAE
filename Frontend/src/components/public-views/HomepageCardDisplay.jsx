@@ -148,13 +148,16 @@ const HomepageCardDisplay = (props) => {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 lg:grid-cols-2">
         {filteredMentorData.map((mentor) => {
           // Check if this mentor already has a match
+          // A mentor has a match if they have any approved mentees
           const mentorHasMatch =
-            mentor.approvedMentees && mentor.approvedMentees.length > 0;
+            mentor.isTeamFull ||
+            (mentor.approvedMentees && mentor.approvedMentees.length > 0);
 
           return (
             <div
               key={mentor.id}
               className={`flex items-center justify-center p-4 bg-white rounded-lg shadow-md ${
+                // Only dim the card if user is a mentee AND there's an active request to another mentor
                 requestedMentorId &&
                 requestedMentorId !== mentor.id &&
                 userType === "Mentee"
@@ -175,7 +178,7 @@ const HomepageCardDisplay = (props) => {
                 isRequested={requestedMentorId === mentor.id}
                 hasActiveRequest={!!requestedMentorId}
                 onRequestSuccess={handleMatchRequestSuccess}
-                mentorHasMatch={mentorHasMatch}
+                mentorHasMatch={mentorHasMatch} // Pass if mentor's team is full
                 isMentee={userType === "Mentee"}
               />
             </div>

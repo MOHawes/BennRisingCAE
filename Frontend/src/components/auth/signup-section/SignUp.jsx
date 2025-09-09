@@ -120,7 +120,7 @@ const SignUp = (props) => {
       <div className="flex justify-center items-center p-4">
         <div className="bg-sky-100 w-full max-w-[34.375rem] p-8 rounded-sm flex flex-col justify-center items-center shadow-2xl text-black">
           {" "}
-          <h2 className="text-center font-bold text-3xl">MENTEE SIGN UP</h2>
+          <h2 className="text-center font-bold text-3xl">FELLOW SIGN UP</h2>
           <form className="flex flex-col w-full" onSubmit={handleSubmit}>
             {/* First Name */}
             <label className="pb-2 uppercase" htmlFor="firstName">
@@ -236,7 +236,7 @@ const SignUp = (props) => {
                     : `Selected: ${selectedInterests.length}/4 interests`}
                 </div>
                 <div className="collapse-content">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                     {availableInterests.map((interest) => (
                       <div key={interest} className="form-control">
                         <label className="cursor-pointer label py-1 justify-start gap-2">
@@ -297,7 +297,7 @@ const SignUp = (props) => {
               className="bg-blue-950 rounded-sm text-white py-2 hover:bg-blue-950/50 hover:border-2 hover:border-blue-950"
               type="submit"
             >
-              SIGN UP AS A MENTEE
+              SIGN UP AS A FELLOW
             </button>
           </form>
         </div>

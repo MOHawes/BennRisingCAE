@@ -442,6 +442,9 @@ router.get("/mentor/view-all", async (req, res) => {
       profilePhoto1: mentor.profilePhoto1 || "",
       profilePhoto2: mentor.profilePhoto2 || "",
       projectCategory: mentor.projectCategory || "",
+      // Add these fields so frontend knows if team is full
+      approvedMentees: mentor.approvedMentees || [],
+      isTeamFull: mentor.approvedMentees && mentor.approvedMentees.length > 0, // Team is full if they have any approved mentee
     }));
 
     res.status(200).json({

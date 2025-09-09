@@ -84,7 +84,7 @@ const MentorDashboard = (props) => {
           <div className="mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md shadow">
             <p>
               👋 Welcome! It looks like your profile is not fully complete.
-              Please take a moment to finish setting it up so mentees can find
+              Please take a moment to finish setting it up so fellows can find
               you!
             </p>
           </div>
