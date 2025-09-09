@@ -12,7 +12,6 @@ const MentorsPage = (props) => {
           <h1 className="text-4xl font-bold text-[#1b0a5f] mb-4">
             Team Coordinators
           </h1>
-          
         </div>
         {/* Program Information Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8 max-w-4xl mx-auto">
@@ -38,8 +37,8 @@ const MentorsPage = (props) => {
 
           <p className="text-gray-700 mb-6">
             The Bennington Rising Program will give you real-world experience in
-            team-based, community programming. <u>Such experience is preferred by
-            employers</u> because it builds teamwork skills, expands communication
+            team-based, community programming. Such experience is preferred by
+            employers because it builds teamwork skills, expands communication
             abilities, and sharpens creative problem solving. This is a unique
             opportunity to build your resume and deliver real impact in
             Bennington.
@@ -53,32 +52,40 @@ const MentorsPage = (props) => {
 
           {/* Training Videos Section */}
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-            <h3 className="font-semibold text-lg mb-3 text-[#1b0a5f]">Required Training Videos:</h3>
+            <h3 className="font-semibold text-lg mb-3 text-[#1b0a5f]">
+              Required Training Videos:
+            </h3>
             <ul className="space-y-3">
               <li className="flex items-center">
                 <span className="text-2xl mr-3">🎥</span>
-                <a href="https://www.youtube.com/watch?v=VOXrpW-rotE" 
-                   target="_blank" 
-                   rel="noopener noreferrer" 
-                   className="text-[#1b0a5f] hover:underline font-semibold">
+                <a
+                  href="https://www.youtube.com/watch?v=VOXrpW-rotE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1b0a5f] hover:underline font-semibold"
+                >
                   Learning Leadership Skills
                 </a>
               </li>
               <li className="flex items-center">
                 <span className="text-2xl mr-3">🎥</span>
-                <a href="https://www.youtube.com/watch?v=aDMtx5ivKK0" 
-                   target="_blank" 
-                   rel="noopener noreferrer" 
-                   className="text-[#1b0a5f] hover:underline font-semibold">
+                <a
+                  href="https://www.youtube.com/watch?v=aDMtx5ivKK0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1b0a5f] hover:underline font-semibold"
+                >
                   Active Listening Techniques
                 </a>
               </li>
               <li className="flex items-center">
                 <span className="text-2xl mr-3">🎥</span>
-                <a href="https://www.youtube.com/watch?v=3uqMQ2WzZr8" 
-                   target="_blank" 
-                   rel="noopener noreferrer" 
-                   className="text-[#1b0a5f] hover:underline font-semibold">
+                <a
+                  href="https://www.youtube.com/watch?v=3uqMQ2WzZr8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1b0a5f] hover:underline font-semibold"
+                >
                   Conflict Management Strategies
                 </a>
               </li>
@@ -97,21 +104,62 @@ const MentorsPage = (props) => {
             in your food" gala at the Bennington Museum.
           </p>
 
+          {/* Horizontal line separator */}
+          <hr className="my-8 border-gray-300" />
+
           <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4 mt-8">LINKS</h2>
 
           <ul className="list-disc list-inside space-y-3 text-gray-700 mb-8">
-            <li>Team Coordinators role document</li>
+            <li>
+              <a
+                href="/team-coordinators.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1b0a5f] hover:underline font-semibold"
+              >
+                Team Coordinators role document
+              </a>
+            </li>
             <li>
               Meeting Log- mandatory for each team meeting
               <ul className="list-disc list-inside ml-6 mt-2">
-                <li>Excel format</li>
-                <li>PDF format</li>
+                <li>
+                  <a
+                    href="/meeting-log.xlsx"
+                    download
+                    className="text-[#1b0a5f] hover:underline font-semibold"
+                  >
+                    Excel format
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/meeting-log.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#1b0a5f] hover:underline font-semibold"
+                  >
+                    PDF format
+                  </a>
+                </li>
               </ul>
             </li>
-            <li>Team member safety acknowledgement</li>
+            <li>
+              <a
+                href="/safety-aknowledgement.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1b0a5f] hover:underline font-semibold"
+              >
+                Team member safety acknowledgement
+              </a>
+            </li>
           </ul>
 
-          <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4 mt-8">
+          {/* Horizontal line separator */}
+          <hr className="my-8 border-gray-300" />
+
+          <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4">
             Questions and Emergencies
           </h2>
 

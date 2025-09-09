@@ -8,7 +8,7 @@ export const navMenu = [
         href: "/mentors",
     },
     {
-        name: "Team Fellows",
+        name: "TeamFellows",
         href: "/mentees",
     },
     {
@@ -21,7 +21,7 @@ export const navMenu = [
     },
     {
         name: "Upright",
-        href: "https://www.uprighted.com/",
+        href: "/upright",
     }
 ]
 

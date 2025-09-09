@@ -136,6 +136,8 @@ const ParentsPage = (props) => {
             </a>, or at the yellow highlighted section at the top of this page.
           </p>
           
+           {/* Horizontal line separator */}
+           <hr className="my-8 border-gray-300" />
 
           <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4 mt-8">
             Contact Information

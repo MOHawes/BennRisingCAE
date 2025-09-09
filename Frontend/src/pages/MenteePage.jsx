@@ -10,7 +10,7 @@ const MenteePage = (props) => {
             Bennington Rising Program
           </h1>
           <h1 className="text-4xl font-bold text-[#1b0a5f] mb-4">
-            Team Fellows 
+            Team Fellows
           </h1>
         </div>
         {/* Program Information Section */}
@@ -60,19 +60,63 @@ const MenteePage = (props) => {
             in your food" gala at the Bennington Museum.
           </p>
 
-          <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4 mt-8">LINKS</h2>
+          {/* Horizontal line separator */}
+          <hr className="my-8 border-gray-300" />
 
-          <ul className="list-disc list-inside space-y-3 text-gray-700 mb-8">
-            <li>Team member safety acknowledgement</li>
-            <li>Link to Parent Consent Information Sheet</li>
+          <div>
+          <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4">
+            LINKS
+          </h2>
+
+          <ul className="list-disc list-inside space-y-3 text-gray-700">
             <li>
-              Meeting Log- mandatory for each team meeting
+              <a 
+                href="/safety-aknowledgement.pdf" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#1b0a5f] hover:underline font-semibold"
+              >
+                Team member safety acknowledgement (PDF)
+              </a>
+            </li>
+            <li>
+              <a 
+                href="/consent-form.pdf" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#1b0a5f] hover:underline font-semibold"
+              >
+                Parent Consent Information Sheet (PDF)
+              </a>
+            </li>
+            <li>Meeting Log - This is mandatory for each team meeting!
               <ul className="list-disc list-inside ml-6 mt-2">
-                <li>Excel format</li>
-                <li>PDF format</li>
+                <li>
+                  <a 
+                    href="/meeting-log.xlsx" 
+                    download
+                    className="text-[#1b0a5f] hover:underline font-semibold"
+                  >
+                    Excel format
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="/meeting-log.pdf" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[#1b0a5f] hover:underline font-semibold"
+                  >
+                    PDF format
+                  </a>
+                </li>
               </ul>
             </li>
           </ul>
+        </div>
+
+          {/* Horizontal line separator */}
+          <hr className="my-8 border-gray-300" />
 
           <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4 mt-8">
             Questions and Emergencies

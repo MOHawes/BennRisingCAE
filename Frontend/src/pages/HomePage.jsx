@@ -70,7 +70,17 @@ const HomePage = (props) => {
                   ))}
                 </select> */}
               </div>
+              {/* Important Dates Button - Outside scrollable area */}
+              <div className="flex justify-center mb-4">
+                <a 
+                  href="/important-dates"
+                  className="bg-[#ff0000] hover:bg-[#f19494] text-white font-bold py-3 px-8 rounded-md text-lg uppercase shadow-md"
+                >
+                  Important Dates
+                </a>
+              </div>
               <div ref={cardsContainerRef} className="mt-2 overflow-y-auto">
+              
                 <div className="py-2">
                   <HomepageCardDisplay token={props.token} />
                 </div>
@@ -88,8 +98,10 @@ const HomePage = (props) => {
                     Rising is your chance to build something meaningful, meet
                     new people, and make an impact in your community!
                     <br />
-                    This program requires commitment of approximately <u>1 hour</u> per
-                    week from now until late December.<br />Join us in the fun!
+                    This program requires commitment of approximately{" "}
+                    <u>1 hour</u> per week from now until late December.
+                    <br />
+                    Join us in the fun!
                   </p>
                 </div>
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
@@ -116,7 +128,7 @@ const HomePage = (props) => {
                 </div>
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
                   <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                  “What’s in your food”  project statement
+                    “What’s in your food” project statement
                   </h2>
                   <p>
                     Investigate what's really inside the foods we eat every day.
@@ -128,7 +140,7 @@ const HomePage = (props) => {
                 </div>
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
                   <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                 "Kid’s for science!"  project statement
+                    "Kid’s for science!" project statement
                   </h2>
                   <p>
                     Join two college students and co-develop a brief hands-on

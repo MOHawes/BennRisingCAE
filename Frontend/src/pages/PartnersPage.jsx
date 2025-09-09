@@ -17,7 +17,7 @@ const PartnersPage = (props) => {
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8 max-w-4xl mx-auto">
           <p className="text-gray-700 mb-6 text-lg">
             The following partners have made possible the Bennington Rising
-            Program. Check out their links.
+            Program. <br /> Click the colored text to check out their links.
           </p>
           {/* Partner Organizations List */}
           <ul className="list-disc list-inside space-y-3 text-gray-700 mb-8">
@@ -95,6 +95,9 @@ const PartnersPage = (props) => {
               | Grandma Moses | Vermont History and Art
             </li>
           </ul>
+
+          {/* Horizontal line separator */}
+          <hr className="my-8 border-gray-300" />
 
           {/* Individuals Section */}
           <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4 mt-8">
