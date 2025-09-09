@@ -32,7 +32,8 @@ app.use("/admin", adminController);
 
 // Use PORT from environment variable (Render provides this) or fallback to 4000
 const PORT = process.env.PORT || 4000;
-const HOST = process.env.HOST || "0.0.0.0";
+// For production (Render), always use 0.0.0.0 to accept connections from any IP
+const HOST = "0.0.0.0";
 
 const uploadURL = require("./s3");
 
@@ -42,7 +43,8 @@ app.use(express.static("Static"));
 app.get("/", (req, res) => {
   res.status(200).json({ 
     message: "Bennington Rising Backend API is running!",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -52,6 +54,7 @@ app.get("/geturl", async (req, res) => {
     const url = await uploadURL();
     res.status(200).json(url);
   } catch (error) {
+    console.error("Error generating upload URL:", error);
     res.status(500).json({ message: "Failed to generate image upload URL" });
   }
 });
