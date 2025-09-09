@@ -1,12 +1,12 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import MentorsPage from "./pages/MentorPage"; // Mentor import path
-import MenteePage from "./pages/MenteePage"; // Added Mentee import
-import ParentsPage from "./pages/ParentsPage"; // Added Parents import
-import PartnersPage from "./pages/PartnersPage"; // Added Partners import
-import ImportantDatesPage from "./pages/ImportantDatesPage"; // Added Important Dates import
+import MentorsPage from "./pages/MentorPage";
+import MenteePage from "./pages/MenteePage";
+import ParentsPage from "./pages/ParentsPage";
+import PartnersPage from "./pages/PartnersPage";
+import ImportantDatesPage from "./pages/ImportantDatesPage";
 import UprightPage from "./pages/UprightPage";
 import Navbar from "./components/public-views/Navbar";
 import Footer from "./components/public-views/Footer";
@@ -27,23 +27,18 @@ import ConsentSubmitted from "./components/Consent/ConsentSubmitted";
 import GenericConsentPage from "./components/Consent/GenericConsentPage";
 
 function App() {
-  // State variable for token and initialize to the value of the token stored in local storage
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // Update token function to update token state variable and store the token in the local storage
   function updateToken(newToken) {
     setToken(newToken);
     if (newToken) {
       localStorage.setItem("token", newToken);
     } else {
-      // Clear everything when logging out
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     }
   }
 
-  // useEffect hook that will run when the component mounts
-  // useEffect should check if token is stored in local storage and update the token state variable if a token is stored
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -52,7 +47,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Navbar token={token} />
       <Routes>
         <Route path="/" element={<HomePage token={token} />} />
@@ -65,7 +60,6 @@ function App() {
           element={<ImportantDatesPage token={token} />}
         />
         <Route path="/upright" element={<UprightPage token={token} />} />
-        {/* Added routes for parents, partners and important dates */}
         <Route
           path="/mentorMatchList"
           element={<MentorMatchList token={token} />}
@@ -101,11 +95,10 @@ function App() {
         />
         <Route path="/consent-submitted" element={<ConsentSubmitted />} />
         <Route path="/consent-info" element={<GenericConsentPage />} />
-        {/* Catch all route - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

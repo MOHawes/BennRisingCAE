@@ -9,29 +9,26 @@ const MobileNav = ({ token, userInfo }) => {
     setNav(!nav);
   };
 
-  // Determine profile link based on user type
   const getProfileLink = () => {
     if (!userInfo) return "/";
     switch (userInfo.userType) {
       case "Mentor":
-        return "/mentor";
+        return "/#/mentor";
       case "Mentee":
-        return "/mentee";
+        return "/#/mentee";
       case "Admin":
-        return "/admin";
+        return "/#/admin";
       default:
         return "/";
     }
   };
 
-  // Get profile button text based on user type
   const getProfileButtonText = () => {
     if (!userInfo) return "My Profile";
     if (userInfo.userType === "Admin") return "Admin Dashboard";
     return "My Profile";
   };
 
-  // Get welcome message based on user type
   const getWelcomeMessage = () => {
     if (!userInfo) return "";
     if (userInfo.userType === "Mentor") {
@@ -41,7 +38,7 @@ const MobileNav = ({ token, userInfo }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 items-center justify-center md:hidden  p-4  uppercase">
+    <div className="flex flex-col gap-4 items-center justify-center md:hidden p-4 uppercase">
       <button onClick={handleNav}>
         {nav ? (
           <AiOutlineClose
@@ -66,7 +63,6 @@ const MobileNav = ({ token, userInfo }) => {
           Benn Rising Mentorship Program
         </h2>
 
-        {/* Welcome message for mobile */}
         {token && userInfo && (
           <p className="text-[#eab246] text-xl font-medium normal-case mb-4">
             {getWelcomeMessage()}
@@ -78,24 +74,26 @@ const MobileNav = ({ token, userInfo }) => {
             <a
               key={menu.name}
               className="py-8 w-full hover:opacity-30 text-center"
-              href={menu.href}
+              href={`/#${menu.href}`}
+              onClick={() => setNav(false)}
             >
               <li>{menu.name}</li>
             </a>
           ))}
 
-          {/* Add profile and auth links for mobile */}
           {token ? (
             <>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
                 href={getProfileLink()}
+                onClick={() => setNav(false)}
               >
                 <li>{getProfileButtonText()}</li>
               </a>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
-                href="/logout"
+                href="/#/logout"
+                onClick={() => setNav(false)}
               >
                 <li>Logout</li>
               </a>
@@ -104,13 +102,15 @@ const MobileNav = ({ token, userInfo }) => {
             <>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
-                href="/signup"
+                href="/#/signup"
+                onClick={() => setNav(false)}
               >
                 <li>Sign Up</li>
               </a>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
-                href="/login"
+                href="/#/login"
+                onClick={() => setNav(false)}
               >
                 <li>Login</li>
               </a>
