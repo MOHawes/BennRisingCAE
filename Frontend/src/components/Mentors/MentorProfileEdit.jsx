@@ -27,7 +27,7 @@ const MentorProfileEdit = (props) => {
     props.mentor.interests || []
   );
   const [interestError, setInterestError] = useState("");
-  // interests for selection form
+  // interests for selection form - UPDATED with Movies
   const availableInterests = [
     "Music",
     "Technology",
@@ -42,6 +42,7 @@ const MentorProfileEdit = (props) => {
     "Gardening",
     "Cars",
     "Politics",
+    "Movies",
   ];
 
   // Handle image selection for photo 1

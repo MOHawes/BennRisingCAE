@@ -13,7 +13,12 @@ const ParentConsentForm = () => {
   
   // Form fields
   const [parentName, setParentName] = useState('');
+  const [parentEmail, setParentEmail] = useState('');
+  const [confirmParentEmail, setConfirmParentEmail] = useState('');
   const [parentPhone, setParentPhone] = useState('');
+  const [emergencyContactName, setEmergencyContactName] = useState('');
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
+  const [emergencyContactRelation, setEmergencyContactRelation] = useState('');
   const [consentDecision, setConsentDecision] = useState('');
   const [pdfViewed, setPdfViewed] = useState(false);
   
@@ -21,15 +26,7 @@ const ParentConsentForm = () => {
   const menteeFirstName = matchInfo?.menteeName?.split(' ')[0] || '';
   
   // PDF URL - Update this with your actual PDF location
-  // Option 1: If PDF is in public folder
   const pdfUrl = '/consent-form.pdf';
-  
-  // Option 2: If you need to import from assets (uncomment and use)
-  // import consentPdf from '../../assets/consent-form.pdf';
-  // const pdfUrl = consentPdf;
-  
-  // Option 3: External URL
-  // const pdfUrl = 'https://example.com/path-to-consent-form.pdf';
   
   // Fetch match request info on load
   useEffect(() => {
@@ -63,13 +60,80 @@ const ParentConsentForm = () => {
       setConsentDecision(value);
     }
   };
+
+  // Email validation helper
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Phone validation helper
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
-    if (!parentName || !parentPhone || !consentDecision) {
-      setError('Please fill in all fields and select a consent option');
+    if (!parentName.trim()) {
+      setError('Parent/guardian name is required');
+      return;
+    }
+
+    if (!parentEmail.trim()) {
+      setError('Parent/guardian email is required');
+      return;
+    }
+
+    if (!validateEmail(parentEmail)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!confirmParentEmail.trim()) {
+      setError('Please confirm your email address');
+      return;
+    }
+
+    if (parentEmail !== confirmParentEmail) {
+      setError('Email addresses do not match');
+      return;
+    }
+
+    if (!parentPhone.trim()) {
+      setError('Parent/guardian phone number is required');
+      return;
+    }
+
+    if (!validatePhone(parentPhone)) {
+      setError('Please enter a valid phone number');
+      return;
+    }
+
+    if (!emergencyContactName.trim()) {
+      setError('Emergency contact name is required');
+      return;
+    }
+
+    if (!emergencyContactPhone.trim()) {
+      setError('Emergency contact phone number is required');
+      return;
+    }
+
+    if (!validatePhone(emergencyContactPhone)) {
+      setError('Please enter a valid emergency contact phone number');
+      return;
+    }
+
+    if (!emergencyContactRelation.trim()) {
+      setError('Emergency contact relationship is required');
+      return;
+    }
+
+    if (!consentDecision) {
+      setError('Please select a consent option');
       return;
     }
     
@@ -89,9 +153,12 @@ const ParentConsentForm = () => {
         },
         body: JSON.stringify({
           guardianName: parentName,
-          childName: matchInfo?.menteeName || 'Not provided', // Use the mentee name from matchInfo
-          guardianEmail: 'placeholder@email.com', // Since we already have it
+          childName: matchInfo?.menteeName || 'Not provided',
+          guardianEmail: parentEmail,
           guardianPhone: parentPhone,
+          emergencyContactName: emergencyContactName,
+          emergencyContactPhone: emergencyContactPhone,
+          emergencyContactRelation: emergencyContactRelation,
           approved: consentDecision === 'approve'
         })
       });
@@ -240,7 +307,7 @@ const ParentConsentForm = () => {
             {/* Parent/Guardian Name */}
             <div>
               <label htmlFor="parentName" className="block text-sm font-medium text-gray-700">
-                Parent/guardian full legal name:
+                Parent/guardian full legal name: <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -251,11 +318,48 @@ const ParentConsentForm = () => {
                 required
               />
             </div>
+
+            {/* Parent Email */}
+            <div>
+              <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700">
+                Parent/guardian email address: <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="parentEmail"
+                value={parentEmail}
+                onChange={(e) => setParentEmail(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                placeholder="parent@example.com"
+                required
+              />
+            </div>
+
+            {/* Confirm Parent Email */}
+            <div>
+              <label htmlFor="confirmParentEmail" className="block text-sm font-medium text-gray-700">
+                Confirm email address: <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="email"
+                id="confirmParentEmail"
+                value={confirmParentEmail}
+                onChange={(e) => setConfirmParentEmail(e.target.value)}
+                className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500 ${
+                  confirmParentEmail && parentEmail !== confirmParentEmail ? 'border-red-500' : ''
+                }`}
+                placeholder="parent@example.com"
+                required
+              />
+              {confirmParentEmail && parentEmail !== confirmParentEmail && (
+                <p className="text-red-500 text-sm mt-1">Email addresses do not match</p>
+              )}
+            </div>
             
             {/* Parent Phone */}
             <div>
               <label htmlFor="parentPhone" className="block text-sm font-medium text-gray-700">
-                Parent/guardian phone number:
+                Parent/guardian phone number: <span className="text-red-500">*</span>
               </label>
               <input
                 type="tel"
@@ -267,6 +371,72 @@ const ParentConsentForm = () => {
                 required
               />
             </div>
+
+            {/* Emergency Contact Section */}
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
+              <h3 className="text-lg font-semibold text-red-800 mb-4">
+                Emergency Contact Information <span className="text-red-500">*</span>
+              </h3>
+              <p className="text-sm text-red-700 mb-4">
+                Please provide a secondary emergency contact (someone other than yourself) who can be reached if needed.
+              </p>
+              
+              <div className="space-y-4">
+                {/* Emergency Contact Name */}
+                <div>
+                  <label htmlFor="emergencyContactName" className="block text-sm font-medium text-gray-700">
+                    Emergency contact full name: <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="emergencyContactName"
+                    value={emergencyContactName}
+                    onChange={(e) => setEmergencyContactName(e.target.value)}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+
+                {/* Emergency Contact Phone */}
+                <div>
+                  <label htmlFor="emergencyContactPhone" className="block text-sm font-medium text-gray-700">
+                    Emergency contact phone number: <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="emergencyContactPhone"
+                    value={emergencyContactPhone}
+                    onChange={(e) => setEmergencyContactPhone(e.target.value)}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="(555) 123-4567"
+                    required
+                  />
+                </div>
+
+                {/* Emergency Contact Relationship */}
+                <div>
+                  <label htmlFor="emergencyContactRelation" className="block text-sm font-medium text-gray-700">
+                    Relationship to child: <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="emergencyContactRelation"
+                    value={emergencyContactRelation}
+                    onChange={(e) => setEmergencyContactRelation(e.target.value)}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  >
+                    <option value="">Select relationship</option>
+                    <option value="Grandparent">Grandparent</option>
+                    <option value="Aunt/Uncle">Aunt/Uncle</option>
+                    <option value="Family Friend">Family Friend</option>
+                    <option value="Neighbor">Neighbor</option>
+                    <option value="Sibling">Sibling</option>
+                    <option value="Other Relative">Other Relative</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             
             {/* PDF Viewed Confirmation */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
@@ -276,9 +446,10 @@ const ParentConsentForm = () => {
                   checked={pdfViewed}
                   onChange={(e) => setPdfViewed(e.target.checked)}
                   className="mt-1 mr-3 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  required
                 />
                 <span className="text-sm text-gray-700">
-                  I confirm that I have reviewed the Bennington Rising Program consent form PDF above
+                  I confirm that I have reviewed the Bennington Rising Program consent form PDF above <span className="text-red-500">*</span>
                 </span>
               </label>
             </div>
@@ -286,7 +457,7 @@ const ParentConsentForm = () => {
             {/* Consent Decision with colored checkboxes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Check one of the following:
+                Check one of the following: <span className="text-red-500">*</span>
               </label>
               <div className="space-y-3">
                 {/* Approve checkbox - Green */}

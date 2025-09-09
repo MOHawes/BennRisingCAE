@@ -4,12 +4,32 @@ import { API_REQUEST_MENTOR } from "../../constants/endpoints";
 
 const CardPreview = (props) => {
   const [showModal, setShowModal] = useState(false);
-  const [answer, setAnswer] = useState("");
+  const [mentorAnswer, setMentorAnswer] = useState("");
+  const [programAnswer, setProgramAnswer] = useState("");
+
+  // Character limits
+  const MENTOR_CHAR_LIMIT = 150;
+  const PROGRAM_CHAR_LIMIT = 150;
 
   // handle match request (connect button)
   const handleMatchRequest = async () => {
-    if (!answer) {
-      alert("Please answer the question!");
+    if (!mentorAnswer.trim()) {
+      alert("Please answer the team's question!");
+      return;
+    }
+
+    if (!programAnswer.trim()) {
+      alert("Please answer the program question!");
+      return;
+    }
+
+    if (mentorAnswer.length > MENTOR_CHAR_LIMIT) {
+      alert(`Team question answer must be ${MENTOR_CHAR_LIMIT} characters or less!`);
+      return;
+    }
+
+    if (programAnswer.length > PROGRAM_CHAR_LIMIT) {
+      alert(`Program question answer must be ${PROGRAM_CHAR_LIMIT} characters or less!`);
       return;
     }
 
@@ -21,7 +41,8 @@ const CardPreview = (props) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          answer: answer,
+          mentorAnswer: mentorAnswer,
+          programAnswer: programAnswer,
         }),
       });
 
@@ -31,7 +52,8 @@ const CardPreview = (props) => {
       } else {
         alert(data.message);
         setShowModal(false);
-        setAnswer("");
+        setMentorAnswer("");
+        setProgramAnswer("");
         // Call the success callback if provided
         if (props.onRequestSuccess) {
           props.onRequestSuccess(props.mentorId);
@@ -96,7 +118,7 @@ const CardPreview = (props) => {
     <>
       <div
         className={`h-full box-border max-w-sm mx-auto bg-[#C6CBFF] card w-96 shadow-sm border-6 border-[#9da2d6] flex flex-col jsutify-between ${
-          props.mentorHasMatch ? "opacity-75" : ""
+          props.mentorHasMatch && !props.showAsMatched ? "opacity-75" : ""
         }`}
       >
         <figure className="px-6 pt-6">
@@ -167,36 +189,68 @@ const CardPreview = (props) => {
         </div>
       </div>
 
-      {/* Modal for answering question */}
+      {/* Modal for answering questions */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-md p-8 max-w-lg w-full mx-4">
-            <h2 className="text-2xl font-bold mb-4">Answer the question</h2>
+          <div className="bg-white rounded-md p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto shadow-xl">
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">Application Questions</h2>
 
-            <p className="mb-2 font-bold">The team asks:</p>
-            <p className="mb-4 italic">{props.questionToAsk}</p>
+            {/* Team's Question */}
+            <div className="mb-6">
+              <p className="mb-2 font-bold text-gray-800">The team asks:</p>
+              <p className="mb-4 italic text-gray-700 bg-gray-50 p-3 rounded-md border-l-4 border-blue-500">
+                {props.questionToAsk}
+              </p>
 
-            <textarea
-              className="w-full p-2 border-2 border-gray-300 rounded-md mb-4"
-              rows="4"
-              placeholder="Type your answer here..."
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-            ></textarea>
+              <textarea
+                className="w-full p-3 border-2 border-gray-300 rounded-md mb-2 text-gray-900 focus:border-blue-500 focus:outline-none"
+                rows="3"
+                placeholder="Type your answer here..."
+                value={mentorAnswer}
+                onChange={(e) => setMentorAnswer(e.target.value)}
+                maxLength={MENTOR_CHAR_LIMIT}
+              ></textarea>
+              
+              <div className="text-right text-sm text-gray-600">
+                {mentorAnswer.length}/{MENTOR_CHAR_LIMIT} characters
+              </div>
+            </div>
+
+            {/* Program Question */}
+            <div className="mb-6">
+              <p className="mb-2 font-bold text-gray-800">Program Question:</p>
+              <p className="mb-4 italic text-gray-700 bg-gray-50 p-3 rounded-md border-l-4 border-green-500">
+                How do you want to grow through participating in the Bennington Rising program?
+              </p>
+
+              <textarea
+                className="w-full p-3 border-2 border-gray-300 rounded-md mb-2 text-gray-900 focus:border-blue-500 focus:outline-none"
+                rows="3"
+                placeholder="Type your answer here..."
+                value={programAnswer}
+                onChange={(e) => setProgramAnswer(e.target.value)}
+                maxLength={PROGRAM_CHAR_LIMIT}
+              ></textarea>
+              
+              <div className="text-right text-sm text-gray-600">
+                {programAnswer.length}/{PROGRAM_CHAR_LIMIT} characters
+              </div>
+            </div>
 
             <div className="flex gap-4">
               <button
                 onClick={handleMatchRequest}
-                className="bg-[#1B0A5F] text-white px-4 py-2 rounded-md hover:bg-[#6C50E1]"
+                className="bg-[#1B0A5F] text-white px-6 py-3 rounded-md hover:bg-[#6C50E1] font-semibold transition-colors"
               >
                 Send Request
               </button>
               <button
                 onClick={() => {
                   setShowModal(false);
-                  setAnswer("");
+                  setMentorAnswer("");
+                  setProgramAnswer("");
                 }}
-                className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
+                className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 font-semibold transition-colors"
               >
                 Cancel
               </button>

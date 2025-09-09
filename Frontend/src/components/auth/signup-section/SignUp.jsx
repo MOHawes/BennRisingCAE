@@ -11,13 +11,13 @@ const SignUp = (props) => {
   const [guardianEmail, setGuardianEmail] = useState("");
   const [school, setSchool] = useState("");
   const [ageCheck, setAgeCheck] = useState(false);
-  // const [project, setProject] = useState("");
+  const [project, setProject] = useState("");
 
   // Interest selection related states
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [interestError, setInterestError] = useState("");
 
-  // Available interests from the mentee model
+  // Available interests from the mentee model - UPDATED with Movies
   const availableInterests = [
     "Music",
     "Technology",
@@ -32,6 +32,7 @@ const SignUp = (props) => {
     "Gardening",
     "Cars",
     "Politics",
+    "Movies",
   ];
 
   // Handle when user clicks on an interest checkbox
@@ -84,6 +85,7 @@ const SignUp = (props) => {
         school,
         ageCheck,
         interests: selectedInterests,
+        project, // Add project selection
       };
 
       console.log("Signup request:", requestBody);
@@ -120,7 +122,7 @@ const SignUp = (props) => {
       <div className="flex justify-center items-center p-4">
         <div className="bg-sky-100 w-full max-w-[34.375rem] p-8 rounded-sm flex flex-col justify-center items-center shadow-2xl text-black">
           {" "}
-          <h2 className="text-center font-bold text-3xl">MENTEE SIGN UP</h2>
+          <h2 className="text-center font-bold text-3xl">FELLOW SIGN UP</h2>
           <form className="flex flex-col w-full" onSubmit={handleSubmit}>
             {/* First Name */}
             <label className="pb-2 uppercase" htmlFor="firstName">
@@ -221,6 +223,23 @@ const SignUp = (props) => {
               </option>
             </select>
 
+            {/* Project Selection - NEW */}
+            <label className="pb-2 uppercase" htmlFor="project">
+              Project Interest:
+            </label>
+            <select
+              className="bg-white border-2 border-gray-300 rounded-md p-2 mb-4"
+              name="project"
+              id="project"
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+              required
+            >
+              <option value="">Please select your project interest</option>
+              <option value="What's in your food">What's in your food</option>
+              <option value="Kid's for science!">Kid's for science!</option>
+            </select>
+
             {/* DaisyUI Collapsible for Interest Selection */}
             <div className="mb-4">
               <label className="pb-2 uppercase block">
@@ -236,7 +255,7 @@ const SignUp = (props) => {
                     : `Selected: ${selectedInterests.length}/4 interests`}
                 </div>
                 <div className="collapse-content">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                     {availableInterests.map((interest) => (
                       <div key={interest} className="form-control">
                         <label className="cursor-pointer label py-1 justify-start gap-2">
@@ -297,7 +316,7 @@ const SignUp = (props) => {
               className="bg-blue-950 rounded-sm text-white py-2 hover:bg-blue-950/50 hover:border-2 hover:border-blue-950"
               type="submit"
             >
-              SIGN UP AS A MENTEE
+              SIGN UP AS A FELLOW
             </button>
           </form>
         </div>

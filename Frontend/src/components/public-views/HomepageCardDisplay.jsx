@@ -20,6 +20,7 @@ const HomepageCardDisplay = (props) => {
   const [filteredMentorData, setFilteredMentorData] = useState([]); // State for filtered mentors
   const [selectedInterest, setSelectedInterest] = useState(""); // State for selected interest
   const [requestedMentorId, setRequestedMentorId] = useState(null); // Track which mentor was requested
+  const [matchedMentor, setMatchedMentor] = useState(null); // Track the matched mentor object
   const [hasParentalConsent, setHasParentalConsent] = useState(false); // Track if mentee has previous consent
   const [userType, setUserType] = useState(null); // Track user type
 
@@ -81,14 +82,19 @@ const HomepageCardDisplay = (props) => {
         setRequestedMentorId(data.user.requestedMentors[0]);
       }
 
-      // Check if mentee has any approved mentors (which means they had parental consent before)
-      // This allows them to request new mentors without consent again
+      // Check if mentee has any approved mentors (matched teams)
       if (
         data.user &&
         data.user.approvedMentors &&
         data.user.approvedMentors.length > 0
       ) {
         setHasParentalConsent(true);
+        // Find the matched mentor from the mentor list
+        const matchedMentorId = data.user.approvedMentors[0];
+        const matchedMentorData = mentorData.find(mentor => mentor.id === matchedMentorId);
+        if (matchedMentorData) {
+          setMatchedMentor(matchedMentorData);
+        }
       }
     } catch (error) {
       console.error("Error checking existing requests:", error);
@@ -98,10 +104,14 @@ const HomepageCardDisplay = (props) => {
   // useEffect to fetch data when component mounts
   useEffect(() => {
     fetchMentorData();
-    if (userType === "Mentee") {
+  }, [props.token]);
+
+  // Check for matches after mentor data is loaded
+  useEffect(() => {
+    if (userType === "Mentee" && mentorData.length > 0) {
       checkExistingRequest();
     }
-  }, [userType]);
+  }, [userType, mentorData]);
 
   // Handle interest selection
   const handleInterestChange = (e) => {
@@ -125,6 +135,42 @@ const HomepageCardDisplay = (props) => {
     setRequestedMentorId(mentorId);
   };
 
+  // If mentee has a matched team, show only that team's card
+  if (userType === "Mentee" && matchedMentor) {
+    return (
+      <>
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-white mb-2">Your Matched Team!</h2>
+          <p className="text-white text-lg">Congratulations! You've been matched with this team.</p>
+        </div>
+        
+        <div className="flex justify-center">
+          <div className="p-4 bg-white rounded-lg shadow-md">
+            <CardPreview
+              firstName={matchedMentor.firstName}
+              lastName={matchedMentor.lastName}
+              profilePhoto1={matchedMentor.profilePhoto1}
+              profilePhoto2={matchedMentor.profilePhoto2}
+              projectCategory={matchedMentor.projectCategory}
+              interests={matchedMentor.interests}
+              questionToAsk={matchedMentor.questionToAsk}
+              mentorId={matchedMentor.id}
+              token={props.token}
+              isRequested={false}
+              hasActiveRequest={false}
+              onRequestSuccess={handleMatchRequestSuccess}
+              mentorHasMatch={true}
+              isMentee={true}
+              isMatchedTeam={true}
+              showAsMatched={true} // New prop to indicate this should show as matched
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Regular display for non-matched mentees or other user types
   return (
     <>
       {/* Dropdown for filtering by interests */}
@@ -148,13 +194,16 @@ const HomepageCardDisplay = (props) => {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 lg:grid-cols-2">
         {filteredMentorData.map((mentor) => {
           // Check if this mentor already has a match
+          // A mentor has a match if they have any approved mentees
           const mentorHasMatch =
-            mentor.approvedMentees && mentor.approvedMentees.length > 0;
+            mentor.isTeamFull ||
+            (mentor.approvedMentees && mentor.approvedMentees.length > 0);
 
           return (
             <div
               key={mentor.id}
               className={`flex items-center justify-center p-4 bg-white rounded-lg shadow-md ${
+                // Only dim if mentee has active request to different mentor
                 requestedMentorId &&
                 requestedMentorId !== mentor.id &&
                 userType === "Mentee"

@@ -143,7 +143,7 @@ export default function CreateMentor(props) {
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
-          {/* Project Category */}
+          {/* Project Category - UPDATED */}
           <div>
             <label
               htmlFor="projectCategory"
@@ -159,8 +159,8 @@ export default function CreateMentor(props) {
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             >
               <option value="">Select a category</option>
-              <option value="video">Video</option>
-              <option value="science">Science</option>
+              <option value="What's in your food">What's in your food</option>
+              <option value="Kid's for science!">Kid's for science!</option>
             </select>
           </div>
           <button

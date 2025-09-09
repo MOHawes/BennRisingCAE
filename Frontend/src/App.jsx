@@ -4,6 +4,10 @@ import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import MentorsPage from "./pages/MentorPage"; // Mentor import path
 import MenteePage from "./pages/MenteePage"; // Added Mentee import
+import ParentsPage from "./pages/ParentsPage"; // Added Parents import
+import PartnersPage from "./pages/PartnersPage"; // Added Partners import
+import ImportantDatesPage from "./pages/ImportantDatesPage"; // Added Important Dates import
+import UprightPage from "./pages/UprightPage";
 import Navbar from "./components/public-views/Navbar";
 import Footer from "./components/public-views/Footer";
 import Auth from "./components/auth/Auth";
@@ -54,7 +58,14 @@ function App() {
         <Route path="/" element={<HomePage token={token} />} />
         <Route path="/mentors" element={<MentorsPage token={token} />} />
         <Route path="/mentees" element={<MenteePage token={token} />} />
-        {/* Added route for mentees */}
+        <Route path="/parents" element={<ParentsPage token={token} />} />
+        <Route path="/partners" element={<PartnersPage token={token} />} />
+        <Route
+          path="/important-dates"
+          element={<ImportantDatesPage token={token} />}
+        />
+        <Route path="/upright" element={<UprightPage token={token} />} />
+        {/* Added routes for parents, partners and important dates */}
         <Route
           path="/mentorMatchList"
           element={<MentorMatchList token={token} />}

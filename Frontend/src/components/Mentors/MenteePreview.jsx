@@ -44,10 +44,10 @@ const MenteePreview = ({ token }) => {
     return (
       <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-3xl mx-auto">
         <h2 className="text-2xl sm:text-3xl text-center font-bold text-blue-600 mb-6 border-b pb-2">
-          No Matched Mentee Yet
+          No Matched Fellow Yet
         </h2>
         <p className="text-center text-gray-500">
-          Once you accept a mentee request, they will appear here.
+          Once you accept a fellow request, they will appear here.
         </p>
       </div>
     );
@@ -57,7 +57,7 @@ const MenteePreview = ({ token }) => {
     <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-3xl mx-auto">
       {/* Title */}
       <h2 className="text-2xl sm:text-3xl text-center font-bold text-blue-600 mb-6 border-b pb-2">
-        Matched Mentee Profile:
+        Matched Fellow Profile:
       </h2>
 
       {/* Mentee Info Card */}

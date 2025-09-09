@@ -17,6 +17,7 @@ const MentorDirectory = (props) => {
   // State to hold mentor data
   const [mentorData, setMentorData] = useState([]);
   const [requestedMentorId, setRequestedMentorId] = useState(null); // Track which mentor was requested
+  const [matchedMentor, setMatchedMentor] = useState(null); // Track the matched mentor object
   const [userType, setUserType] = useState(null); // Track user type
 
   // Get user type from localStorage
@@ -46,7 +47,7 @@ const MentorDirectory = (props) => {
     // response object
     let data = await response.json();
     //set the state variable to the data
-    console.log(data.mentors);
+    console.log("Mentor data with team status:", data.mentors);
 
     setMentorData(data.mentors);
   }
@@ -77,6 +78,20 @@ const MentorDirectory = (props) => {
         // Set the first requested mentor as the active request
         setRequestedMentorId(data.user.requestedMentors[0]);
       }
+
+      // Check if mentee has any approved mentors (matched teams)
+      if (
+        data.user &&
+        data.user.approvedMentors &&
+        data.user.approvedMentors.length > 0
+      ) {
+        // Find the matched mentor from the mentor list
+        const matchedMentorId = data.user.approvedMentors[0];
+        const matchedMentorData = mentorData.find(mentor => mentor.id === matchedMentorId);
+        if (matchedMentorData) {
+          setMatchedMentor(matchedMentorData);
+        }
+      }
     } catch (error) {
       console.error("Error checking existing requests:", error);
     }
@@ -85,23 +100,75 @@ const MentorDirectory = (props) => {
   // useEffect to fetch data when component mounts
   useEffect(() => {
     fetchMentorData();
-    if (userType === "Mentee") {
+  }, [props.token]);
+
+  // Check for matches after mentor data is loaded
+  useEffect(() => {
+    if (userType === "Mentee" && mentorData.length > 0) {
       checkExistingRequest();
     }
-  }, [userType]);
+  }, [userType, mentorData]);
 
+  // this will refresh mentor data when page regains focus
+  // so if a team gets full in another tab, it will update here
   useEffect(() => {
-    console.log(
-      "Mentor IDs:",
-      mentorData.map((m) => m.id)
-    );
-  }, [mentorData]);
+    const handleFocus = () => {
+      console.log("Page regained focus, refreshing mentor data...");
+      fetchMentorData();
+      if (userType === "Mentee" && mentorData.length > 0) {
+        checkExistingRequest();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    // cleanup function to remove event listener
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [userType, mentorData]);
 
   // Handle successful match request
   const handleMatchRequestSuccess = (mentorId) => {
     setRequestedMentorId(mentorId);
+    // refresh mentor data to update team full status
+    setTimeout(() => {
+      fetchMentorData();
+    }, 1000); // wait a second then refresh to show updated status
   };
 
+  // If mentee has a matched team, show only that team's card
+  if (userType === "Mentee" && matchedMentor) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">Your Matched Team!</h2>
+          <div className="flex justify-center">
+            <CardPreview
+              firstName={matchedMentor.firstName}
+              lastName={matchedMentor.lastName}
+              profilePhoto1={matchedMentor.profilePhoto1}
+              profilePhoto2={matchedMentor.profilePhoto2}
+              interests={matchedMentor.interests}
+              projectCategory={matchedMentor.projectCategory}
+              questionToAsk={matchedMentor.questionToAsk}
+              mentorId={matchedMentor.id}
+              token={props.token}
+              isRequested={false}
+              hasActiveRequest={false}
+              onRequestSuccess={handleMatchRequestSuccess}
+              mentorHasMatch={true}
+              isMentee={true}
+              isMatchedTeam={true}
+              showAsMatched={true} // New prop to indicate this should show as matched
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular carousel display for non-matched mentees or other user types
   return (
     <>
       {/* Swiper Carousel */}
@@ -117,13 +184,16 @@ const MentorDirectory = (props) => {
       >
         {mentorData.map((mentor) => {
           // Check if this mentor already has a match
+          // A mentor has a match if they have any approved mentees or isTeamFull is true
           const mentorHasMatch =
-            mentor.approvedMentees && mentor.approvedMentees.length > 0;
+            mentor.isTeamFull ||
+            (mentor.approvedMentees && mentor.approvedMentees.length > 0);
 
           return (
             <SwiperSlide
               key={mentor.id}
               className={`flex items-center justify-center h-[500px] ${
+                // Only dim if user is mentee AND has active request to different mentor
                 requestedMentorId &&
                 requestedMentorId !== mentor.id &&
                 userType === "Mentee"
@@ -144,7 +214,7 @@ const MentorDirectory = (props) => {
                 isRequested={requestedMentorId === mentor.id}
                 hasActiveRequest={!!requestedMentorId}
                 onRequestSuccess={handleMatchRequestSuccess}
-                mentorHasMatch={mentorHasMatch}
+                mentorHasMatch={mentorHasMatch} // Pass if team is full
                 isMentee={userType === "Mentee"}
               />
             </SwiperSlide>

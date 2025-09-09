@@ -18,6 +18,7 @@ const MenteeProfileEdit = ({
   );
   const [interestError, setInterestError] = useState("");
 
+  // Updated interests list with Movies
   const availableInterests = [
     "Music",
     "Technology",
@@ -32,6 +33,7 @@ const MenteeProfileEdit = ({
     "Gardening",
     "Cars",
     "Politics",
+    "Movies",
   ];
 
   // Handle interest selection
