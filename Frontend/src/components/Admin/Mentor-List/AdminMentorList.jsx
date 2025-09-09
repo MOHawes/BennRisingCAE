@@ -6,9 +6,9 @@ import {
   API_VIEW_MENTORS,
 } from "../../../constants/endpoints";
 import UpdateMentorForm from "./UpdateMentorForm";
+
 const AdminMentorList = (props) => {
   const [mentors, setMentors] = useState([]);
-
 
   // for the Update Modal
   const [showModal, setShowModal] = useState(false);
@@ -17,7 +17,6 @@ const AdminMentorList = (props) => {
   const handleOpenModal = (mentor) => {
     console.log("Opening modal for mentor:", mentor);
     setMentorToUpdate(mentor);
-
     setShowModal(true);
   };
 
@@ -25,64 +24,6 @@ const AdminMentorList = (props) => {
     setShowModal(false);
     setMentorToUpdate(null);
   };
-  // const [firstName, setFirstName] = useState("Ceporah");
-  // const [lastName, setLastName] = useState("Wiggins-Mentor2");
-  // const [email, setEmail] = useState("email-mentor1@test.com");
-  // const [password, setPassword] = useState("1234");
-  // const [projectCategory, setProjectCategory] = useState("");
-  // function handleSubmit(event) {
-  //   event.preventDefault();
-  //   // Handle form submission logic here
-  //   console.log("Form submitted:", { firstName, lastName, email, password });
-  //   createMentor();
-  //   // Reset form fields
-  //   setFirstName("");
-  //   setLastName("");
-  //   setEmail("");
-  //   setPassword("");
-  //   setProjectCategory("");
-  // }
-
-  // async function createMentor() {
-  //   try {
-  //     //Headers
-  //     let headers = new Headers();
-  //     headers.append("Content-Type", "application/json");
-  //     // Request Body
-  //     let body = JSON.stringify({
-  //       firstName: firstName,
-  //       lastName: lastName,
-  //       email: email,
-  //       password: password,
-  //       userType: "Mentor",
-  //       projectCategory: projectCategory,
-  //     });
-  //     // Request Options
-  //     let requestOption = {
-  //       method: "POST",
-  //       headers: headers,
-  //       body: body,
-  //     };
-  //     // Send Request
-  //     let response = await fetch(
-  //       "http://localhost:4000/user/register",
-  //       requestOption
-  //     ); //TODO Use API_LOGIN and import at top of file
-
-  //     // Response Object
-  //     let data = await response.json();
-  //     // Update Token from the App.jsx file
-  //     console.log(data);
-  //     // Check if the response is ok (status code 200-299)
-  //     if (!response.ok) {
-  //       alert("Mentor Creation Failed! " + data.message);
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-  //     alert("Mentor Created Successfully!");
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 
   useEffect(() => {
     fetchMentors();
@@ -166,7 +107,7 @@ const AdminMentorList = (props) => {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `${props.token}`,
+            Authorization: `${props.token}`,
           },
         });
         if (response.ok) {
@@ -180,70 +121,85 @@ const AdminMentorList = (props) => {
       }
     }
   }
+
   return (
     <>
-      <div className="container mx-auto p-4">
-        <h1 className="text-4xl text-center py-4 uppercase">Mentor List</h1>
+      <div className="container mx-auto p-4 bg-white dark:bg-gray-900">
+        <h1 className="text-4xl text-center py-4 uppercase text-gray-900 dark:text-white">
+          Mentor List
+        </h1>
         <div className="overflow-x-auto">
-          <table className="w-full bg-white rounded-lg shadow-md">
-            <thead className="sticky top-0 bg-[#1b0a5f]">
-              <tr className="text-left text-white">
-                {/* <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
-                  ID:
-                </th> */}
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
-                  First Name:
+          <table className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <thead className="sticky top-0 bg-[#1b0a5f] dark:bg-gray-700">
+              <tr className="text-left text-white dark:text-gray-200">
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
+                  Coordinator #1:
                 </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
-                  Last Name:
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
+                  Coordinator #2:
                 </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Email:
                 </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Project Category:
                 </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Interests:
                 </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Question:
                 </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Actions:
                 </th>
               </tr>
             </thead>
             <tbody>
               {mentors.map((mentor) => (
-                <tr key={mentor.id} className="hover:bg-blue-100 transition-colors">
-                  {/* <td className="px-4 py-3 border-2 border-[#1b0a5f]">
-                    {mentor.id}
-                  </td> */}
-                  <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f]">
+                <tr
+                  key={mentor.id}
+                  className="hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
                     {mentor.firstName}
                   </td>
-                  <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f]">
+                  <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
                     {mentor.lastName}
                   </td>
-                  <td className="px-4 py-3 border-2 border-[#1b0a5f]">
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
                     {mentor.email}
                   </td>
-                  <td className="px-4 py-3 border-2 text-blue-500 font-bold border-[#1b0a5f]">
+                  <td className="px-4 py-3 border-2 text-blue-500 dark:text-blue-400 font-bold border-[#1b0a5f] dark:border-gray-600">
                     {mentor.projectCategory || "N/A"}
                   </td>
-                  <td className="px-4 py-3 border-2 border-[#1b0a5f]">{mentor.interests.join(', ')}</td>
-                  <td className="px-4 py-3 border-2 border-[#1b0a5f]">{mentor.questionToAsk}</td>
-                  <td className="px-4 py-3 border-2 border-[#1b0a5f]">
-                    <div className="flex justify-center gap-4">
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
+                    {mentor.interests.join(", ")}
+                  </td>
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
+                    {mentor.questionToAsk}
+                  </td>
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600">
+                    <div className="flex justify-center gap-2">
                       <button
-                        className="btn btn-soft btn-primary px-2 py-1 rounded-md transition"
+                        className="btn btn-soft btn-primary px-2 py-1 rounded-md transition bg-blue-500 hover:bg-blue-600 text-white text-sm"
                         onClick={() => handleOpenModal(mentor)}
                       >
                         Update
                       </button>
                       <button
-                        className="btn btn-soft btn-error px-2 py-1 rounded-md transition"
+                        className="btn btn-soft px-2 py-1 rounded-md transition bg-yellow-500 hover:bg-yellow-600 text-white text-sm"
+                        onClick={() =>
+                          handleResetPassword(
+                            mentor.id,
+                            `${mentor.firstName} ${mentor.lastName}`
+                          )
+                        }
+                      >
+                        Reset Password
+                      </button>
+                      <button
+                        className="btn btn-soft btn-error px-2 py-1 rounded-md transition bg-red-500 hover:bg-red-600 text-white text-sm"
                         onClick={() => handleDelete(mentor.id)}
                       >
                         Delete
@@ -264,87 +220,6 @@ const AdminMentorList = (props) => {
           />
         )}
       </div>
-      {/* <div className="container mx-auto p-4">
-  <div className="bg-blue-500 w-full mx-auto max-w-[450px] p-8 rounded-sm flex flex-col justify-center items-center">
-    <form className="w-full" onSubmit={handleSubmit}>
-      <h2 className="text-3xl text-center py-4 uppercase">Add Mentor</h2>
-      <div className="flex flex-col w-full">
-        <label className="pb-2 uppercase" htmlFor="firstName">
-          First Name:
-        </label>
-        <input
-          className="bg-white border-2 border-gray-300 rounded-md p-2 mb-4"
-          type="text"
-          id="firstName"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex flex-col w-full">
-        <label className="pb-2 uppercase" htmlFor="lastName">
-          Last Name:
-        </label>
-        <input
-          className="bg-white border-2 border-gray-300 rounded-md p-2 mb-4"
-          type="text"
-          id="lastName"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex flex-col w-full">
-        <label className="pb-2 uppercase" htmlFor="email">
-          Email:
-        </label>
-        <input
-          className="bg-white border-2 border-gray-300 rounded-md p-2 mb-4"
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex flex-col w-full">
-        <label className="pb-2 uppercase" htmlFor="password">
-          Password:
-        </label>
-        <input
-          className="bg-white border-2 border-gray-300 rounded-md p-2 mb-4"
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <div className="flex flex-col w-full">
-        <label className="pb-2 uppercase" htmlFor="projectCategory">
-          Project Category:
-        </label>
-        <select
-          className="bg-white text-black border-2 border-gray-300 rounded-md p-2 mb-4"
-          id="projectCategory"
-          value={projectCategory}
-          onChange={(e) => setProjectCategory(e.target.value)}
-          required
-        >
-          <option value="">Select a category</option>
-          <option value="video">Video</option>
-          <option value="science">Science</option>
-        </select>
-      </div>
-      <button
-        className="bg-blue-950 rounded-sm text-white px-12 py-2 hover:bg-blue-950/50 hover:border-2 hover:border-blue-950 w-full"
-        type="submit"
-      >
-        Add Mentor
-      </button>
-    </form>
-  </div>
-</div> */}
     </>
   );
 };

@@ -94,7 +94,28 @@ router.post(
     try {
       const menteeId = req.user._id;
       const mentorId = req.params.mentorId;
-      const { answer } = req.body;
+      const { mentorAnswer, programAnswer } = req.body;
+
+      // Validate both answers are provided
+      if (!mentorAnswer || !programAnswer) {
+        return res.status(400).json({
+          message:
+            "Both mentor question and program question answers are required",
+        });
+      }
+
+      // Validate character limits
+      if (mentorAnswer.length > 150) {
+        return res.status(400).json({
+          message: "Mentor question answer must be 150 characters or less",
+        });
+      }
+
+      if (programAnswer.length > 150) {
+        return res.status(400).json({
+          message: "Program question answer must be 150 characters or less",
+        });
+      }
 
       // Get mentee and mentor data
       const mentee = await Mentee.findById(menteeId);
@@ -123,12 +144,15 @@ router.post(
           .json({ message: "Match request already exists" });
       }
 
-      // Create Answer record first
+      // Create Answer record with both answers
       const answerRecord = new Answer({
         menteeId: menteeId,
         mentorId: mentorId,
         mentorQuestion: mentor.questionToAsk,
-        menteeAnswer: answer,
+        menteeAnswer: mentorAnswer,
+        programQuestion:
+          "How do you want to grow through participating in the Bennington Rising program?",
+        programAnswer: programAnswer,
       });
       await answerRecord.save();
 
@@ -165,7 +189,8 @@ router.post(
         lastName: mentee.lastName,
         interests: mentee.interests,
         answer1: mentee.project || "Not provided", // General answer
-        answer2: answer, // Answer to mentor's specific question
+        answer2: mentorAnswer, // Answer to mentor's specific question
+        programAnswer: programAnswer, // Answer to program question
       });
 
       // Send email #2 to mentee - Consent Needed
@@ -559,5 +584,47 @@ router.post("/send-reminders", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+// Add this route to Backend/controllers/admin.controller.js
+
+// POST /admin/mentor/reset-password/:id
+router.put(
+  "/mentor/reset-password/:id",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const mentorId = req.params.id;
+      console.log("Resetting password for mentor ID: ", mentorId);
+
+      // Reset password to "0000"
+      const defaultPassword = "0000";
+      const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+
+      // Update the mentor's password
+      const updatedMentor = await Mentor.findByIdAndUpdate(
+        mentorId,
+        { password: hashedPassword },
+        { new: true }
+      );
+
+      // Error if update was unsuccessful
+      if (!updatedMentor) {
+        return res
+          .status(404)
+          .json({ message: "Mentor not found or error resetting password" });
+      }
+
+      // Success response
+      res.status(200).json({
+        message: `Password reset successfully for ${updatedMentor.firstName} ${updatedMentor.lastName}. New password is: ${defaultPassword}`,
+        mentorId: updatedMentor._id.toString(),
+        newPassword: defaultPassword, // Include in response for admin reference
+      });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 module.exports = router;

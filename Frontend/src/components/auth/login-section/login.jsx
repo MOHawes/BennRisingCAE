@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { API_LOGIN } from "../../../constants/endpoints";
 
 const Login = (props) => {
-  const [email, setEmail] = useState("student@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showMessage, setShowMessage] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success"); // success or error

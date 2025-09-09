@@ -79,6 +79,27 @@ const MentorDashboard = (props) => {
               : "Loading..."}
           </h1>
         </div>
+
+        {/* Important Dates Button */}
+        <div className="flex justify-center mt-4 mb-4">
+          <a
+            href="/important-dates"
+            className="bg-[#ff0000] hover:bg-[#f19494] text-white font-bold py-3 px-8 rounded-md text-lg uppercase shadow-md transition-colors"
+          >
+            Important Dates
+          </a>
+        </div>
+
+        {/* Password Reset Notification */}
+        {mentor.firstName && (
+          <div className="mt-4 p-4 bg-blue-100 dark:bg-blue-900 border-l-4 border-blue-500 text-blue-700 dark:text-blue-300 rounded-md shadow">
+            <p>
+              💡 <strong>Tip:</strong> If your password was reset by an admin,
+              please update it from your profile settings for security.
+            </p>
+          </div>
+        )}
+
         {/* Notification Banner */}
         {!profileComplete && (
           <div className="mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md shadow">

@@ -30,6 +30,10 @@ export const API_MENTEE_PROFILE_PREVIEW = `${API}/user/mentee/profile`;
 
 export const API_MENTOR_PROFILE_PREVIEW = `${API}/user/mentor/profile`;
 
+export const API_ADMIN_RESET_PASSWORD = `${API}/admin/mentor/reset-password`;
+
+export const API_ADMIN_MATCH_REQUESTS = `${API}/admin/match-requests`;
+
 // Add the S3 upload URL endpoint
 export const API_GET_UPLOAD_URL = `${API}/geturl`;
 

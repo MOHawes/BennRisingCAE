@@ -8,6 +8,8 @@ const MentorProfileEdit = (props) => {
   const [updatedFirstName, setUpdatedFirstName] = useState("");
   const [updatedLastName, setUpdatedLastName] = useState("");
   const [updatedEmail, setUpdatedEmail] = useState("");
+  const [updatedPassword, setUpdatedPassword] = useState(""); // New password field
+  const [confirmPassword, setConfirmPassword] = useState(""); // Password confirmation
   const [updatedBio, setUpdatedBio] = useState("");
   // Update Question
   const [updatedQuestionToAsk, setUpdatedQuestionToAsk] = useState("");
@@ -27,6 +29,9 @@ const MentorProfileEdit = (props) => {
     props.mentor.interests || []
   );
   const [interestError, setInterestError] = useState("");
+  // Password validation
+  const [passwordError, setPasswordError] = useState("");
+
   // interests for selection form
   const availableInterests = [
     "Music",
@@ -162,6 +167,24 @@ const MentorProfileEdit = (props) => {
     setInterestError("");
   };
 
+  // Validate passwords match
+  const validatePasswords = () => {
+    if (updatedPassword && confirmPassword) {
+      if (updatedPassword !== confirmPassword) {
+        setPasswordError("Passwords do not match");
+        return false;
+      } else if (updatedPassword.length < 4) {
+        setPasswordError("Password must be at least 4 characters");
+        return false;
+      } else {
+        setPasswordError("");
+        return true;
+      }
+    }
+    setPasswordError("");
+    return true;
+  };
+
   // form submit
   async function handleSubmit(e) {
     e.preventDefault();
@@ -169,6 +192,11 @@ const MentorProfileEdit = (props) => {
     // Validate interests
     if (selectedInterests.length > 0 && selectedInterests.length !== 4) {
       setInterestError("You need to select exactly 4 interests");
+      return;
+    }
+
+    // Validate passwords if provided
+    if (updatedPassword && !validatePasswords()) {
       return;
     }
 
@@ -186,6 +214,7 @@ const MentorProfileEdit = (props) => {
       if (updatedFirstName) body.firstName = updatedFirstName;
       if (updatedLastName) body.lastName = updatedLastName;
       if (updatedEmail) body.email = updatedEmail;
+      if (updatedPassword) body.password = updatedPassword; // Include password if provided
       if (updatedBio) body.bio = updatedBio;
       if (updatedQuestionToAsk) body.questionToAsk = updatedQuestionToAsk;
       if (profilePhotoUrl1) body.profilePhoto1 = profilePhotoUrl1;
@@ -226,6 +255,8 @@ const MentorProfileEdit = (props) => {
       setUpdatedFirstName("");
       setUpdatedLastName("");
       setUpdatedEmail("");
+      setUpdatedPassword("");
+      setConfirmPassword("");
       setUpdatedBio("");
       setUpdatedQuestionToAsk("");
       setSelectedImage1(null);
@@ -302,6 +333,57 @@ const MentorProfileEdit = (props) => {
               placeholder={props.mentor.email || "Type Here"}
               type="text"
             />
+
+            {/* Password Update Section */}
+            <div className="w-full max-w-xl mb-4 mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-md">
+              <h3 className="font-bold text-lg text-center mb-4 text-yellow-800">
+                Update Password (Optional)
+              </h3>
+              <p className="text-sm text-gray-600 mb-4 text-center">
+                Leave blank to keep current password. If your password was reset
+                by an admin, please update it here.
+              </p>
+
+              <label className="label-text font-bold text-lg text-center mb-2 block">
+                New Password:
+              </label>
+              <input
+                className="input input-bordered bg-white text-black w-full mb-2"
+                value={updatedPassword}
+                onChange={(e) => {
+                  setUpdatedPassword(e.target.value);
+                  validatePasswords();
+                }}
+                id="passwordUpdate"
+                name="password"
+                placeholder="Enter new password (min 4 characters)"
+                type="password"
+                minLength={4}
+              />
+
+              <label className="label-text font-bold text-lg text-center mb-2 block">
+                Confirm New Password:
+              </label>
+              <input
+                className="input input-bordered bg-white text-black w-full mb-2"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  validatePasswords();
+                }}
+                id="confirmPasswordUpdate"
+                name="confirmPassword"
+                placeholder="Confirm new password"
+                type="password"
+                minLength={4}
+              />
+
+              {passwordError && (
+                <p className="text-red-500 text-sm mt-1 text-center">
+                  {passwordError}
+                </p>
+              )}
+            </div>
 
             {/* Team Bio */}
             <label className="label-text font-bold text-lg text-center mb-2 mt-2">

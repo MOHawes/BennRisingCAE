@@ -72,6 +72,16 @@ const MenteeDashboard = (props) => {
           </h1>
         </div>
 
+        {/* Important Dates Button */}
+        <div className="flex justify-center mt-4 mb-4">
+          <a 
+            href="/important-dates"
+            className="bg-[#ff0000] hover:bg-[#f19494] text-white font-bold py-3 px-8 rounded-md text-lg uppercase shadow-md transition-colors"
+          >
+            Important Dates
+          </a>
+        </div>
+
         {/* Two-column layout starts here */}
         <div className="flex flex-col md:flex-row gap-6 mt-6 px-4">
           {/* Left Column: Mentor Directory */}
