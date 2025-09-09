@@ -116,6 +116,7 @@ const MentorDashboard = (props) => {
         <div className="flex flex-col md:flex-row gap-6">
           {/* LEFT SIDE */}
           <div className="w-full md:w-1/2 space-y-4 flex flex-col items-center pt-6">
+
             {/* View Pending Requests - Pass the refresh callback */}
             <MentorPendingRequest
               token={props.token}
@@ -125,6 +126,7 @@ const MentorDashboard = (props) => {
             {/* Show matched mentee automatically if there is one */}
             {hasMatchedMentee && (
               <div className="p-4 mt-4 rounded-md w-full md:w-[95%] shadow bg-sky-50">
+
                 <MenteePreview token={props.token} />
               </div>
             )}

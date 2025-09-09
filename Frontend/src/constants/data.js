@@ -8,6 +8,7 @@ export const navMenu = [
         href: "/mentors",
     },
     {
+
         name: "Team Fellows",
         href: "/mentees",
     },
@@ -24,6 +25,7 @@ export const navMenu = [
         href: "/upright",
     }
 ]
+
 
 // Updated interests list with Movies added
 export const interests = [
@@ -42,3 +44,4 @@ export const interests = [
     "Politics",
     "Movies"
 ];
+

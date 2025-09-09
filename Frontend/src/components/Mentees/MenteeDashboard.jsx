@@ -88,14 +88,14 @@ const MenteeDashboard = (props) => {
           <div className="w-full md:w-1/2 relative">
             {" "}
             {/* Make this container relative */}
-            {/* Swipe indicator arrows (outside the shadow box) */}
+            {/* Swipe indicator arrows (outside the shadow box)
             <div className="hidden sm:flex absolute top-1/4 -left-[10rem] transform -rotate-90 text-blue-500 z-10">
               <span className="px-4 py-2 font-bold flex items-center">
                 <span className="text-9xl leading-none">←</span>
                 <span className="mx-2 text-5xl">Swipe</span>
                 <span className="text-9xl leading-none">→</span>
               </span>
-            </div>
+            </div> */}
             {/* Heading and MentorDirectory box */}
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-6 border-b pb-2 pt-6 text-center">
               Browse Mentors
