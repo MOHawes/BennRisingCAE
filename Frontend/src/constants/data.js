@@ -8,7 +8,8 @@ export const navMenu = [
         href: "/mentors",
     },
     {
-        name: "Fellows",
+
+        name: "Team Fellows",
         href: "/mentees",
     },
     {
@@ -21,8 +22,26 @@ export const navMenu = [
     },
     {
         name: "Upright",
-        href: "https://www.uprighted.com/",
+        href: "/upright",
     }
 ]
 
-export const interests = ["Music", "Technology", "Sports", "Outdoor activities", "Books and writing", "Art", "Exercising", "Food", "Gaming", "Pets and animals", "Gardening", "Cars", "Politics","Movies"];
+
+// Updated interests list with Movies added
+export const interests = [
+    "Music", 
+    "Technology", 
+    "Sports", 
+    "Outdoor activities", 
+    "Books and writing", 
+    "Art", 
+    "Exercising", 
+    "Food", 
+    "Gaming", 
+    "Pets and animals", 
+    "Gardening", 
+    "Cars", 
+    "Politics",
+    "Movies"
+];
+

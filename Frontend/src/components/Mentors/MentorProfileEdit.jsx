@@ -27,7 +27,7 @@ const MentorProfileEdit = (props) => {
     props.mentor.interests || []
   );
   const [interestError, setInterestError] = useState("");
-  // interests for selection form
+  // interests for selection form - UPDATED with Movies
   const availableInterests = [
     "Music",
     "Technology",
@@ -42,6 +42,7 @@ const MentorProfileEdit = (props) => {
     "Gardening",
     "Cars",
     "Politics",
+    "Movies",
   ];
 
   // Handle image selection for photo 1
@@ -261,8 +262,9 @@ const MentorProfileEdit = (props) => {
         <fieldset className="fieldset w-full space-y-4">
           {/* Form to update Profile */}
           <div className="flex flex-col items-center w-full">
+            {/* Team Member 1 Name */}
             <label className="label-text font-bold text-lg text-center mb-2 mt-2">
-              Update First Name Here:
+              Update Team Member 1 Name:
             </label>
             <input
               className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
@@ -274,8 +276,9 @@ const MentorProfileEdit = (props) => {
               type="text"
             />
 
+            {/* Team Member 2 Name */}
             <label className="label-text font-bold text-lg text-center mb-2 mt-2">
-              Update Last Name Here:
+              Update Team Member 2 Name:
             </label>
             <input
               className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
@@ -287,8 +290,9 @@ const MentorProfileEdit = (props) => {
               type="text"
             />
 
+            {/* Team Email */}
             <label className="label-text font-bold text-lg text-center mb-2 mt-2">
-              Update Email Here:
+              Update Team Email:
             </label>
             <input
               className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
@@ -300,8 +304,9 @@ const MentorProfileEdit = (props) => {
               type="text"
             />
 
+            {/* Team Bio */}
             <label className="label-text font-bold text-lg text-center mb-2 mt-2">
-              Update Bio Here:
+              Update Team Bio:
             </label>
             <input
               className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"

@@ -2,6 +2,7 @@ const router = require("express").Router();
 const validateSession = require("../middleware/validate-session");
 const validateMentee = require("../middleware/validate-mentee");
 const validateMentor = require("../middleware/validate-mentor");
+const validateAdmin = require("../middleware/validate-admin"); // ADD THIS LINE
 const Mentor = require("../models/mentor.model");
 const Mentee = require("../models/mentee.model");
 const Answer = require("../models/match.model");
@@ -27,6 +28,27 @@ const {
 router.get("/consent-info/:matchRequestId", async (req, res) => {
   try {
     const { matchRequestId } = req.params;
+
+    // Handle test case for development
+    if (
+      matchRequestId === "test-match-id" ||
+      matchRequestId === "test-match-request-id"
+    ) {
+      // Return mock data for testing
+      return res.status(200).json({
+        menteeName: "Test Student",
+        mentorName: "Test Mentor",
+        projectCategory: "Science",
+        deadline: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours from now
+      });
+    }
+
+    // For real match requests, validate ObjectId
+    if (!matchRequestId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid match request ID format",
+      });
+    }
 
     const matchRequest = await MatchRequest.findById(matchRequestId)
       .populate("menteeId", "firstName lastName")
@@ -73,7 +95,28 @@ router.post(
     try {
       const menteeId = req.user._id;
       const mentorId = req.params.mentorId;
-      const { answer } = req.body;
+      const { mentorAnswer, programAnswer } = req.body;
+
+      // Validate both answers are provided
+      if (!mentorAnswer || !programAnswer) {
+        return res.status(400).json({
+          message:
+            "Both mentor question and program question answers are required",
+        });
+      }
+
+      // Validate character limits
+      if (mentorAnswer.length > 150) {
+        return res.status(400).json({
+          message: "Mentor question answer must be 150 characters or less",
+        });
+      }
+
+      if (programAnswer.length > 150) {
+        return res.status(400).json({
+          message: "Program question answer must be 150 characters or less",
+        });
+      }
 
       // Get mentee and mentor data
       const mentee = await Mentee.findById(menteeId);
@@ -102,12 +145,15 @@ router.post(
           .json({ message: "Match request already exists" });
       }
 
-      // Create Answer record first
+      // Create Answer record with both answers
       const answerRecord = new Answer({
         menteeId: menteeId,
         mentorId: mentorId,
         mentorQuestion: mentor.questionToAsk,
-        menteeAnswer: answer,
+        menteeAnswer: mentorAnswer,
+        programQuestion:
+          "How do you want to grow through participating in the Bennington Rising program?",
+        programAnswer: programAnswer,
       });
       await answerRecord.save();
 
@@ -144,7 +190,8 @@ router.post(
         lastName: mentee.lastName,
         interests: mentee.interests,
         answer1: mentee.project || "Not provided", // General answer
-        answer2: answer, // Answer to mentor's specific question
+        answer2: mentorAnswer, // Answer to mentor's specific question
+        programAnswer: programAnswer, // Answer to program question
       });
 
       // Send email #2 to mentee - Consent Needed
@@ -220,8 +267,47 @@ router.get(
 router.post("/consent/:matchRequestId", async (req, res) => {
   try {
     const { matchRequestId } = req.params;
-    const { approved, guardianName, childName, guardianEmail, guardianPhone } =
-      req.body;
+    const { 
+      approved, 
+      guardianName, 
+      childName, 
+      guardianEmail, 
+      guardianPhone,
+      emergencyContactName,
+      emergencyContactPhone,
+      emergencyContactRelation
+    } = req.body;
+
+    // Handle test case for development
+    if (
+      matchRequestId === "test-match-id" ||
+      matchRequestId === "test-match-request-id"
+    ) {
+      // Simulate successful submission for testing
+      console.log("Test consent form submitted:", {
+        approved,
+        guardianName,
+        childName,
+        guardianEmail,
+        guardianPhone,
+        emergencyContactName,
+        emergencyContactPhone,
+        emergencyContactRelation
+      });
+
+      return res.status(200).json({
+        message: approved
+          ? "Test consent approved successfully"
+          : "Test consent declined successfully",
+      });
+    }
+
+    // For real match requests, validate ObjectId
+    if (!matchRequestId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        message: "Invalid match request ID format",
+      });
+    }
 
     const matchRequest = await MatchRequest.findById(matchRequestId)
       .populate("menteeId")
@@ -244,10 +330,23 @@ router.post("/consent/:matchRequestId", async (req, res) => {
     }
 
     if (approved) {
-      // Update match status
+      // Update match status and store guardian/emergency contact info
       matchRequest.status = "pending_mentor_approval";
       matchRequest.guardianConsentAt = new Date();
       matchRequest.guardianConsentReceived = true;
+      
+      // Store guardian and emergency contact information
+      matchRequest.guardianInfo = {
+        name: guardianName,
+        email: guardianEmail,
+        phone: guardianPhone,
+        emergencyContact: {
+          name: emergencyContactName,
+          phone: emergencyContactPhone,
+          relation: emergencyContactRelation
+        }
+      };
+      
       await matchRequest.save();
 
       // Send email #7 to mentee - Consent Approved
@@ -276,9 +375,22 @@ router.post("/consent/:matchRequestId", async (req, res) => {
 
       res.status(200).json({ message: "Consent approved successfully" });
     } else {
-      // Update match status
+      // Update match status and store guardian info even for declined
       matchRequest.status = "declined_by_guardian";
       matchRequest.declinedAt = new Date();
+      
+      // Store guardian information for declined requests too
+      matchRequest.guardianInfo = {
+        name: guardianName,
+        email: guardianEmail,
+        phone: guardianPhone,
+        emergencyContact: {
+          name: emergencyContactName,
+          phone: emergencyContactPhone,
+          relation: emergencyContactRelation
+        }
+      };
+      
       await matchRequest.save();
 
       // Remove from requested lists
@@ -309,140 +421,6 @@ router.post("/consent/:matchRequestId", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-// Route for mentor to approve/decline match
-router.post(
-  "/mentor-decision/:matchRequestId",
-  validateSession,
-  validateMentor,
-  async (req, res) => {
-    try {
-      const { matchRequestId } = req.params;
-      const { approved } = req.body;
-      const mentorId = req.user._id;
-
-      const matchRequest = await MatchRequest.findById(matchRequestId)
-        .populate("menteeId")
-        .populate("mentorId");
-
-      if (!matchRequest) {
-        return res.status(404).json({ message: "Match request not found" });
-      }
-
-      // Verify this mentor is the one in the request
-      if (matchRequest.mentorId._id.toString() !== mentorId.toString()) {
-        return res.status(403).json({ message: "Unauthorized" });
-      }
-
-      if (matchRequest.status !== "pending_mentor_approval") {
-        return res.status(400).json({ message: "Match decision already made" });
-      }
-
-      if (approved) {
-        // Update match status
-        matchRequest.status = "confirmed";
-        matchRequest.confirmedAt = new Date();
-        matchRequest.mentorDecisionAt = new Date();
-        await matchRequest.save();
-
-        // Update approved lists
-        await Mentor.findByIdAndUpdate(matchRequest.mentorId._id, {
-          $pull: { menteeRequests: matchRequest.menteeId._id },
-          $push: { approvedMentees: matchRequest.menteeId._id },
-        });
-
-        await Mentee.findByIdAndUpdate(matchRequest.menteeId._id, {
-          $pull: { requestedMentors: matchRequest.mentorId._id },
-          $push: { approvedMentors: matchRequest.mentorId._id },
-        });
-
-        // Get all mentees for this mentor (for team email)
-        const allMentees = await Mentee.find({
-          approvedMentors: matchRequest.mentorId._id,
-        });
-
-        // Get answers for all mentees
-        const menteeAnswers = await Answer.find({
-          mentorId: matchRequest.mentorId._id,
-          menteeId: { $in: allMentees.map((m) => m._id) },
-        });
-
-        // Send email #10 to mentor - Match Confirmed
-        await sendMatchConfirmedToMentor(
-          matchRequest.mentorId.email,
-          matchRequest.mentorId.firstName,
-          allMentees.map((m) => {
-            const answer = menteeAnswers.find(
-              (a) => a.menteeId.toString() === m._id.toString()
-            );
-            return {
-              firstName: m.firstName,
-              lastName: m.lastName,
-              email: m.email,
-              phone: m.phone,
-              interests: m.interests,
-              answer1: m.project || "Not provided",
-              answer2: answer ? answer.menteeAnswer : "Not provided",
-            };
-          }),
-          "TBD" // Match date - you can add this to your system
-        );
-
-        // Send email #10 to mentee - Match Confirmed
-        await sendMatchConfirmedToMentee(
-          matchRequest.menteeId.email,
-          matchRequest.menteeId.firstName,
-          [
-            {
-              firstName: matchRequest.mentorId.firstName,
-              lastName: matchRequest.mentorId.lastName,
-              email: matchRequest.mentorId.email,
-              phone: matchRequest.mentorId.phone,
-              interests: matchRequest.mentorId.interests,
-              bio: matchRequest.mentorId.bio,
-              projectCategory: matchRequest.mentorId.projectCategory,
-            },
-          ],
-          "TBD" // Match date
-        );
-
-        res.status(200).json({ message: "Match confirmed successfully" });
-      } else {
-        // Update match status
-        matchRequest.status = "declined_by_mentor";
-        matchRequest.declinedAt = new Date();
-        matchRequest.mentorDecisionAt = new Date();
-        await matchRequest.save();
-
-        // Remove from lists
-        await Mentor.findByIdAndUpdate(matchRequest.mentorId._id, {
-          $pull: { menteeRequests: matchRequest.menteeId._id },
-        });
-
-        await Mentee.findByIdAndUpdate(matchRequest.menteeId._id, {
-          $pull: { requestedMentors: matchRequest.mentorId._id },
-        });
-
-        // Send email #11 to mentor - Match Declined
-        await sendMatchDeclinedByMentor(
-          matchRequest.mentorId.email,
-          matchRequest.mentorId.firstName
-        );
-
-        // Send email #12 to mentee - Match Declined
-        await sendMatchDeclinedToMentee(
-          matchRequest.menteeId.email,
-          matchRequest.menteeId.firstName
-        );
-
-        res.status(200).json({ message: "Match declined" });
-      }
-    } catch (error) {
-      console.error("Error processing mentor decision:", error);
-      res.status(500).json({ message: error.message });
-    }
-  }
-);
 
 // Route to send reminders (call this from a cron job)
 router.post("/send-reminders", async (req, res) => {
@@ -510,5 +488,47 @@ router.post("/send-reminders", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+// Add this route to Backend/controllers/admin.controller.js
+
+// POST /admin/mentor/reset-password/:id
+router.put(
+  "/mentor/reset-password/:id",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const mentorId = req.params.id;
+      console.log("Resetting password for mentor ID: ", mentorId);
+
+      // Reset password to "0000"
+      const defaultPassword = "0000";
+      const hashedPassword = bcrypt.hashSync(defaultPassword, 10);
+
+      // Update the mentor's password
+      const updatedMentor = await Mentor.findByIdAndUpdate(
+        mentorId,
+        { password: hashedPassword },
+        { new: true }
+      );
+
+      // Error if update was unsuccessful
+      if (!updatedMentor) {
+        return res
+          .status(404)
+          .json({ message: "Mentor not found or error resetting password" });
+      }
+
+      // Success response
+      res.status(200).json({
+        message: `Password reset successfully for ${updatedMentor.firstName} ${updatedMentor.lastName}. New password is: ${defaultPassword}`,
+        mentorId: updatedMentor._id.toString(),
+        newPassword: defaultPassword, // Include in response for admin reference
+      });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
 
 module.exports = router;

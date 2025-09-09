@@ -56,7 +56,6 @@ export default function CreateMentor(props) {
       // Refresh list of mentors and alert that mentor creation successful
       props.setRefreshMentors(true);
       alert("Mentor created successfully!");
-
     } catch (error) {
       console.log(error);
     }
@@ -66,18 +65,19 @@ export default function CreateMentor(props) {
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-[#1b0a5f] p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-[#eab246] mb-8 uppercase">
-          Create Mentor
+          Create Mentor Team
         </h2>
         <form
           onSubmit={handleSubmit}
           className="bg-white  p-8 space-y-4 rounded-md"
         >
+          {/* Team Member 1 */}
           <div>
             <label
               htmlFor="firstName"
               className="block text-sm font-medium text-[#1b0a5f]"
             >
-              First Name:
+              Team Member 1:
             </label>
             <input
               type="text"
@@ -85,16 +85,17 @@ export default function CreateMentor(props) {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
-              placeholder="Name"
+              placeholder="First name"
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
+          {/* Team Member 2 */}
           <div>
             <label
               htmlFor="lastName"
               className="block text-sm font-medium text-[#1b0a5f]"
             >
-              Last Name:
+              Team Member 2:
             </label>
             <input
               type="text"
@@ -102,16 +103,17 @@ export default function CreateMentor(props) {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
-              placeholder="Last"
+              placeholder="First name"
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
+          {/* Team Email */}
           <div>
             <label
               htmlFor="email"
               className="block text-sm font-medium text-[#1b0a5f]"
             >
-              Email:
+              Team Email:
             </label>
             <input
               type="email"
@@ -123,6 +125,7 @@ export default function CreateMentor(props) {
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
+          {/* Password */}
           <div>
             <label
               htmlFor="password"
@@ -140,6 +143,7 @@ export default function CreateMentor(props) {
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
+          {/* Project Category - UPDATED */}
           <div>
             <label
               htmlFor="projectCategory"
@@ -155,8 +159,8 @@ export default function CreateMentor(props) {
               className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             >
               <option value="">Select a category</option>
-              <option value="video">Video</option>
-              <option value="science">Science</option>
+              <option value="What's in your food">What's in your food</option>
+              <option value="Kid's for science!">Kid's for science!</option>
             </select>
           </div>
           <button

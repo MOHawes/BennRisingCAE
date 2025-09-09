@@ -75,11 +75,11 @@ const sendMatchUnderReviewToMentor = async (
     <blockquote style="background-color: #f0f0f0; padding: 15px; margin: 10px 0;">
       <strong>${menteeData.firstName} ${menteeData.lastName}</strong><br>
       <strong>Interests:</strong> ${menteeData.interests.join(", ")}<br>
-      <strong>Answer to Question 1:</strong> ${
-        menteeData.answer1 || "Not provided"
-      }<br>
-      <strong>Answer to Question 2:</strong> ${
+      <strong>Answer to Your Question:</strong> ${
         menteeData.answer2 || "Not provided"
+      }<br>
+      <strong>Answer to "How do you want to grow through participating in the Bennington Rising program?":</strong> ${
+        menteeData.programAnswer || "Not provided"
       }
     </blockquote>
     

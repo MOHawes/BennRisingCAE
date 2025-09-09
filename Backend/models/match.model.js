@@ -17,6 +17,16 @@ const AnswerSchema = new mongoose.Schema({
   menteeAnswer: {
     type: String,
     required: true,
+    maxlength: 150,
+  },
+  programQuestion: {
+    type: String,
+    default: "How do you want to grow through participating in the Bennington Rising program?",
+  },
+  programAnswer: {
+    type: String,
+    required: true,
+    maxlength: 150,
   },
 });
 

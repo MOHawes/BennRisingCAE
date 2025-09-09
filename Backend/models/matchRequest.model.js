@@ -57,6 +57,29 @@ const MatchRequestSchema = new mongoose.Schema(
     expiredAt: {
       type: Date,
     },
+    // Guardian and emergency contact information
+    guardianInfo: {
+      name: {
+        type: String,
+      },
+      email: {
+        type: String,
+      },
+      phone: {
+        type: String,
+      },
+      emergencyContact: {
+        name: {
+          type: String,
+        },
+        phone: {
+          type: String,
+        },
+        relation: {
+          type: String,
+        }
+      }
+    },
     // Email tracking
     remindersSent: {
       type: Number,
