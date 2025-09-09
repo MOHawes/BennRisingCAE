@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import MentorsPage from "./pages/MentorPage"; // Mentor import path
 import MenteePage from "./pages/MenteePage"; // Added Mentee import
@@ -52,7 +52,7 @@ function App() {
   }, []);
 
   return (
-    <>
+    <BrowserRouter>
       <Navbar token={token} />
       <Routes>
         <Route path="/" element={<HomePage token={token} />} />
@@ -103,7 +103,7 @@ function App() {
         <Route path="/consent-info" element={<GenericConsentPage />} />
       </Routes>
       <Footer />
-    </>
+    </BrowserRouter>
   );
 }
 
