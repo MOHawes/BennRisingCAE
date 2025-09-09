@@ -11,13 +11,13 @@ const SignUp = (props) => {
   const [guardianEmail, setGuardianEmail] = useState("");
   const [school, setSchool] = useState("");
   const [ageCheck, setAgeCheck] = useState(false);
-  // const [project, setProject] = useState("");
+  const [project, setProject] = useState("");
 
   // Interest selection related states
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [interestError, setInterestError] = useState("");
 
-  // Available interests from the mentee model
+  // Available interests from the mentee model - UPDATED with Movies
   const availableInterests = [
     "Music",
     "Technology",
@@ -32,6 +32,7 @@ const SignUp = (props) => {
     "Gardening",
     "Cars",
     "Politics",
+    "Movies",
   ];
 
   // Handle when user clicks on an interest checkbox
@@ -84,6 +85,7 @@ const SignUp = (props) => {
         school,
         ageCheck,
         interests: selectedInterests,
+        project, // Add project selection
       };
 
       console.log("Signup request:", requestBody);
@@ -219,6 +221,23 @@ const SignUp = (props) => {
               <option value="Mount Anthony Union High School">
                 Mount Anthony Union High School
               </option>
+            </select>
+
+            {/* Project Selection - NEW */}
+            <label className="pb-2 uppercase" htmlFor="project">
+              Project Interest:
+            </label>
+            <select
+              className="bg-white border-2 border-gray-300 rounded-md p-2 mb-4"
+              name="project"
+              id="project"
+              value={project}
+              onChange={(e) => setProject(e.target.value)}
+              required
+            >
+              <option value="">Please select your project interest</option>
+              <option value="What's in your food">What's in your food</option>
+              <option value="Kid's for science!">Kid's for science!</option>
             </select>
 
             {/* DaisyUI Collapsible for Interest Selection */}

@@ -79,6 +79,7 @@ const MentorSchema = new mongoose.Schema({
         "Gardening",
         "Cars",
         "Politics",
+        "Movies",
       ],
     },
   ],
@@ -89,7 +90,7 @@ const MentorSchema = new mongoose.Schema({
 
   projectCategory: {
     type: String,
-    enum: ["video", "science"],
+    enum: ["What's in your food", "Kid's for science!"],
     required: false,
   },
 

@@ -699,4 +699,111 @@ router.get("/mentee/profile", validateSession, async (req, res) => {
   }
 });
 
+// ! Route to view all mentees (for admin)
+// Endpoint: http://localhost:4000/user/mentee/view-all
+// Request type: GET
+router.get("/mentee/view-all", validateSession, validateAdmin, async (req, res) => {
+  try {
+    const mentees = await Mentee.find({ userType: "Mentee" });
+
+    const formattedMentees = mentees.map((mentee) => ({
+      id: mentee._id,
+      firstName: mentee.firstName,
+      lastName: mentee.lastName,
+      email: mentee.email,
+      school: mentee.school || "",
+      interests: mentee.interests || [],
+      project: mentee.project || "",
+      guardianEmail: mentee.guardianEmail || "",
+      requestedMentors: mentee.requestedMentors || [],
+      approvedMentors: mentee.approvedMentors || [],
+      ageCheck: mentee.ageCheck,
+    }));
+
+    res.status(200).json({
+      message: `All mentees retrieved successfully`,
+      mentees: formattedMentees,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Add these routes to your admin.controller.js file
+
+// TODO DELETE /admin/mentee/delete/:id
+router.delete("/mentee/delete/:id", validateSession, validateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedMentee = await Mentee.deleteOne({ _id: id });
+
+    if (deletedMentee.deletedCount === 0) {
+      return res.status(404).json({ message: "Mentee not found." });
+    } else {
+      return res.status(200).json({
+        message: "Mentee successfully deleted.",
+        deletedUserId: id,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// TODO PUT /admin/mentee/update/:id (optional - for future use)
+router.put("/mentee/update/:id", validateSession, validateAdmin, async (req, res) => {
+  try {
+    const menteeId = req.params.id;
+    console.log("Received mentee ID: ", menteeId);
+
+    const { firstName, lastName, email, school, guardianEmail, interests } = req.body;
+
+    const updatedInfo = {};
+    // only update if provided values are NOT undefined
+    if (firstName !== undefined && firstName.trim() !== "")
+      updatedInfo.firstName = firstName;
+    if (lastName !== undefined && lastName.trim() !== "")
+      updatedInfo.lastName = lastName;
+    if (email !== undefined && email.trim() !== "") 
+      updatedInfo.email = email;
+    if (school !== undefined && school.trim() !== "")
+      updatedInfo.school = school;
+    if (guardianEmail !== undefined && guardianEmail.trim() !== "")
+      updatedInfo.guardianEmail = guardianEmail;
+    if (interests !== undefined && Array.isArray(interests))
+      updatedInfo.interests = interests;
+
+    // Update the mentee's info
+    const updatedMentee = await Mentee.findByIdAndUpdate(
+      menteeId,
+      updatedInfo,
+      {
+        new: true,
+      }
+    );
+
+    // error if update was unsuccessful
+    if (!updatedMentee) {
+      return res
+        .status(404)
+        .json({ message: "Error updating mentee profile - please try again" });
+    }
+    // success
+    res.status(200).json({
+      message: "Mentee profile was successfully updated",
+      user: {
+        id: updatedMentee._id.toString(),
+        firstName: updatedMentee.firstName,
+        lastName: updatedMentee.lastName,
+        email: updatedMentee.email,
+        school: updatedMentee.school,
+        guardianEmail: updatedMentee.guardianEmail,
+        interests: updatedMentee.interests,
+      },
+    });
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+});
+
 module.exports = router;

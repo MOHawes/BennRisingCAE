@@ -25,4 +25,20 @@ export const navMenu = [
     }
 ]
 
-export const interests = ["Music", "Technology", "Sports", "Outdoor activities", "Books and writing", "Art", "Exercising", "Food", "Gaming", "Pets and animals", "Gardening", "Cars", "Politics"];
+// Updated interests list with Movies added
+export const interests = [
+    "Music", 
+    "Technology", 
+    "Sports", 
+    "Outdoor activities", 
+    "Books and writing", 
+    "Art", 
+    "Exercising", 
+    "Food", 
+    "Gaming", 
+    "Pets and animals", 
+    "Gardening", 
+    "Cars", 
+    "Politics",
+    "Movies"
+];

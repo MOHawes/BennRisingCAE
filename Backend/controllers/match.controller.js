@@ -2,6 +2,7 @@ const router = require("express").Router();
 const validateSession = require("../middleware/validate-session");
 const validateMentee = require("../middleware/validate-mentee");
 const validateMentor = require("../middleware/validate-mentor");
+const validateAdmin = require("../middleware/validate-admin"); // ADD THIS LINE
 const Mentor = require("../models/mentor.model");
 const Mentee = require("../models/mentee.model");
 const Answer = require("../models/match.model");

@@ -38,6 +38,12 @@ function Navigationbar(props) {
     return "/";
   };
 
+  // Get profile button text based on user type
+  const getProfileButtonText = () => {
+    if (userType === "Admin") return "Admin Dashboard";
+    return "My Profile";
+  };
+
   // Function to check if a menu item is active
   const isActive = (href) => {
     // Check if the current path matches the menu item href
@@ -113,7 +119,7 @@ function Navigationbar(props) {
                         isProfileActive() ? "ring-2 ring-white" : ""
                       }`}
                     >
-                      <a href={getProfileLink()}>My Profile</a>
+                      <a href={getProfileLink()}>{getProfileButtonText()}</a>
                     </button>
                     <button
                       className={`bg-[#eab246] hover:bg-[#d4a03d] text-white uppercase px-6 py-2 rounded-md ${

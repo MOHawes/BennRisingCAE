@@ -1,48 +1,35 @@
 import React, { useState, useEffect } from "react";
 import {
-  API_ADMIN_DELETE_MENTOR,
-  API_ADMIN_UPDATE_MENTOR,
-  API_DELETE_MENTOR,
-  API_VIEW_MENTORS,
+  API_VIEW_MENTORS, // We'll need to create a new endpoint for mentees
 } from "../../../constants/endpoints";
-import UpdateMentorForm from "./UpdateMentorForm";
 
-const AdminMentorList = (props) => {
-  const [mentors, setMentors] = useState([]);
+// We'll need to add this new endpoint to endpoints.js
+const API_VIEW_MENTEES = "http://localhost:4000/user/mentee/view-all";
+
+const AdminFellowsList = (props) => {
+  const [fellows, setFellows] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(null);
 
-  // for the Update Modal
-  const [showModal, setShowModal] = useState(false);
-  const [mentorToUpdate, setMentorToUpdate] = useState(null);
-
-  const handleOpenModal = (mentor) => {
-    console.log("Opening modal for mentor:", mentor);
-    setMentorToUpdate(mentor);
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setMentorToUpdate(null);
-  };
-
   useEffect(() => {
-    fetchMentors();
-    // after fetch, reset the refresh flag to stop it form triggering
-    props.setRefreshMentors(false);
-  }, [props.refreshMentors]);
+    fetchFellows();
+  }, []);
 
-  async function fetchMentors() {
+  async function fetchFellows() {
     setIsRefreshing(true);
     try {
-      const response = await fetch(API_VIEW_MENTORS);
+      const response = await fetch(API_VIEW_MENTEES, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: props.token,
+        },
+      });
       const data = await response.json();
-      setMentors(data.mentors);
+      setFellows(data.mentees || []);
       setLastRefreshed(new Date());
     } catch (error) {
-      console.error("Error fetching mentors:", error);
-      alert("Failed to fetch mentors. Please check if the backend server is running.");
+      console.error("Error fetching fellows:", error);
+      alert("Failed to fetch fellows. Please check if the backend server is running.");
     } finally {
       setIsRefreshing(false);
     }
@@ -50,7 +37,7 @@ const AdminMentorList = (props) => {
 
   // Manual refresh function
   const handleRefresh = () => {
-    fetchMentors();
+    fetchFellows();
   };
 
   // Format last refreshed time
@@ -64,83 +51,28 @@ const AdminMentorList = (props) => {
     return lastRefreshed.toLocaleTimeString();
   };
 
-  //! Handle Update button function
-  async function handleUpdate(mentorId, updatedData) {
-    if (!mentorToUpdate || !mentorToUpdate.id) {
-      console.error("Mentor ID is missing");
-      return; // Don't proceed if there's no ID
-    }
-
-    try {
-      console.log("Update Clicked");
-      // Headers
-      let myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-      // Add an authorization to the headers if you need a token for that route
-      myHeaders.append("Authorization", props.token);
-      console.log(props.token);
-      // Request Body
-      let body = {
-        firstName: updatedData.firstName,
-        lastName: updatedData.lastName,
-        email: updatedData.email,
-        projectCategory: updatedData.projectCategory,
-      };
-      //   Request Options
-      let requestOption = {
-        method: "PUT",
-        headers: myHeaders,
-        body: JSON.stringify(body),
-      };
-
-      console.log("Updating mentor with this ID: ", mentorId);
-
-      // Send Request
-      let response = await fetch(
-        `${API_ADMIN_UPDATE_MENTOR}/${mentorId}`,
-        requestOption
-      );
-
-      if (!response.ok) {
-        // If not, throw an error with status code
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      // Response Object
-      let data = await response.json();
-      console.log(data);
-
-      // Re-fetch mentors
-      fetchMentors();
-
-      // Close modal
-      setShowModal(false);
-    } catch (error) {
-      console.error("Error occured during update: ", error);
-    }
-  }
-
-  async function handleDelete(mentorId) {
+  async function handleDeleteFellow(fellowId) {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this mentor?"
+      "Are you sure you want to delete this fellow?"
     );
     if (confirmDelete) {
       try {
-        const response = await fetch(`${API_ADMIN_DELETE_MENTOR}/${mentorId}`, {
+        // We'll need to create this endpoint too
+        const response = await fetch(`http://localhost:4000/admin/mentee/delete/${fellowId}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `${props.token}`,
+            Authorization: props.token,
           },
         });
         if (response.ok) {
-          fetchMentors(); // Refresh the list after deletion
-          console.log(`Mentor with ID: ${mentorId} deleted successfully.`);
+          fetchFellows(); // Refresh the list after deletion
+          console.log(`Fellow with ID: ${fellowId} deleted successfully.`);
         } else {
-          console.error("Failed to delete mentor.");
+          console.error("Failed to delete fellow.");
         }
       } catch (error) {
-        console.error("Error deleting mentor:", error);
+        console.error("Error deleting fellow:", error);
       }
     }
   }
@@ -151,7 +83,7 @@ const AdminMentorList = (props) => {
         {/* Header with title and refresh button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl text-center py-4 uppercase text-gray-900 dark:text-white">
-            Mentor List
+            Fellows List
           </h1>
           
           {/* Refresh section */}
@@ -196,22 +128,25 @@ const AdminMentorList = (props) => {
             <thead className="sticky top-0 bg-[#1b0a5f] dark:bg-gray-700">
               <tr className="text-left text-white dark:text-gray-200">
                 <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
-                  Coordinator #1:
-                </th>
-                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
-                  Coordinator #2:
+                  Fellow Name:
                 </th>
                 <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Email:
                 </th>
                 <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
-                  Project Category:
+                  School:
                 </th>
                 <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Interests:
                 </th>
                 <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
-                  Question:
+                  Project:
+                </th>
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
+                  Guardian Email:
+                </th>
+                <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
+                  Match Status:
                 </th>
                 <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                   Actions:
@@ -219,51 +154,62 @@ const AdminMentorList = (props) => {
               </tr>
             </thead>
             <tbody>
-              {mentors.map((mentor) => (
+              {fellows.map((fellow) => (
                 <tr
-                  key={mentor.id}
+                  key={fellow.id}
                   className="hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
-                    {mentor.firstName}
-                  </td>
-                  <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
-                    {mentor.lastName}
+                    {fellow.firstName} {fellow.lastName}
                   </td>
                   <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
-                    {mentor.email}
-                  </td>
-                  <td className="px-4 py-3 border-2 text-blue-500 dark:text-blue-400 font-bold border-[#1b0a5f] dark:border-gray-600">
-                    {mentor.projectCategory || "N/A"}
+                    {fellow.email}
                   </td>
                   <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
-                    {mentor.interests.join(", ")}
+                    {fellow.school}
                   </td>
                   <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
-                    {mentor.questionToAsk}
+                    {fellow.interests ? fellow.interests.join(", ") : "N/A"}
+                  </td>
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
+                    <div className="max-w-xs overflow-hidden">
+                      <p className="truncate" title={fellow.project || "No project answer"}>
+                        {fellow.project || "N/A"}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
+                    {fellow.guardianEmail}
+                  </td>
+                  <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600">
+                    {fellow.approvedMentors && fellow.approvedMentors.length > 0 ? (
+                      <span className="px-2 py-1 bg-green-500 text-white rounded-md text-sm">
+                        Matched
+                      </span>
+                    ) : fellow.requestedMentors && fellow.requestedMentors.length > 0 ? (
+                      <span className="px-2 py-1 bg-yellow-500 text-white rounded-md text-sm">
+                        Pending
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 bg-gray-500 text-white rounded-md text-sm">
+                        No Request
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600">
                     <div className="flex justify-center gap-2">
                       <button
-                        className="btn btn-soft btn-primary px-2 py-1 rounded-md transition bg-blue-500 hover:bg-blue-600 text-white text-sm"
-                        onClick={() => handleOpenModal(mentor)}
+                        className="btn btn-soft px-2 py-1 rounded-md transition bg-blue-500 hover:bg-blue-600 text-white text-sm"
+                        onClick={() => {
+                          // View details functionality
+                          alert(`Fellow Details:\nName: ${fellow.firstName} ${fellow.lastName}\nEmail: ${fellow.email}\nSchool: ${fellow.school}\nInterests: ${fellow.interests ? fellow.interests.join(", ") : "None"}\nProject: ${fellow.project || "No answer"}\nGuardian: ${fellow.guardianEmail}`);
+                        }}
                       >
-                        Update
-                      </button>
-                      <button
-                        className="btn btn-soft px-2 py-1 rounded-md transition bg-yellow-500 hover:bg-yellow-600 text-white text-sm"
-                        onClick={() =>
-                          handleResetPassword(
-                            mentor.id,
-                            `${mentor.firstName} ${mentor.lastName}`
-                          )
-                        }
-                      >
-                        Reset Password
+                        View Details
                       </button>
                       <button
                         className="btn btn-soft btn-error px-2 py-1 rounded-md transition bg-red-500 hover:bg-red-600 text-white text-sm"
-                        onClick={() => handleDelete(mentor.id)}
+                        onClick={() => handleDeleteFellow(fellow.id)}
                       >
                         Delete
                       </button>
@@ -278,29 +224,20 @@ const AdminMentorList = (props) => {
           {isRefreshing && (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1b0a5f] dark:border-white"></div>
-              <span className="ml-2 text-gray-600 dark:text-gray-300">Loading mentors...</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-300">Loading fellows...</span>
             </div>
           )}
           
-          {/* Show message when no mentors */}
-          {!isRefreshing && mentors.length === 0 && (
+          {/* Show message when no fellows */}
+          {!isRefreshing && fellows.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No mentors found. Try refreshing or check if any mentors have been created.
+              No fellows found. Try refreshing or check if any fellows have registered.
             </div>
           )}
         </div>
-        
-        {/* Conditionally render the modal if showModal is true */}
-        {showModal && mentorToUpdate && (
-          <UpdateMentorForm
-            mentorData={mentorToUpdate}
-            handleUpdateMentor={handleUpdate}
-            handleClose={handleCloseModal} // Pass the close function to the modal
-          />
-        )}
       </div>
     </>
   );
 };
 
-export default AdminMentorList;
+export default AdminFellowsList;

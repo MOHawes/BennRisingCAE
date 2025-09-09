@@ -24,6 +24,13 @@ const MobileNav = ({ token, userInfo }) => {
     }
   };
 
+  // Get profile button text based on user type
+  const getProfileButtonText = () => {
+    if (!userInfo) return "My Profile";
+    if (userInfo.userType === "Admin") return "Admin Dashboard";
+    return "My Profile";
+  };
+
   // Get welcome message based on user type
   const getWelcomeMessage = () => {
     if (!userInfo) return "";
@@ -84,7 +91,7 @@ const MobileNav = ({ token, userInfo }) => {
                 className="py-8 w-full hover:opacity-30 text-center"
                 href={getProfileLink()}
               >
-                <li>My Profile</li>
+                <li>{getProfileButtonText()}</li>
               </a>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"

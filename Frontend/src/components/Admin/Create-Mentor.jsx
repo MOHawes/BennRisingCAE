@@ -62,20 +62,20 @@ export default function CreateMentor(props) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-      <div className="bg-[#1b0a5f] dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-[#eab246] dark:text-yellow-400 mb-8 uppercase">
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-[#1b0a5f] p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center text-[#eab246] mb-8 uppercase">
           Create Mentor Team
         </h2>
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-700 p-8 space-y-4 rounded-md"
+          className="bg-white  p-8 space-y-4 rounded-md"
         >
           {/* Team Member 1 */}
           <div>
             <label
               htmlFor="firstName"
-              className="block text-sm font-medium text-[#1b0a5f] dark:text-gray-200"
+              className="block text-sm font-medium text-[#1b0a5f]"
             >
               Team Member 1:
             </label>
@@ -86,14 +86,14 @@ export default function CreateMentor(props) {
               onChange={(e) => setFirstName(e.target.value)}
               required
               placeholder="First name"
-              className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
           {/* Team Member 2 */}
           <div>
             <label
               htmlFor="lastName"
-              className="block text-sm font-medium text-[#1b0a5f] dark:text-gray-200"
+              className="block text-sm font-medium text-[#1b0a5f]"
             >
               Team Member 2:
             </label>
@@ -104,14 +104,14 @@ export default function CreateMentor(props) {
               onChange={(e) => setLastName(e.target.value)}
               required
               placeholder="First name"
-              className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
           {/* Team Email */}
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-[#1b0a5f] dark:text-gray-200"
+              className="block text-sm font-medium text-[#1b0a5f]"
             >
               Team Email:
             </label>
@@ -122,14 +122,14 @@ export default function CreateMentor(props) {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="Email"
-              className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
           {/* Password */}
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-[#1b0a5f] dark:text-gray-200"
+              className="block text-sm font-medium text-[#1b0a5f]"
             >
               Password:
             </label>
@@ -140,14 +140,14 @@ export default function CreateMentor(props) {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Password"
-              className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             />
           </div>
-          {/* Project Category */}
+          {/* Project Category - UPDATED */}
           <div>
             <label
               htmlFor="projectCategory"
-              className="block text-sm font-medium text-[#1b0a5f] dark:text-gray-200"
+              className="block text-sm font-medium text-[#1b0a5f]"
             >
               Project Category:
             </label>
@@ -156,22 +156,16 @@ export default function CreateMentor(props) {
               value={projectCategory}
               onChange={(e) => setProjectCategory(e.target.value)}
               required
-              className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="w-full mt-1 p-2 border border-[#6c50e1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1]"
             >
-              <option value="" className="text-gray-900 dark:text-white">
-                Select a category
-              </option>
-              <option value="video" className="text-gray-900 dark:text-white">
-                Video
-              </option>
-              <option value="science" className="text-gray-900 dark:text-white">
-                Science
-              </option>
+              <option value="">Select a category</option>
+              <option value="What's in your food">What's in your food</option>
+              <option value="Kid's for science!">Kid's for science!</option>
             </select>
           </div>
           <button
             type="submit"
-            className="w-full bg-[#eab246] dark:bg-yellow-500 text-[#1b0a5f] dark:text-gray-900 uppercase font-bold py-2 px-4 rounded-md hover:bg-[#6c50e1] dark:hover:bg-yellow-400 hover:text-white dark:hover:text-gray-800 transition duration-300"
+            className="w-full bg-[#eab246] text-[#1b0a5f] uppercase font-bold py-2 px-4 rounded-md hover:bg-[#6c50e1] hover:text-white transition duration-300"
           >
             Submit
           </button>
