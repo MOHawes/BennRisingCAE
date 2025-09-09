@@ -101,6 +101,8 @@ function App() {
         />
         <Route path="/consent-submitted" element={<ConsentSubmitted />} />
         <Route path="/consent-info" element={<GenericConsentPage />} />
+        {/* Catch all route - redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
     </BrowserRouter>
