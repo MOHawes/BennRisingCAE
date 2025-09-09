@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useState, useEffect } from "react";
-import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
+import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import MentorsPage from "./pages/MentorPage";
 import MenteePage from "./pages/MenteePage";
@@ -47,7 +47,7 @@ function App() {
   }, []);
 
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Navbar token={token} />
       <Routes>
         <Route path="/" element={<HomePage token={token} />} />
@@ -98,7 +98,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
-    </HashRouter>
+    </BrowserRouter>
   );
 }
 

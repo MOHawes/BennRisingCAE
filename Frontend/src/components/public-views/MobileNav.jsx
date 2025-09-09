@@ -13,11 +13,11 @@ const MobileNav = ({ token, userInfo }) => {
     if (!userInfo) return "/";
     switch (userInfo.userType) {
       case "Mentor":
-        return "/#/mentor";
+        return "/mentor";
       case "Mentee":
-        return "/#/mentee";
+        return "/mentee";
       case "Admin":
-        return "/#/admin";
+        return "/admin";
       default:
         return "/";
     }
@@ -74,7 +74,7 @@ const MobileNav = ({ token, userInfo }) => {
             <a
               key={menu.name}
               className="py-8 w-full hover:opacity-30 text-center"
-              href={`/#${menu.href}`}
+              href={menu.href}
               onClick={() => setNav(false)}
             >
               <li>{menu.name}</li>
@@ -92,7 +92,7 @@ const MobileNav = ({ token, userInfo }) => {
               </a>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
-                href="/#/logout"
+                href="/logout"
                 onClick={() => setNav(false)}
               >
                 <li>Logout</li>
@@ -102,14 +102,14 @@ const MobileNav = ({ token, userInfo }) => {
             <>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
-                href="/#/signup"
+                href="/signup"
                 onClick={() => setNav(false)}
               >
                 <li>Sign Up</li>
               </a>
               <a
                 className="py-8 w-full hover:opacity-30 text-center"
-                href="/#/login"
+                href="/login"
                 onClick={() => setNav(false)}
               >
                 <li>Login</li>

@@ -26,9 +26,9 @@ function Navigationbar(props) {
   }, [token]);
 
   const getProfileLink = () => {
-    if (userType === "Mentor") return "/#/mentor";
-    if (userType === "Mentee") return "/#/mentee";
-    if (userType === "Admin") return "/#/admin";
+    if (userType === "Mentor") return "/mentor";
+    if (userType === "Mentee") return "/mentee";
+    if (userType === "Admin") return "/admin";
     return "/";
   };
 
@@ -38,9 +38,7 @@ function Navigationbar(props) {
   };
 
   const isActive = (href) => {
-    // For hash routing, check the hash part
-    const currentPath = location.pathname;
-    return currentPath === href;
+    return location.pathname === href;
   };
 
   const isProfileActive = () => {
@@ -63,7 +61,7 @@ function Navigationbar(props) {
                     className={`hover:text-[#eab246] hover:underline hover:underline-offset-4 pb-2 ${
                       isActive(menu.href) ? "border-b-2 border-white" : ""
                     }`}
-                    href={`/#${menu.href}`}
+                    href={menu.href}
                   >
                     {menu.name}
                   </a>
@@ -85,7 +83,7 @@ function Navigationbar(props) {
                           : ""
                       }`}
                     >
-                      <a href="/#/signup">Sign Up</a>
+                      <a href="/signup">Sign Up</a>
                     </button>
                     <button
                       className={`bg-[#eab246] hover:bg-[#d4a03d] text-white uppercase px-6 py-2 rounded-md ${
@@ -94,7 +92,7 @@ function Navigationbar(props) {
                           : ""
                       }`}
                     >
-                      <a href="/#/login">Login</a>
+                      <a href="/login">Login</a>
                     </button>
                   </>
                 ) : (
@@ -113,7 +111,7 @@ function Navigationbar(props) {
                           : ""
                       }`}
                     >
-                      <a href="/#/logout">Logout</a>
+                      <a href="/logout">Logout</a>
                     </button>
                   </>
                 )}
