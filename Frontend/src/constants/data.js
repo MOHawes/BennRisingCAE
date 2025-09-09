@@ -8,7 +8,7 @@ export const navMenu = [
         href: "/mentors",
     },
     {
-        name: "TeamFellows",
+        name: "Team Fellows",
         href: "/mentees",
     },
     {

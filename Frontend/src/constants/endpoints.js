@@ -38,6 +38,9 @@ export const API_MENTEE_PROFILE_PREVIEW = `${API}/user/mentee/profile`;
 
 export const API_MENTOR_PROFILE_PREVIEW = `${API}/user/mentor/profile`;
 
+// export const API_VIEW_MENTEES = `${API}/user/mentee/view-all`;
+
+
 // Admin match requests endpoint
 export const API_ADMIN_MATCH_REQUESTS = `${API}/admin/match-requests`;
 

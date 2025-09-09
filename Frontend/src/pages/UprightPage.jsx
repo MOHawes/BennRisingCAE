@@ -51,8 +51,8 @@ const UprightPage = (props) => {
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
             <h3 className="font-semibold text-lg mb-2 text-[#1b0a5f]">For Businesses:</h3>
             <p className="text-gray-700">
-              Interested in engaging UpRight students in your company's projects, contact 
-+1 (802) 770-8957 <br /> or, info@uprighted.com
+              Interested in engaging UpRight students in your company's projects? Contact 
++1 (802) 770-8957 <br /> or, info@uprighted.com for more information.
 
             </p>
           </div>
@@ -75,7 +75,7 @@ const UprightPage = (props) => {
               <div className="w-32 h-32 bg-gray-300 mx-auto mb-4 flex items-center justify-center">
                 <span className="text-gray-500">[QR Code]</span>
               </div>
-              <h3 className="font-semibold">Developer Name</h3>
+              <h3 className="font-semibold">Nick Russotti</h3>
               <p className="text-sm text-gray-600">LinkedIn Profile</p>
             </div>
             
@@ -83,7 +83,7 @@ const UprightPage = (props) => {
               <div className="w-32 h-32 bg-gray-300 mx-auto mb-4 flex items-center justify-center">
                 <span className="text-gray-500">[QR Code]</span>
               </div>
-              <h3 className="font-semibold">Developer Name</h3>
+              <h3 className="font-semibold">Maddie Hawes</h3>
               <p className="text-sm text-gray-600">LinkedIn Profile</p>
             </div>
           </div>
