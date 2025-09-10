@@ -300,7 +300,7 @@ const AdminMentorList = (props) => {
           <UpdateMentorForm
             mentorData={mentorToUpdate}
             handleUpdateMentor={handleUpdate}
-            handleClose={handleCloseModal} // Pass the close function to the modal
+            handleClose={handleCloseModal} // Pass the close function to the modals
           />
         )}
       </div>

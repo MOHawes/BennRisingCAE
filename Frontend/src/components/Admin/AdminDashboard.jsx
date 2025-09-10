@@ -134,7 +134,7 @@ const AdminDashboard = (props) => {
           </div>
         </div>
 
-        {/* Render the active view */}
+        {/* Render active view */}
         <div className="w-full">{renderActiveView()}</div>
       </div>
     </>

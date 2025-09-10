@@ -21,7 +21,7 @@ export default function CreateMentor(props) {
     if (props.onBackToList) {
       props.onBackToList();
     }
-  }
+  };
 
   async function createMentor() {
     try {
@@ -62,24 +62,23 @@ export default function CreateMentor(props) {
 
       // Show success message
       setShowSuccessMessage(true);
-      
+
       // Clear form fields
       setFirstName("");
       setLastName("");
       setEmail("");
       setPassword("");
       setProjectCategory("");
-      
+
       // Refresh list of mentors
       props.setRefreshMentors(true);
-      
+
       // Hide success message after 3 seconds and optionally go back to list
       setTimeout(() => {
         setShowSuccessMessage(false);
         // Optionally auto-navigate back to list after success
         // handleBackToList();
       }, 3000);
-      
     } catch (error) {
       console.log(error);
       alert("Error creating mentor: " + error.message);
@@ -94,8 +93,18 @@ export default function CreateMentor(props) {
       {showSuccessMessage && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50">
           <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
-            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-6 h-6 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <span className="font-medium">Team created successfully!</span>
           </div>
@@ -113,12 +122,22 @@ export default function CreateMentor(props) {
             className="text-white hover:text-[#eab246] dark:hover:text-yellow-400 transition-colors"
             title="Back to Team List"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
-        
+
         <form
           onSubmit={handleSubmit}
           className="bg-white dark:bg-gray-700 p-8 space-y-4 rounded-md"
@@ -219,15 +238,15 @@ export default function CreateMentor(props) {
             type="submit"
             disabled={isCreating}
             className={`w-full font-bold py-2 px-4 rounded-md transition duration-300 ${
-              isCreating 
-                ? "bg-gray-400 text-gray-200 cursor-not-allowed" 
+              isCreating
+                ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                 : "bg-[#eab246] text-[#1b0a5f] dark:bg-yellow-500 dark:text-gray-900 uppercase hover:bg-[#6c50e1] hover:text-white dark:hover:bg-blue-600"
             }`}
           >
             {isCreating ? "Creating..." : "Submit"}
           </button>
-          
-          {/* Back to Team List Button */}
+
+          {/* return to Team List Button */}
           <button
             type="button"
             onClick={handleBackToList}
