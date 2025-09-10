@@ -325,37 +325,41 @@ router.delete(
 );
 
 // TODO GET /admin/fellows-consent-data - Get consent form data for all fellows
-router.get("/fellows-consent-data", validateSession, validateAdmin, async (req, res) => {
-  try {
-    // Get all match requests with consent data
-    const matchRequestsWithConsent = await MatchRequest.find({
-      guardianConsentReceived: true,
-      guardianInfo: { $exists: true }
-    })
-      .populate({
-        path: "menteeId",
-        select: "firstName lastName email"
+router.get(
+  "/fellows-consent-data",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      // Get all match requests with consent data
+      const matchRequestsWithConsent = await MatchRequest.find({
+        guardianConsentReceived: true,
+        guardianInfo: { $exists: true },
       })
-      .select("menteeId guardianInfo guardianConsentAt");
+        .populate({
+          path: "menteeId",
+          select: "firstName lastName email",
+        })
+        .select("menteeId guardianInfo guardianConsentAt");
 
-    // Format the data for the frontend
-    const consentData = matchRequestsWithConsent.map(request => ({
-      menteeId: request.menteeId._id.toString(),
-      menteeName: `${request.menteeId.firstName} ${request.menteeId.lastName}`,
-      menteeEmail: request.menteeId.email,
-      guardianName: request.guardianInfo?.name,
-      guardianEmail: request.guardianInfo?.email,
-      guardianPhone: request.guardianInfo?.phone,
-      emergencyContact: request.guardianInfo?.emergencyContact,
-      consentDate: request.guardianConsentAt
-    }));
+      // Format the data for the frontend
+      const consentData = matchRequestsWithConsent.map((request) => ({
+        menteeId: request.menteeId._id.toString(),
+        menteeName: `${request.menteeId.firstName} ${request.menteeId.lastName}`,
+        menteeEmail: request.menteeId.email,
+        guardianName: request.guardianInfo?.name,
+        guardianEmail: request.guardianInfo?.email,
+        guardianPhone: request.guardianInfo?.phone,
+        emergencyContact: request.guardianInfo?.emergencyContact,
+        consentDate: request.guardianConsentAt,
+      }));
 
-    res.status(200).json(consentData);
-
-  } catch (error) {
-    console.error("Error fetching fellows consent data:", error);
-    res.status(500).json({ message: error.message });
+      res.status(200).json(consentData);
+    } catch (error) {
+      console.error("Error fetching fellows consent data:", error);
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 module.exports = router;

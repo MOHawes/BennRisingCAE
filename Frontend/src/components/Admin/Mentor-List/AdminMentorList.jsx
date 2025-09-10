@@ -42,7 +42,9 @@ const AdminMentorList = (props) => {
       setLastRefreshed(new Date());
     } catch (error) {
       console.error("Error fetching mentors:", error);
-      alert("Failed to fetch mentors. Please check if the backend server is running.");
+      alert(
+        "Failed to fetch mentors. Please check if the backend server is running."
+      );
     } finally {
       setIsRefreshing(false);
     }
@@ -58,7 +60,7 @@ const AdminMentorList = (props) => {
     if (!lastRefreshed) return "";
     const now = new Date();
     const diffInSeconds = Math.floor((now - lastRefreshed) / 1000);
-    
+
     if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     return lastRefreshed.toLocaleTimeString();
@@ -153,7 +155,7 @@ const AdminMentorList = (props) => {
           <h1 className="text-4xl text-center py-4 uppercase text-gray-900 dark:text-white">
             Mentor List
           </h1>
-          
+
           {/* Refresh section */}
           <div className="flex flex-col items-end gap-2">
             <button
@@ -181,7 +183,7 @@ const AdminMentorList = (props) => {
               </svg>
               {isRefreshing ? "Refreshing..." : "Refresh"}
             </button>
-            
+
             {/* Last refreshed timestamp */}
             {lastRefreshed && !isRefreshing && (
               <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -273,23 +275,26 @@ const AdminMentorList = (props) => {
               ))}
             </tbody>
           </table>
-          
+
           {/* Show loading state when refreshing */}
           {isRefreshing && (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1b0a5f] dark:border-white"></div>
-              <span className="ml-2 text-gray-600 dark:text-gray-300">Loading mentors...</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-300">
+                Loading mentors...
+              </span>
             </div>
           )}
-          
+
           {/* Show message when no mentors */}
           {!isRefreshing && mentors.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              No mentors found. Try refreshing or check if any mentors have been created.
+              No mentors found. Try refreshing or check if any mentors have been
+              created.
             </div>
           )}
         </div>
-        
+
         {/* Conditionally render the modal if showModal is true */}
         {showModal && mentorToUpdate && (
           <UpdateMentorForm

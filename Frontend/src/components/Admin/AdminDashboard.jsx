@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import CreateMentor from "./Create-Mentor";
 import AdminMentorList from "./Mentor-List/AdminMentorList";
-import AdminFellowsList from "./Fellows-List/AdminFellowsList"; 
+import AdminFellowsList from "./Fellows-List/AdminFellowsList";
 import MatchRequestsTable from "./Match-Requests/MatchRequestsTable";
 
 const AdminDashboard = (props) => {
@@ -19,6 +19,13 @@ const AdminDashboard = (props) => {
     setActiveView("create");
   };
 
+  // Handle going back to mentor list from create form
+  const handleBackToList = () => {
+    setActiveView("mentors");
+    setShowForm(false);
+    setRefreshMentors(true); // Force refresh when returning to list
+  };
+
   const renderActiveView = () => {
     switch (activeView) {
       case "create":
@@ -26,6 +33,7 @@ const AdminDashboard = (props) => {
           <CreateMentor
             setRefreshMentors={setRefreshMentors}
             token={props.token}
+            onBackToList={handleBackToList}
           />
         );
       case "fellows":
@@ -62,7 +70,8 @@ const AdminDashboard = (props) => {
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
-              Team Coordinators ({refreshMentors ? "Refreshing..." : "View All"})
+              Team Coordinators ({refreshMentors ? "Refreshing..." : "View All"}
+              )
             </button>
 
             <button
@@ -99,33 +108,34 @@ const AdminDashboard = (props) => {
             <button
               onClick={handleToggleForm}
               className={`px-6 py-3 text-lg font-medium rounded-md transition-colors ${
-                activeView === "create" || showForm
+                activeView === "create"
                   ? "bg-[#eab246] text-[#1b0a5f]"
                   : "bg-[#1b0a5f] text-white hover:bg-[#6c50e1]"
               }`}
             >
-              {showForm ? "Hide Create Form" : "Create New Team"}
+              {activeView === "create" ? "Hide Create Form" : "Create New Team"}
             </button>
           </div>
 
           {/* Active view indicator */}
           <div className="text-center text-gray-600 mb-4">
             <span className="text-sm">
-              Currently viewing: {" "}
+              Currently viewing:{" "}
               <span className="font-semibold capitalize">
-                {activeView === "mentors" ? "Team Coordinators" : 
-                 activeView === "fellows" ? "Team Fellows" : 
-                 activeView === "requests" ? "Match Requests" :
-                 "Create New Team"}
+                {activeView === "mentors"
+                  ? "Team Coordinators"
+                  : activeView === "fellows"
+                  ? "Team Fellows"
+                  : activeView === "requests"
+                  ? "Match Requests"
+                  : "Create New Team"}
               </span>
             </span>
           </div>
         </div>
 
         {/* Render the active view */}
-        <div className="w-full">
-          {renderActiveView()}
-        </div>
+        <div className="w-full">{renderActiveView()}</div>
       </div>
     </>
   );
