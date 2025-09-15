@@ -5,6 +5,7 @@ import {
   API_DELETE_MENTOR,
   API_VIEW_MENTORS,
 } from "../../../constants/endpoints";
+import { API } from "../../../constants/endpoints";
 import UpdateMentorForm from "./UpdateMentorForm";
 
 const AdminMentorList = (props) => {
@@ -121,6 +122,34 @@ const AdminMentorList = (props) => {
       console.error("Error occured during update: ", error);
     }
   }
+
+  // Reset mentor password
+  const handleResetPassword = async (mentorId, mentorName) => {
+    if (!window.confirm(`Are you sure you want to reset the password for ${mentorName}? The new password will be: 0000`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API}/admin/mentor/reset-password/${mentorId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: props.token,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password");
+      }
+      
+      alert(data.message);
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      alert(error.message || "Failed to reset password");
+    }
+  };
 
   async function handleDelete(mentorId) {
     const confirmDelete = window.confirm(

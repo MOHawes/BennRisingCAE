@@ -78,6 +78,34 @@ const AdminFellowsList = (props) => {
     }
   }
 
+  // Reset fellow password
+  const handleResetPassword = async (fellowId, fellowName) => {
+    if (!window.confirm(`Are you sure you want to reset the password for ${fellowName}? The new password will be: 0000`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API}/admin/mentee/reset-password/${fellowId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: props.token,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password");
+      }
+      
+      alert(data.message);
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      alert(error.message || "Failed to reset password");
+    }
+  };
+
   const getLastRefreshedText = () => {
     if (!lastRefreshed) return "";
     const now = new Date();
@@ -111,12 +139,42 @@ const AdminFellowsList = (props) => {
   };
 
   const getMatchStatus = (fellow) => {
+    // Check for matched status
     if (fellow.approvedMentors && fellow.approvedMentors.length > 0) {
-      return { status: "Matched", color: "bg-green-500" };
-    } else if (fellow.requestedMentors && fellow.requestedMentors.length > 0) {
-      return { status: "Pending", color: "bg-yellow-500" };
-    } else {
-      return { status: "No Request", color: "bg-gray-500" };
+      return { 
+        status: "Matched", 
+        color: "bg-green-500", // Reverted to original green
+        icon: "✓",
+        description: "Matched with team"
+      };
+    } 
+    // Check for pending request
+    else if (fellow.requestedMentors && fellow.requestedMentors.length > 0) {
+      // Check if we have consent data
+      if (fellow.consentData) {
+        return { 
+          status: "Pending Team", 
+          color: "bg-blue-500", // Reverted to original blue
+          icon: "⏳",
+          description: "Awaiting team decision"
+        };
+      } else {
+        return { 
+          status: "Pending Consent", 
+          color: "bg-yellow-500", // Reverted to original yellow
+          icon: "📋",
+          description: "Awaiting guardian consent"
+        };
+      }
+    } 
+    // No request made
+    else {
+      return { 
+        status: "Not Matched", 
+        color: "bg-gray-500", // Reverted to original gray
+        icon: "—",
+        description: "No active request"
+      };
     }
   };
 
@@ -178,26 +236,29 @@ const AdminFellowsList = (props) => {
         <table className="w-full bg-white rounded-lg shadow-md">
           <thead className="sticky top-0 bg-[#1b0a5f]">
             <tr className="text-left text-white">
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
                 Fellow Name
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
                 Email
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
                 School
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
-                Project Assigned
+              <th className="px-2 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold text-sm">
+                Project
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold text-sm">
                 Guardian Email
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold min-w-[120px]">
                 Status
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
-                Additional Details
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+                Actions
+              </th>
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold text-sm">
+                Details
               </th>
             </tr>
           </thead>
@@ -207,43 +268,55 @@ const AdminFellowsList = (props) => {
               return (
                 <React.Fragment key={fellow.id}>
                   <tr className="hover:bg-blue-100 transition-colors">
-                    <td className="px-4 py-3 border-2 font-bold border-[#1b0a5f]">
+                    <td className="px-3 py-3 border-2 font-bold border-[#1b0a5f]">
                       {fellow.firstName} {fellow.lastName}
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f]">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-sm">
                       {fellow.email}
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f]">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-sm">
                       {fellow.school}
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f]">
-                      <div className="max-w-xs">
+                    <td className="px-2 py-3 border-2 border-[#1b0a5f]">
+                      <div className="max-w-[100px]">
                         <p
-                          className="truncate"
+                          className="truncate text-sm"
                           title={fellow.project || "No answer provided"}
                         >
                           {fellow.project || "N/A"}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f]">
-                      {fellow.guardianEmail}
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-sm">
+                      <div className="max-w-[150px]">
+                        <p className="truncate" title={fellow.guardianEmail}>
+                          {fellow.guardianEmail}
+                        </p>
+                      </div>
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f]">
+                    <td className="px-4 py-3 border-2 border-[#1b0a5f] text-center">
                       <span
                         className={`px-2 py-1 ${matchStatus.color} text-white rounded-md text-sm`}
                       >
                         {matchStatus.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f]">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-center">
+                      <button
+                        onClick={() => handleResetPassword(fellow.id, `${fellow.firstName} ${fellow.lastName}`)}
+                        className="text-yellow-600 hover:text-yellow-800 font-medium text-sm"
+                      >
+                        Reset Password
+                      </button>
+                    </td>
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-center">
                       <button
                         onClick={() => toggleRowExpansion(fellow.id)}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                       >
                         {expandedRows.has(fellow.id)
-                          ? "Hide Details"
-                          : "Show Details"}
+                          ? "Hide"
+                          : "Show"}
                       </button>
                     </td>
                   </tr>
@@ -251,7 +324,7 @@ const AdminFellowsList = (props) => {
                   {/* Expanded row with consent form data */}
                   {expandedRows.has(fellow.id) && (
                     <tr className="bg-gray-50">
-                      <td colSpan="7" className="px-4 py-4">
+                      <td colSpan="8" className="px-4 py-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {/* Fellow Details */}
                           <div className="bg-white p-4 rounded-lg border">
@@ -269,10 +342,6 @@ const AdminFellowsList = (props) => {
                               <p>
                                 <strong>School:</strong> {fellow.school}
                               </p>
-                              {/* <p>
-                                <strong>Age:</strong>{" "}
-                                {fellow.age || "Not provided"}
-                              </p> */}
                               <p>
                                 <strong>Interests:</strong>{" "}
                                 {fellow.interests

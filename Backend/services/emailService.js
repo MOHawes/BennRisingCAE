@@ -298,42 +298,46 @@ const sendConsentApprovedToMentee = async (menteeEmail, menteeFirstName) => {
   return await sendEmail(menteeEmail, subject, html);
 };
 
-// #8 - Match Request to Mentor
+// #8 - Match Request to Mentor (Updated version without Yes/No prompt)
 const sendMatchRequestToMentor = async (
   mentorEmail,
   mentorFirstName,
   menteeData
 ) => {
-  const subject = "Team Match Request -- Please Confirm Your Acceptance";
+  const subject = "New Team Match Request -- Action Required";
 
   const html = `
     <p>Dear ${mentorFirstName},</p>
     
-    <p>A potential Fellow is looking to match with your Bennington Rising project team! Please take a moment to review your Fellow's information and let us know if you accept the match.</p>
+    <p>Great news! A Fellow is interested in joining your Bennington Rising project team. Their parent/guardian has provided consent, and we now need your decision on this match.</p>
     
     <p><strong>Fellow information:</strong></p>
     <ul>
-      <li><strong>Name:</strong> ${menteeData.firstName}</li>
+      <li><strong>Name:</strong> ${menteeData.firstName} ${
+    menteeData.lastName
+  }</li>
       <li><strong>Age:</strong> ${menteeData.age || "Not provided"}</li>
       <li><strong>School:</strong> ${menteeData.school}</li>
       <li><strong>Interests:</strong> ${menteeData.interests.join(", ")}</li>
-      <li><strong>Answer to Q#1:</strong> ${
+      <li><strong>Project Interest:</strong> ${
         menteeData.answer1 || "Not provided"
       }</li>
-      <li><strong>Answer to Q#2:</strong> ${
+      <li><strong>Answer to Your Question:</strong> ${
         menteeData.answer2 || "Not provided"
       }</li>
     </ul>
     
-    <p>Please take a moment to reflect on this match. We ask that you confirm your decision by taking one of the actions below:</p>
+    <p><strong>IMPORTANT: Please log in to your Bennington Rising dashboard to accept or decline this match request.</strong></p>
     
-    <blockquote style="background-color: #f0f0f0; padding: 15px; margin: 10px 0;">
-      Reply <strong>"Yes"</strong> to this email to <strong>accept</strong> your Fellow match<br><br>
-      Reply <strong>"No"</strong> to this email to <strong>decline</strong> Fellow match<br><br>
-      <strong>Note:</strong> To decline a match, you must first discuss the circumstances with the Bennington Rising Program Team. Once you decline a match, a notification will be sent to the Bennington Rising Project team. While we fully understand that not every match is perfect fit, we also want to acknowledge that being declined can be heartbreaking for a young person who's excited to connect.
-    </blockquote>
+    <p>You will find the pending request in your dashboard where you can review the Fellow's complete information and make your decision.</p>
     
-    <p>Thank you for your time and for being an important part of this work — we appreciate you!</p>
+    <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 4px solid #1976d2;">
+      <p style="margin: 0;"><strong>Note:</strong> Please respond within 48 hours. Direct replies to this email will not update the system - you must use the dashboard to record your decision.</p>
+    </div>
+    
+    <p>We understand that not every match is the perfect fit. If you need to decline, we appreciate your thoughtful consideration, as we want to ensure the best experience for both mentors and fellows.</p>
+    
+    <p>Thank you for your time and for being an important part of this work!</p>
     
     <p>Best,<br>
     <strong>Bennington Rising Program Team</strong><br>

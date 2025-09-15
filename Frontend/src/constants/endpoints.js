@@ -53,3 +53,12 @@ export const API_CONSENT_FORM_SUBMIT = `${API}/match/consent`;
 export const API_CONSENT_FORM_INFO = `${API}/match/consent-info`;
 
 export const API_MENTOR_DECISION = `${API}/match/mentor-decision`;
+
+// Admin password reset endpoints
+export const API_ADMIN_RESET_MENTOR_PASSWORD = `${API}/admin/mentor/reset-password`;
+export const API_ADMIN_RESET_MENTEE_PASSWORD = `${API}/admin/mentee/reset-password`;
+export const API_ADMIN_RESET_ADMIN_PASSWORD = `${API}/admin/admin/reset-password`;
+
+// Admin management endpoints
+export const API_ADMIN_CREATE_ADMIN = `${API}/admin/create-admin`;
+export const API_ADMIN_LIST_ADMINS = `${API}/admin/list-admins`;

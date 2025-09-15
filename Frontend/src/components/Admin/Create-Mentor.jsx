@@ -115,7 +115,7 @@ export default function CreateMentor(props) {
         {/* Header with Back Button */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-[#eab246] dark:text-yellow-400 uppercase">
-            Create Mentor Team
+            Create a new Team Coordinator account
           </h2>
           <button
             onClick={handleBackToList}
