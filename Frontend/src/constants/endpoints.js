@@ -62,3 +62,4 @@ export const API_ADMIN_RESET_ADMIN_PASSWORD = `${API}/admin/admin/reset-password
 // Admin management endpoints
 export const API_ADMIN_CREATE_ADMIN = `${API}/admin/create-admin`;
 export const API_ADMIN_LIST_ADMINS = `${API}/admin/list-admins`;
+
