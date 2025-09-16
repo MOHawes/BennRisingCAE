@@ -55,6 +55,64 @@ const sendEmail = async (to, subject, html) => {
   }
 };
 
+// Email for newly created team coordinator account
+const sendAccountCreatedToMentor = async (
+  mentorEmail,
+  mentorFirstName,
+  temporaryPassword,
+  loginUrl = "https://bennrisinglive.vercel.app/login"
+) => {
+  const subject =
+    "Your Bennington Rising Team Coordinator Account Has Been Created";
+
+  const html = `
+    <p>Dear ${mentorFirstName},</p>
+    
+    <p>An account has been created for you on Bennington Rising. You have been registered as a Team Coordinator for the Bennington Rising Program.</p>
+    
+    <p>Please follow the link below to sign in to your account and set up your information:</p>
+    
+    <div style="background-color: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center;">
+      <h3 style="color: #1976d2; margin-bottom: 15px;">Your Login Information</h3>
+      <p style="margin-bottom: 10px;"><strong>Email:</strong> ${mentorEmail}</p>
+      <p style="margin-bottom: 15px;"><strong>Temporary Password:</strong> ${temporaryPassword}</p>
+      <a href="${loginUrl}" style="display: inline-block; background-color: #1976d2; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Sign In Now</a>
+    </div>
+    
+    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0;"><strong>Important:</strong> Please update your password after logging in for the first time. Your temporary password should be changed to something secure that only you know.</p>
+    </div>
+    
+    <p><strong>Next Steps:</strong></p>
+    <ol>
+      <li>Click the link above or go to ${loginUrl}</li>
+      <li>Sign in with your email and temporary password</li>
+      <li>Update your password immediately</li>
+      <li>Complete your profile by adding:
+        <ul>
+          <li>Team member names</li>
+          <li>Team photos (both members)</li>
+          <li>Team bio</li>
+          <li>Your question for potential fellows</li>
+          <li>Your interests (select 4)</li>
+          <li>Project category</li>
+        </ul>
+      </li>
+    </ol>
+    
+    <p>If you have any questions or issues logging in, please don't hesitate to contact us.</p>
+    
+    <p>Welcome to the Bennington Rising team!</p>
+    
+    <p>Best,<br>
+    The Bennington Rising Team<br>
+    <a href="mailto:VISTA.svhealthcare@gmail.com">VISTA.svhealthcare@gmail.com</a><br>
+    <a href="mailto:james.trimarchi@svhealthcare.org">james.trimarchi@svhealthcare.org</a></p>
+  `;
+
+  return await sendEmail(mentorEmail, subject, html);
+};
+
 // #1 - Team Match Under Review (to Team Coordinator)
 const sendMatchUnderReviewToMentor = async (
   mentorEmail,
@@ -587,12 +645,20 @@ const sendTestEmailSuite = async () => {
     guardianEmail: "guardian@example.com",
     answer1: "I want to learn video production",
     answer2: "I am interested in documentary filmmaking",
+    programAnswer: "I want to develop leadership skills",
   };
 
   // Send all email types
   const results = [];
 
   results.push(await sendWelcomeEmail(testMentee.email, testMentee.firstName));
+  results.push(
+    await sendAccountCreatedToMentor(
+      testMentor.email,
+      testMentor.firstName,
+      "TempPass123!"
+    )
+  );
   results.push(
     await sendMatchUnderReviewToMentor(
       testMentor.email,
@@ -666,6 +732,7 @@ const sendTestEmailSuite = async () => {
 
 module.exports = {
   sendWelcomeEmail,
+  sendAccountCreatedToMentor,
   sendMatchUnderReviewToMentor,
   sendConsentNeededToMentee,
   sendConsentRequestToGuardian,

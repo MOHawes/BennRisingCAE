@@ -4,7 +4,19 @@ import { API } from "../../../constants/endpoints";
 const AdminManagement = ({ token }) => {
   const [admins, setAdmins] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const [isLoadingAdmins, setIsLoadingAdmins] = useState(true);
+
+  // Password change form state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState({
+    type: "",
+    text: "",
+  });
 
   // Form state for new admin
   const [newAdmin, setNewAdmin] = useState({
@@ -17,6 +29,9 @@ const AdminManagement = ({ token }) => {
   // Fetch all admins
   const fetchAdmins = async () => {
     try {
+      setIsLoadingAdmins(true);
+      setFetchError(false);
+
       const response = await fetch(`${API}/admin/list-admins`, {
         headers: {
           Authorization: token,
@@ -24,18 +39,56 @@ const AdminManagement = ({ token }) => {
         },
       });
 
-      if (!response.ok) throw new Error("Failed to fetch admins");
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log(
+            "Admin list endpoint not found. This feature may not be implemented yet."
+          );
+          setFetchError(true);
+          // Set current user as the only admin for now
+          const currentUser = JSON.parse(localStorage.getItem("user"));
+          if (currentUser) {
+            setAdmins([
+              {
+                id: currentUser.id,
+                firstName: currentUser.firstName,
+                lastName: currentUser.lastName,
+                email: currentUser.email,
+              },
+            ]);
+          }
+          return;
+        }
+        throw new Error("Failed to fetch admins");
+      }
 
       const data = await response.json();
-      setAdmins(data.admins);
+      setAdmins(data.admins || []);
+      setFetchError(false);
     } catch (error) {
       console.error("Error fetching admins:", error);
-      alert("Failed to load admin list");
+      setFetchError(true);
+      // Set current user as the only admin for fallback
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+      if (currentUser) {
+        setAdmins([
+          {
+            id: currentUser.id,
+            firstName: currentUser.firstName,
+            lastName: currentUser.lastName,
+            email: currentUser.email,
+          },
+        ]);
+      }
+    } finally {
+      setIsLoadingAdmins(false);
     }
   };
 
   useEffect(() => {
-    fetchAdmins();
+    if (token) {
+      fetchAdmins();
+    }
   }, [token]);
 
   // Create new admin
@@ -56,6 +109,12 @@ const AdminManagement = ({ token }) => {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 404) {
+          alert(
+            "Admin creation endpoint not found. This feature may not be implemented yet."
+          );
+          return;
+        }
         throw new Error(data.message || "Failed to create admin");
       }
 
@@ -71,14 +130,89 @@ const AdminManagement = ({ token }) => {
     }
   };
 
+  // Handle password change for current admin
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    // Clear previous messages
+    setPasswordMessage({ type: "", text: "" });
+
+    // Validate passwords
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordMessage({ type: "error", text: "All fields are required" });
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      setPasswordMessage({
+        type: "error",
+        text: "New password must be at least 4 characters",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: "error", text: "New passwords do not match" });
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setPasswordMessage({
+        type: "error",
+        text: "New password must be different from current password",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${API}/admin/change-password`, {
+        method: "PUT",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to change password");
+      }
+
+      setPasswordMessage({
+        type: "success",
+        text: "Password changed successfully!",
+      });
+      // Clear form
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      // Close form after 2 seconds
+      setTimeout(() => {
+        setShowPasswordForm(false);
+        setPasswordMessage({ type: "", text: "" });
+      }, 2000);
+    } catch (error) {
+      console.error("Error changing password:", error);
+      setPasswordMessage({ type: "error", text: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Reset admin password
   const handleResetPassword = async (adminId, adminName) => {
     const currentUserId = JSON.parse(localStorage.getItem("user"))?.id;
 
     if (adminId === currentUserId) {
-      alert(
-        "You cannot reset your own password. Please ask another admin for help."
-      );
+      // Show password change form instead
+      setShowPasswordForm(true);
       return;
     }
 
@@ -105,6 +239,12 @@ const AdminManagement = ({ token }) => {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 404) {
+          alert(
+            "Password reset endpoint not found. This feature may not be implemented yet."
+          );
+          return;
+        }
         throw new Error(data.message || "Failed to reset password");
       }
 
@@ -114,6 +254,20 @@ const AdminManagement = ({ token }) => {
       alert(error.message);
     }
   };
+
+  // Show loading state while fetching admins
+  if (isLoadingAdmins) {
+    return (
+      <div className="w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1b0a5f]"></div>
+          <span className="ml-2 text-gray-600 dark:text-gray-300">
+            Loading admin accounts...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
@@ -128,6 +282,108 @@ const AdminManagement = ({ token }) => {
           {showCreateForm ? "Cancel" : "Create New Admin"}
         </button>
       </div>
+
+      {/* Error message */}
+      {fetchError && (
+        <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            <strong>Note:</strong> Unable to fetch full admin list from server.
+            Showing current admin account only. You can still create new admins
+            and reset passwords.
+          </p>
+        </div>
+      )}
+
+      {/* Password Change Form Modal */}
+      {showPasswordForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+              Change Your Password
+            </h3>
+
+            {passwordMessage.text && (
+              <div
+                className={`mb-4 p-3 rounded-md text-sm ${
+                  passwordMessage.type === "success"
+                    ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200"
+                    : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200"
+                }`}
+              >
+                {passwordMessage.text}
+              </div>
+            )}
+
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  minLength="4"
+                  required
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Minimum 4 characters
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 bg-[#1b0a5f] hover:bg-[#6c50e1] text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-400"
+                >
+                  {isLoading ? "Changing..." : "Change Password"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordForm(false);
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                    setPasswordMessage({ type: "", text: "" });
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Create Admin Form */}
       {showCreateForm && (
@@ -148,7 +404,7 @@ const AdminManagement = ({ token }) => {
                   onChange={(e) =>
                     setNewAdmin({ ...newAdmin, firstName: e.target.value })
                   }
-                  className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500"
+                  className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                 />
               </div>
               <div>
@@ -162,7 +418,7 @@ const AdminManagement = ({ token }) => {
                   onChange={(e) =>
                     setNewAdmin({ ...newAdmin, lastName: e.target.value })
                   }
-                  className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500"
+                  className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                 />
               </div>
             </div>
@@ -177,7 +433,7 @@ const AdminManagement = ({ token }) => {
                 onChange={(e) =>
                   setNewAdmin({ ...newAdmin, email: e.target.value })
                 }
-                className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500"
+                className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
               />
             </div>
             <div>
@@ -192,9 +448,11 @@ const AdminManagement = ({ token }) => {
                 onChange={(e) =>
                   setNewAdmin({ ...newAdmin, password: e.target.value })
                 }
-                className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500"
+                className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
               />
-              <p className="text-xs text-gray-500 mt-1">Minimum 4 characters</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Minimum 4 characters
+              </p>
             </div>
             <button
               type="submit"
@@ -239,7 +497,7 @@ const AdminManagement = ({ token }) => {
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
                       {admin.firstName} {admin.lastName}
                       {isCurrentUser && (
-                        <span className="ml-2 text-xs text-gray-500">
+                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                           (You)
                         </span>
                       )}
@@ -258,14 +516,18 @@ const AdminManagement = ({ token }) => {
                           `${admin.firstName} ${admin.lastName}`
                         )
                       }
-                      disabled={isCurrentUser}
                       className={`px-3 py-1 rounded-md text-white ${
                         isCurrentUser
-                          ? "bg-gray-400 cursor-not-allowed"
+                          ? "bg-[#1b0a5f] hover:bg-[#6c50e1]"
                           : "bg-yellow-500 hover:bg-yellow-600"
                       }`}
+                      title={
+                        isCurrentUser
+                          ? "Change your password"
+                          : "Reset password to Admin0000"
+                      }
                     >
-                      Reset Password
+                      {isCurrentUser ? "Change Password" : "Reset Password"}
                     </button>
                   </td>
                 </tr>
@@ -274,14 +536,14 @@ const AdminManagement = ({ token }) => {
           </tbody>
         </table>
 
-        {admins.length === 0 && (
+        {admins.length === 0 && !fetchError && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No admin accounts found
           </div>
         )}
       </div>
 
-      <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900 rounded-md">
+      <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
         <p className="text-sm text-blue-700 dark:text-blue-300">
           <strong>Note:</strong> Reset passwords are "0000" for mentors/fellows
           and "Admin0000" for admins. Users should change their password after

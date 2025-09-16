@@ -24,12 +24,16 @@ const CardPreview = (props) => {
     }
 
     if (mentorAnswer.length > MENTOR_CHAR_LIMIT) {
-      alert(`Team question answer must be ${MENTOR_CHAR_LIMIT} characters or less!`);
+      alert(
+        `Team question answer must be ${MENTOR_CHAR_LIMIT} characters or less!`
+      );
       return;
     }
 
     if (programAnswer.length > PROGRAM_CHAR_LIMIT) {
-      alert(`Program question answer must be ${PROGRAM_CHAR_LIMIT} characters or less!`);
+      alert(
+        `Program question answer must be ${PROGRAM_CHAR_LIMIT} characters or less!`
+      );
       return;
     }
 
@@ -128,7 +132,7 @@ const CardPreview = (props) => {
               src={
                 props.profilePhoto1
                   ? props.profilePhoto1
-                  : "../../../assets/blank-profile-picture-973460_1280.png"
+                  : "/images/blank-profile-picture-973460_1280.png"
               }
               alt="Team Member 1"
               className="object-cover w-1/2 h-48 md:h-64 rounded-sm border-2 border-[#9da2d6] shadow-xl"
@@ -137,7 +141,7 @@ const CardPreview = (props) => {
               src={
                 props.profilePhoto2
                   ? props.profilePhoto2
-                  : "../../../assets/blank-profile-picture-973460_1280.png"
+                  : "/images/blank-profile-picture-973460_1280.png"
               }
               alt="Team Member 2"
               className="object-cover w-1/2 h-48 md:h-64 rounded-sm border-2 border-[#9da2d6] shadow-xl"
@@ -193,7 +197,9 @@ const CardPreview = (props) => {
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-md p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto shadow-xl">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Application Questions</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">
+              Application Questions
+            </h2>
 
             {/* Team's Question */}
             <div className="mb-6">
@@ -210,7 +216,7 @@ const CardPreview = (props) => {
                 onChange={(e) => setMentorAnswer(e.target.value)}
                 maxLength={MENTOR_CHAR_LIMIT}
               ></textarea>
-              
+
               <div className="text-right text-sm text-gray-600">
                 {mentorAnswer.length}/{MENTOR_CHAR_LIMIT} characters
               </div>
@@ -220,7 +226,8 @@ const CardPreview = (props) => {
             <div className="mb-6">
               <p className="mb-2 font-bold text-gray-800">Program Question:</p>
               <p className="mb-4 italic text-gray-700 bg-gray-50 p-3 rounded-md border-l-4 border-green-500">
-                How do you want to grow through participating in the Bennington Rising program?
+                How do you want to grow through participating in the Bennington
+                Rising program?
               </p>
 
               <textarea
@@ -231,7 +238,7 @@ const CardPreview = (props) => {
                 onChange={(e) => setProgramAnswer(e.target.value)}
                 maxLength={PROGRAM_CHAR_LIMIT}
               ></textarea>
-              
+
               <div className="text-right text-sm text-gray-600">
                 {programAnswer.length}/{PROGRAM_CHAR_LIMIT} characters
               </div>

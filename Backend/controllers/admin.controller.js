@@ -9,6 +9,9 @@ const Mentee = require("../models/mentee.model");
 const Admin = require("../models/admin.model");
 const MatchRequest = require("../models/matchRequest.model");
 
+// Import email service
+const { sendAccountCreatedToMentor } = require("../services/emailService");
+
 // GET /admin/list-admins - Get all admin accounts
 router.get("/list-admins", validateSession, validateAdmin, async (req, res) => {
   try {
@@ -31,50 +34,56 @@ router.get("/list-admins", validateSession, validateAdmin, async (req, res) => {
 });
 
 // POST /admin/create-admin - Create new admin account
-router.post("/create-admin", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const { firstName, lastName, email, password } = req.body;
+router.post(
+  "/create-admin",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const { firstName, lastName, email, password } = req.body;
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ 
-        message: "All fields are required: firstName, lastName, email, password" 
-      });
-    }
-
-    // Check if admin with this email already exists
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
-      return res.status(400).json({ 
-        message: "An admin with this email already exists" 
-      });
-    }
-
-    // Create new admin
-    const newAdmin = new Admin({
-      firstName,
-      lastName,
-      email,
-      password: bcrypt.hashSync(password, 10),
-    });
-
-    await newAdmin.save();
-
-    res.status(201).json({
-      message: "Admin created successfully",
-      admin: {
-        id: newAdmin._id,
-        firstName: newAdmin.firstName,
-        lastName: newAdmin.lastName,
-        email: newAdmin.email,
-        userType: "Admin",
+      // Validate required fields
+      if (!firstName || !lastName || !email || !password) {
+        return res.status(400).json({
+          message:
+            "All fields are required: firstName, lastName, email, password",
+        });
       }
-    });
-  } catch (error) {
-    console.error("Error creating admin:", error);
-    res.status(500).json({ message: error.message });
+
+      // Check if admin with this email already exists
+      const existingAdmin = await Admin.findOne({ email });
+      if (existingAdmin) {
+        return res.status(400).json({
+          message: "An admin with this email already exists",
+        });
+      }
+
+      // Create new admin
+      const newAdmin = new Admin({
+        firstName,
+        lastName,
+        email,
+        password: bcrypt.hashSync(password, 10),
+      });
+
+      await newAdmin.save();
+
+      res.status(201).json({
+        message: "Admin created successfully",
+        admin: {
+          id: newAdmin._id,
+          firstName: newAdmin.firstName,
+          lastName: newAdmin.lastName,
+          email: newAdmin.email,
+          userType: "Admin",
+        },
+      });
+    } catch (error) {
+      console.error("Error creating admin:", error);
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 // PUT /admin/mentee/reset-password/:id
 router.put(
@@ -210,206 +219,272 @@ router.put(
 );
 
 // POST /admin/mentor/create - Create new mentor
-router.post("/mentor/create", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const { firstName, lastName, email, password, projectCategory } = req.body;
+router.post(
+  "/mentor/create",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const { firstName, lastName, email, password, projectCategory } =
+        req.body;
 
-    // Check if mentor already exists
-    const existingMentor = await Mentor.findOne({ email });
-    if (existingMentor) {
-      return res.status(400).json({ message: "Mentor with this email already exists" });
+      // Check if mentor already exists
+      const existingMentor = await Mentor.findOne({ email });
+      if (existingMentor) {
+        return res
+          .status(400)
+          .json({ message: "Mentor with this email already exists" });
+      }
+
+      // Create new mentor
+      const newMentor = new Mentor({
+        firstName,
+        lastName,
+        email,
+        password: bcrypt.hashSync(password, 10),
+        projectCategory: projectCategory || "",
+        approvedMentees: [],
+        menteeRequests: [],
+      });
+
+      await newMentor.save();
+
+      // Send the account created email
+      try {
+        await sendAccountCreatedToMentor(
+          email,
+          firstName,
+          password // Send the plain text password before it was hashed
+        );
+        console.log("Account creation email sent successfully to:", email);
+      } catch (emailError) {
+        console.error("Failed to send account creation email:", emailError);
+        // Don't fail the account creation if email fails
+        // But you might want to log this for admin attention
+      }
+
+      res.status(201).json({
+        message: "Mentor created successfully",
+        mentor: newMentor,
+      });
+    } catch (error) {
+      console.error("Error creating mentor:", error);
+      res.status(500).json({ message: error.message });
     }
-
-    // Create new mentor
-    const newMentor = new Mentor({
-      firstName,
-      lastName,
-      email,
-      password: bcrypt.hashSync(password, 10),
-      projectCategory: projectCategory || "",
-      approvedMentees: [],
-      menteeRequests: [],
-    });
-
-    await newMentor.save();
-
-    res.status(201).json({
-      message: "Mentor created successfully",
-      mentor: newMentor,
-    });
-  } catch (error) {
-    console.error("Error creating mentor:", error);
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // PUT /admin/mentor/update/:id - Update mentor
-router.put("/mentor/update/:id", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const mentorId = req.params.id;
-    const { firstName, lastName, email, projectCategory } = req.body;
+router.put(
+  "/mentor/update/:id",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const mentorId = req.params.id;
+      const { firstName, lastName, email, projectCategory } = req.body;
 
-    const updatedInfo = {};
-    if (firstName !== undefined && firstName.trim() !== "") updatedInfo.firstName = firstName;
-    if (lastName !== undefined && lastName.trim() !== "") updatedInfo.lastName = lastName;
-    if (email !== undefined && email.trim() !== "") updatedInfo.email = email;
-    if (projectCategory !== undefined) updatedInfo.projectCategory = projectCategory;
+      const updatedInfo = {};
+      if (firstName !== undefined && firstName.trim() !== "")
+        updatedInfo.firstName = firstName;
+      if (lastName !== undefined && lastName.trim() !== "")
+        updatedInfo.lastName = lastName;
+      if (email !== undefined && email.trim() !== "") updatedInfo.email = email;
+      if (projectCategory !== undefined)
+        updatedInfo.projectCategory = projectCategory;
 
-    const updatedMentor = await Mentor.findByIdAndUpdate(mentorId, updatedInfo, { new: true });
+      const updatedMentor = await Mentor.findByIdAndUpdate(
+        mentorId,
+        updatedInfo,
+        { new: true }
+      );
 
-    if (!updatedMentor) {
-      return res.status(404).json({ message: "Mentor not found" });
+      if (!updatedMentor) {
+        return res.status(404).json({ message: "Mentor not found" });
+      }
+
+      res.status(200).json({
+        message: "Mentor updated successfully",
+        mentor: updatedMentor,
+      });
+    } catch (error) {
+      console.error("Error updating mentor:", error);
+      res.status(500).json({ message: error.message });
     }
-
-    res.status(200).json({
-      message: "Mentor updated successfully",
-      mentor: updatedMentor,
-    });
-  } catch (error) {
-    console.error("Error updating mentor:", error);
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // DELETE /admin/mentor/delete/:id - Delete mentor
-router.delete("/mentor/delete/:id", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const mentorId = req.params.id;
-    const deletedMentor = await Mentor.findByIdAndDelete(mentorId);
+router.delete(
+  "/mentor/delete/:id",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const mentorId = req.params.id;
+      const deletedMentor = await Mentor.findByIdAndDelete(mentorId);
 
-    if (!deletedMentor) {
-      return res.status(404).json({ message: "Mentor not found" });
+      if (!deletedMentor) {
+        return res.status(404).json({ message: "Mentor not found" });
+      }
+
+      res.status(200).json({
+        message: "Mentor deleted successfully",
+        deletedMentor,
+      });
+    } catch (error) {
+      console.error("Error deleting mentor:", error);
+      res.status(500).json({ message: error.message });
     }
-
-    res.status(200).json({
-      message: "Mentor deleted successfully",
-      deletedMentor,
-    });
-  } catch (error) {
-    console.error("Error deleting mentor:", error);
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // PUT /admin/mentee/update/:id - Update mentee
-router.put("/mentee/update/:id", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const menteeId = req.params.id;
-    console.log("Received mentee ID: ", menteeId);
+router.put(
+  "/mentee/update/:id",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const menteeId = req.params.id;
+      console.log("Received mentee ID: ", menteeId);
 
-    const { firstName, lastName, email, school, guardianEmail, interests } = req.body;
+      const { firstName, lastName, email, school, guardianEmail, interests } =
+        req.body;
 
-    const updatedInfo = {};
-    if (firstName !== undefined && firstName.trim() !== "") updatedInfo.firstName = firstName;
-    if (lastName !== undefined && lastName.trim() !== "") updatedInfo.lastName = lastName;
-    if (email !== undefined && email.trim() !== "") updatedInfo.email = email;
-    if (school !== undefined && school.trim() !== "") updatedInfo.school = school;
-    if (guardianEmail !== undefined && guardianEmail.trim() !== "") updatedInfo.guardianEmail = guardianEmail;
-    if (interests !== undefined && Array.isArray(interests)) updatedInfo.interests = interests;
+      const updatedInfo = {};
+      if (firstName !== undefined && firstName.trim() !== "")
+        updatedInfo.firstName = firstName;
+      if (lastName !== undefined && lastName.trim() !== "")
+        updatedInfo.lastName = lastName;
+      if (email !== undefined && email.trim() !== "") updatedInfo.email = email;
+      if (school !== undefined && school.trim() !== "")
+        updatedInfo.school = school;
+      if (guardianEmail !== undefined && guardianEmail.trim() !== "")
+        updatedInfo.guardianEmail = guardianEmail;
+      if (interests !== undefined && Array.isArray(interests))
+        updatedInfo.interests = interests;
 
-    const updatedMentee = await Mentee.findByIdAndUpdate(
-      menteeId,
-      updatedInfo,
-      { new: true }
-    );
+      const updatedMentee = await Mentee.findByIdAndUpdate(
+        menteeId,
+        updatedInfo,
+        { new: true }
+      );
 
-    if (!updatedMentee) {
-      return res.status(404).json({
-        message: "Error updating mentee profile - please try again",
+      if (!updatedMentee) {
+        return res.status(404).json({
+          message: "Error updating mentee profile - please try again",
+        });
+      }
+
+      res.status(200).json({
+        message: "Mentee profile was successfully updated",
+        user: {
+          id: updatedMentee._id.toString(),
+          firstName: updatedMentee.firstName,
+          lastName: updatedMentee.lastName,
+          email: updatedMentee.email,
+          school: updatedMentee.school,
+          guardianEmail: updatedMentee.guardianEmail,
+          interests: updatedMentee.interests,
+        },
       });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
-
-    res.status(200).json({
-      message: "Mentee profile was successfully updated",
-      user: {
-        id: updatedMentee._id.toString(),
-        firstName: updatedMentee.firstName,
-        lastName: updatedMentee.lastName,
-        email: updatedMentee.email,
-        school: updatedMentee.school,
-        guardianEmail: updatedMentee.guardianEmail,
-        interests: updatedMentee.interests,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // DELETE /admin/mentee/delete/:id - Delete mentee
-router.delete("/mentee/delete/:id", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedMentee = await Mentee.deleteOne({ _id: id });
+router.delete(
+  "/mentee/delete/:id",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deletedMentee = await Mentee.deleteOne({ _id: id });
 
-    if (deletedMentee.deletedCount === 0) {
-      return res.status(404).json({ message: "Mentee not found." });
+      if (deletedMentee.deletedCount === 0) {
+        return res.status(404).json({ message: "Mentee not found." });
+      }
+
+      return res.status(200).json({
+        message: "Mentee successfully deleted.",
+        deletedUserId: id,
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
-
-    return res.status(200).json({
-      message: "Mentee successfully deleted.",
-      deletedUserId: id,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
-});
+);
 
 // GET /admin/match-requests - Get all match requests
-router.get("/match-requests", validateSession, validateAdmin, async (req, res) => {
-  try {
-    const matchRequests = await MatchRequest.find()
-      .populate("menteeId", "firstName lastName email school interests")
-      .populate("mentorId", "firstName lastName projectCategory")
-      .populate("answerId", "menteeAnswer programAnswer")
-      .sort({ requestedAt: -1 });
+router.get(
+  "/match-requests",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      const matchRequests = await MatchRequest.find()
+        .populate("menteeId", "firstName lastName email school interests")
+        .populate("mentorId", "firstName lastName projectCategory")
+        .populate("answerId", "menteeAnswer programAnswer")
+        .sort({ requestedAt: -1 });
 
-    // Calculate status counts
-    const statusCounts = matchRequests.reduce((acc, request) => {
-      acc[request.status] = (acc[request.status] || 0) + 1;
-      return acc;
-    }, {});
+      // Calculate status counts
+      const statusCounts = matchRequests.reduce((acc, request) => {
+        acc[request.status] = (acc[request.status] || 0) + 1;
+        return acc;
+      }, {});
 
-    // Format the response
-    const formattedRequests = matchRequests.map(request => ({
-      id: request._id,
-      status: request.status,
-      requestedAt: request.requestedAt,
-      consentDeadline: request.consentDeadline,
-      guardianConsentAt: request.guardianConsentAt,
-      mentorDecisionAt: request.mentorDecisionAt,
-      confirmedAt: request.confirmedAt,
-      declinedAt: request.declinedAt,
-      expiredAt: request.expiredAt,
-      remindersSent: request.remindersSent,
-      mentee: {
-        id: request.menteeId?._id,
-        name: `${request.menteeId?.firstName || ''} ${request.menteeId?.lastName || ''}`,
-        email: request.menteeId?.email || '',
-        school: request.menteeId?.school || '',
-        interests: request.menteeId?.interests || []
-      },
-      mentor: {
-        id: request.mentorId?._id,
-        name: `${request.mentorId?.firstName || ''} ${request.mentorId?.lastName || ''}`,
-        projectCategory: request.mentorId?.projectCategory || ''
-      },
-      answers: request.answerId ? {
-        mentorAnswer: request.answerId.menteeAnswer,
-        programAnswer: request.answerId.programAnswer
-      } : null
-    }));
+      // Format the response
+      const formattedRequests = matchRequests.map((request) => ({
+        id: request._id,
+        status: request.status,
+        requestedAt: request.requestedAt,
+        consentDeadline: request.consentDeadline,
+        guardianConsentAt: request.guardianConsentAt,
+        mentorDecisionAt: request.mentorDecisionAt,
+        confirmedAt: request.confirmedAt,
+        declinedAt: request.declinedAt,
+        expiredAt: request.expiredAt,
+        remindersSent: request.remindersSent,
+        mentee: {
+          id: request.menteeId?._id,
+          name: `${request.menteeId?.firstName || ""} ${
+            request.menteeId?.lastName || ""
+          }`,
+          email: request.menteeId?.email || "",
+          school: request.menteeId?.school || "",
+          interests: request.menteeId?.interests || [],
+        },
+        mentor: {
+          id: request.mentorId?._id,
+          name: `${request.mentorId?.firstName || ""} ${
+            request.mentorId?.lastName || ""
+          }`,
+          projectCategory: request.mentorId?.projectCategory || "",
+        },
+        answers: request.answerId
+          ? {
+              mentorAnswer: request.answerId.menteeAnswer,
+              programAnswer: request.answerId.programAnswer,
+            }
+          : null,
+      }));
 
-    res.status(200).json({
-      requests: formattedRequests,
-      statusCounts: statusCounts,
-      total: matchRequests.length
-    });
-  } catch (error) {
-    console.error("Error fetching match requests:", error);
-    res.status(500).json({ message: error.message });
+      res.status(200).json({
+        requests: formattedRequests,
+        statusCounts: statusCounts,
+        total: matchRequests.length,
+      });
+    } catch (error) {
+      console.error("Error fetching match requests:", error);
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 // Export the router
 module.exports = router;

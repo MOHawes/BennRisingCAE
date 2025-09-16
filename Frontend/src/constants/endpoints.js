@@ -38,16 +38,13 @@ export const API_MENTEE_PROFILE_PREVIEW = `${API}/user/mentee/profile`;
 
 export const API_MENTOR_PROFILE_PREVIEW = `${API}/user/mentor/profile`;
 
-// export const API_VIEW_MENTEES = `${API}/user/mentee/view-all`;
-
-
 // Admin match requests endpoint
 export const API_ADMIN_MATCH_REQUESTS = `${API}/admin/match-requests`;
 
 // Add the S3 upload URL endpoint
 export const API_GET_UPLOAD_URL = `${API}/geturl`;
 
-// !New! consent endpoints
+// Consent endpoints
 export const API_CONSENT_FORM_SUBMIT = `${API}/match/consent`;
 
 export const API_CONSENT_FORM_INFO = `${API}/match/consent-info`;
@@ -62,4 +59,7 @@ export const API_ADMIN_RESET_ADMIN_PASSWORD = `${API}/admin/admin/reset-password
 // Admin management endpoints
 export const API_ADMIN_CREATE_ADMIN = `${API}/admin/create-admin`;
 export const API_ADMIN_LIST_ADMINS = `${API}/admin/list-admins`;
+export const API_ADMIN_CHANGE_PASSWORD = `${API}/admin/change-password`;
 
+// Admin consent data endpoint
+export const API_ADMIN_FELLOWS_CONSENT_DATA = `${API}/admin/fellows-consent-data`;
