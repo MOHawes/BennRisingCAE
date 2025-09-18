@@ -349,6 +349,26 @@ router.post("/consent/:matchRequestId", async (req, res) => {
 
       await matchRequest.save();
 
+      // Update the mentee with consent data
+      const mentorName = `${matchRequest.mentorId.firstName} ${matchRequest.mentorId.lastName}`;
+
+      await Mentee.findByIdAndUpdate(matchRequest.menteeId._id, {
+        hasParentConsent: true,
+        parentConsentData: {
+          guardianName: guardianName,
+          guardianEmail: guardianEmail,
+          guardianPhone: guardianPhone,
+          emergencyContact: {
+            name: emergencyContactName,
+            phone: emergencyContactPhone,
+            relation: emergencyContactRelation,
+          },
+          consentDate: new Date(),
+          consentFormId: matchRequest._id,
+          matchedMentorName: mentorName,
+        },
+      });
+
       // Send email #7 to mentee - Consent Approved
       await sendConsentApprovedToMentee(
         matchRequest.menteeId.email,
@@ -392,6 +412,11 @@ router.post("/consent/:matchRequestId", async (req, res) => {
       };
 
       await matchRequest.save();
+
+      // Update mentee to note consent was declined
+      await Mentee.findByIdAndUpdate(matchRequest.menteeId._id, {
+        hasParentConsent: false,
+      });
 
       // Remove from requested lists
       await Mentee.findByIdAndUpdate(matchRequest.menteeId._id, {

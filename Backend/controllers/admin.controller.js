@@ -115,60 +115,41 @@ router.get(
   validateAdmin,
   async (req, res) => {
     try {
-      // First, get all mentees
+      // Get all mentees - consent data is now stored directly on mentee
       const mentees = await Mentee.find({});
 
-      // For each mentee, find their match requests to get consent data
-      const menteesWithConsent = await Promise.all(
-        mentees.map(async (mentee) => {
-          // Find all match requests for this mentee
-          const matchRequests = await MatchRequest.find({
-            menteeId: mentee._id,
-          }).populate("mentorId", "firstName lastName projectCategory");
+      // Format the response
+      const menteesWithConsent = mentees.map((mentee) => {
+        // Build the mentee object with consent data
+        const menteeData = {
+          id: mentee._id,
+          firstName: mentee.firstName,
+          lastName: mentee.lastName,
+          email: mentee.email,
+          school: mentee.school,
+          interests: mentee.interests || [],
+          project: mentee.project,
+          guardianEmail: mentee.guardianEmail,
+          approvedMentors: mentee.approvedMentors || [],
+          requestedMentors: mentee.requestedMentors || [],
+          ageCheck: mentee.ageCheck,
+          hasParentConsent: mentee.hasParentConsent || false,
+          // Add consent data if available
+          consentData:
+            mentee.hasParentConsent && mentee.parentConsentData
+              ? {
+                  guardianName: mentee.parentConsentData.guardianName,
+                  guardianEmail: mentee.parentConsentData.guardianEmail,
+                  guardianPhone: mentee.parentConsentData.guardianPhone,
+                  emergencyContact: mentee.parentConsentData.emergencyContact,
+                  consentDate: mentee.parentConsentData.consentDate,
+                  matchedMentorName: mentee.parentConsentData.matchedMentorName,
+                }
+              : null,
+        };
 
-          // Find the most recent confirmed match or any match with guardian info
-          const confirmedMatch = matchRequests.find(
-            (req) => req.status === "confirmed" && req.guardianInfo
-          );
-          const anyMatchWithInfo = matchRequests.find(
-            (req) => req.guardianInfo
-          );
-          const relevantMatch = confirmedMatch || anyMatchWithInfo;
-
-          // Build the mentee object with consent data
-          const menteeData = {
-            id: mentee._id,
-            firstName: mentee.firstName,
-            lastName: mentee.lastName,
-            email: mentee.email,
-            school: mentee.school,
-            interests: mentee.interests || [],
-            project: mentee.project,
-            guardianEmail: mentee.guardianEmail,
-            approvedMentors: mentee.approvedMentors || [],
-            requestedMentors: mentee.requestedMentors || [],
-            ageCheck: mentee.ageCheck,
-            // Add consent data if available
-            consentData:
-              relevantMatch && relevantMatch.guardianInfo
-                ? {
-                    guardianName: relevantMatch.guardianInfo.name,
-                    guardianEmail: relevantMatch.guardianInfo.email,
-                    guardianPhone: relevantMatch.guardianInfo.phone,
-                    emergencyContact:
-                      relevantMatch.guardianInfo.emergencyContact,
-                    consentDate: relevantMatch.guardianConsentAt,
-                    matchStatus: relevantMatch.status,
-                    mentorName: relevantMatch.mentorId
-                      ? `${relevantMatch.mentorId.firstName} ${relevantMatch.mentorId.lastName}`
-                      : "Unknown",
-                  }
-                : null,
-          };
-
-          return menteeData;
-        })
-      );
+        return menteeData;
+      });
 
       res.status(200).json({
         message: "Fellows with consent data retrieved successfully",
@@ -522,11 +503,23 @@ router.get(
   validateAdmin,
   async (req, res) => {
     try {
+      console.log("=== MATCH REQUESTS ENDPOINT HIT ===");
+
       const matchRequests = await MatchRequest.find()
         .populate("menteeId", "firstName lastName email school interests")
         .populate("mentorId", "firstName lastName projectCategory")
         .populate("answerId", "menteeAnswer programAnswer")
         .sort({ requestedAt: -1 });
+
+      console.log(`Found ${matchRequests.length} match requests`);
+
+      // Log the first match request to see its structure
+      if (matchRequests.length > 0) {
+        console.log(
+          "First match request guardianInfo:",
+          matchRequests[0].guardianInfo
+        );
+      }
 
       // Calculate status counts
       const statusCounts = matchRequests.reduce((acc, request) => {
@@ -534,42 +527,61 @@ router.get(
         return acc;
       }, {});
 
-      // Format the response - NOW INCLUDING guardianInfo!
-      const formattedRequests = matchRequests.map((request) => ({
-        id: request._id,
-        status: request.status,
-        requestedAt: request.requestedAt,
-        consentDeadline: request.consentDeadline,
-        guardianConsentAt: request.guardianConsentAt,
-        mentorDecisionAt: request.mentorDecisionAt,
-        confirmedAt: request.confirmedAt,
-        declinedAt: request.declinedAt,
-        expiredAt: request.expiredAt,
-        remindersSent: request.remindersSent,
-        guardianInfo: request.guardianInfo, // THIS IS THE KEY FIX - NOW INCLUDED!
-        mentee: {
-          id: request.menteeId?._id,
-          name: `${request.menteeId?.firstName || ""} ${
-            request.menteeId?.lastName || ""
-          }`,
-          email: request.menteeId?.email || "",
-          school: request.menteeId?.school || "",
-          interests: request.menteeId?.interests || [],
-        },
-        mentor: {
-          id: request.mentorId?._id,
-          name: `${request.mentorId?.firstName || ""} ${
-            request.mentorId?.lastName || ""
-          }`,
-          projectCategory: request.mentorId?.projectCategory || "",
-        },
-        answers: request.answerId
-          ? {
-              mentorAnswer: request.answerId.menteeAnswer,
-              programAnswer: request.answerId.programAnswer,
-            }
-          : null,
-      }));
+      // Format the response
+      const formattedRequests = matchRequests.map((request) => {
+        const formatted = {
+          id: request._id,
+          status: request.status,
+          requestedAt: request.requestedAt,
+          consentDeadline: request.consentDeadline,
+          guardianConsentAt: request.guardianConsentAt,
+          mentorDecisionAt: request.mentorDecisionAt,
+          confirmedAt: request.confirmedAt,
+          declinedAt: request.declinedAt,
+          expiredAt: request.expiredAt,
+          remindersSent: request.remindersSent,
+          guardianInfo: request.guardianInfo,
+          mentee: {
+            id: request.menteeId?._id,
+            name: `${request.menteeId?.firstName || ""} ${
+              request.menteeId?.lastName || ""
+            }`,
+            email: request.menteeId?.email || "",
+            school: request.menteeId?.school || "",
+            interests: request.menteeId?.interests || [],
+          },
+          mentor: {
+            id: request.mentorId?._id,
+            name: `${request.mentorId?.firstName || ""} ${
+              request.mentorId?.lastName || ""
+            }`,
+            projectCategory: request.mentorId?.projectCategory || "",
+          },
+          answers: request.answerId
+            ? {
+                mentorAnswer: request.answerId.menteeAnswer,
+                programAnswer: request.answerId.programAnswer,
+              }
+            : null,
+        };
+
+        // Log if this request has guardian info
+        if (request.guardianInfo) {
+          console.log(`Match request ${request._id} HAS guardian info`);
+        }
+
+        return formatted;
+      });
+
+      console.log(
+        "Sending response with",
+        formattedRequests.length,
+        "requests"
+      );
+      console.log(
+        "Requests with guardian info:",
+        formattedRequests.filter((r) => r.guardianInfo).length
+      );
 
       res.status(200).json({
         requests: formattedRequests,
@@ -582,6 +594,5 @@ router.get(
     }
   }
 );
-
 // Export the router
 module.exports = router;

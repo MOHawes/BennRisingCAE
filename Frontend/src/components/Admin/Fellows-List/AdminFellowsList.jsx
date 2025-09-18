@@ -18,6 +18,8 @@ const AdminFellowsList = (props) => {
   async function fetchFellows() {
     setIsRefreshing(true);
     try {
+      console.log("=== STARTING FETCH FELLOWS ===");
+
       // First, get all mentees
       const response = await fetch(API_VIEW_MENTEES, {
         headers: {
@@ -27,7 +29,9 @@ const AdminFellowsList = (props) => {
       });
 
       const data = await response.json();
+      console.log("Mentees response:", data);
       const menteesList = data.mentees || [];
+      console.log(`Found ${menteesList.length} mentees`);
 
       // Get match requests to find consent data
       const matchResponse = await fetch(API_ADMIN_MATCH_REQUESTS, {
@@ -39,13 +43,38 @@ const AdminFellowsList = (props) => {
 
       if (matchResponse.ok) {
         const matchData = await matchResponse.json();
+        console.log("Match requests response:", matchData);
+        console.log(`Found ${matchData.requests.length} match requests`);
+
+        // Log requests with guardian info
+        const requestsWithGuardianInfo = matchData.requests.filter(
+          (r) => r.guardianInfo
+        );
+        console.log(
+          `${requestsWithGuardianInfo.length} requests have guardian info`
+        );
+
+        if (requestsWithGuardianInfo.length > 0) {
+          console.log(
+            "Sample guardian info:",
+            requestsWithGuardianInfo[0].guardianInfo
+          );
+        }
 
         // Create a map for quick lookup by mentee ID
         const consentMap = {};
 
         // Process each match request
         matchData.requests.forEach((request) => {
+          console.log("Processing request:", {
+            id: request.id,
+            menteeId: request.mentee?.id,
+            hasGuardianInfo: !!request.guardianInfo,
+            status: request.status,
+          });
+
           if (request.guardianInfo && request.mentee?.id) {
+            console.log(`Mapping consent for mentee ${request.mentee.id}`);
             // Store the guardian info keyed by mentee ID
             consentMap[request.mentee.id] = {
               guardianName: request.guardianInfo.name,
@@ -59,18 +88,38 @@ const AdminFellowsList = (props) => {
           }
         });
 
+        console.log("Consent map:", consentMap);
+        console.log(
+          `Consent map has ${Object.keys(consentMap).length} entries`
+        );
+
         // Merge consent data with fellows
         const fellowsWithConsent = menteesList.map((mentee) => {
-          const consent = consentMap[mentee.id] || consentMap[mentee._id];
+          const menteeId = mentee.id || mentee._id;
+          const consent = consentMap[menteeId];
+
+          if (consent) {
+            console.log(
+              `Found consent for mentee ${mentee.firstName} ${mentee.lastName}`
+            );
+          }
+
           return {
             ...mentee,
             consentData: consent || null,
           };
         });
 
+        console.log("Fellows with consent:", fellowsWithConsent);
+        console.log(
+          `${
+            fellowsWithConsent.filter((f) => f.consentData).length
+          } fellows have consent data`
+        );
+
         setFellows(fellowsWithConsent);
       } else {
-        // If match requests fail, just show fellows without consent data
+        console.error("Match requests response not OK:", matchResponse.status);
         setFellows(menteesList);
       }
 
@@ -131,6 +180,7 @@ const AdminFellowsList = (props) => {
   };
 
   const toggleRowExpansion = (fellowId) => {
+    console.log("Toggling expansion for fellow:", fellowId);
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(fellowId)) {
       newExpanded.delete(fellowId);
@@ -140,7 +190,6 @@ const AdminFellowsList = (props) => {
     setExpandedRows(newExpanded);
   };
 
-  // Functions for expand/collapse all
   const expandAll = () => {
     const allFellowIds = new Set(fellows.map((fellow) => fellow.id));
     setExpandedRows(allFellowIds);
@@ -197,7 +246,6 @@ const AdminFellowsList = (props) => {
           Fellows List
         </h1>
         <div className="flex items-center gap-4">
-          {/* Expand/Collapse All Buttons */}
           <div className="flex gap-2">
             <button
               onClick={expandAll}
@@ -279,6 +327,17 @@ const AdminFellowsList = (props) => {
           <tbody>
             {fellows.map((fellow) => {
               const matchStatus = getMatchStatus(fellow);
+              const isExpanded = expandedRows.has(fellow.id);
+
+              console.log(
+                `Rendering fellow ${fellow.firstName} ${fellow.lastName}:`,
+                {
+                  hasConsentData: !!fellow.consentData,
+                  consentData: fellow.consentData,
+                  isExpanded: isExpanded,
+                }
+              );
+
               return (
                 <React.Fragment key={fellow.id}>
                   <tr className="hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors">
@@ -333,13 +392,13 @@ const AdminFellowsList = (props) => {
                         onClick={() => toggleRowExpansion(fellow.id)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm"
                       >
-                        {expandedRows.has(fellow.id) ? "Hide" : "Show"}
+                        {isExpanded ? "Hide" : "Show"}
                       </button>
                     </td>
                   </tr>
 
                   {/* Expanded row with consent form data */}
-                  {expandedRows.has(fellow.id) && (
+                  {isExpanded && (
                     <tr className="bg-gray-50 dark:bg-gray-900">
                       <td
                         colSpan="8"
@@ -487,34 +546,6 @@ const AdminFellowsList = (props) => {
         {fellows.length === 0 && !isRefreshing && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No fellows found.
-          </div>
-        )}
-
-        {isRefreshing && (
-          <div className="text-center py-4">
-            <div className="inline-flex items-center">
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-500"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              <span className="text-gray-500">Refreshing fellows list...</span>
-            </div>
           </div>
         )}
       </div>

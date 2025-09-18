@@ -18,7 +18,6 @@ const MenteeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
   userType: {
     type: String,
     default: "Mentee",
@@ -88,6 +87,43 @@ const MenteeSchema = new mongoose.Schema({
     type: Boolean,
     required: true,
     default: false,
+  },
+  // Add consent data fields
+  hasParentConsent: {
+    type: Boolean,
+    default: false,
+  },
+  parentConsentData: {
+    guardianName: {
+      type: String,
+    },
+    guardianEmail: {
+      type: String,
+    },
+    guardianPhone: {
+      type: String,
+    },
+    emergencyContact: {
+      name: {
+        type: String,
+      },
+      phone: {
+        type: String,
+      },
+      relation: {
+        type: String,
+      }
+    },
+    consentDate: {
+      type: Date,
+    },
+    consentFormId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "MatchRequest",
+    },
+    matchedMentorName: {
+      type: String,
+    }
   },
 });
 
