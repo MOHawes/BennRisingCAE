@@ -98,15 +98,15 @@ const MenteeDashboard = (props) => {
           {/* Right Column: Mentee Info + Matched Mentor Preview */}
           <div className="w-full md:w-1/2 space-y-4">
             <MenteeProfile token={props.token} />
-            {/* Show or Hide Matched Mentor */}
+            {/* Show or Hide Matched Mentor/team */}
             <div className="space-y-4 flex flex-col items-center pb-4">
               <button
                 className="btn mt-2 btn-soft btn-primary text-base sm:text-xl px-4 sm:px-8 py-2 sm:py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-md"
                 onClick={toggleMentorPreview}
               >
                 {showMentorPreview
-                  ? "Hide Matched Mentor"
-                  : "View Matched Mentor"}
+                  ? "Hide Matched Team"
+                  : "View Matched Team"}
               </button>
 
               {showMentorPreview && (

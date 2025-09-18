@@ -534,7 +534,7 @@ router.get(
         return acc;
       }, {});
 
-      // Format the response
+      // Format the response - NOW INCLUDING guardianInfo!
       const formattedRequests = matchRequests.map((request) => ({
         id: request._id,
         status: request.status,
@@ -546,6 +546,7 @@ router.get(
         declinedAt: request.declinedAt,
         expiredAt: request.expiredAt,
         remindersSent: request.remindersSent,
+        guardianInfo: request.guardianInfo, // THIS IS THE KEY FIX - NOW INCLUDED!
         mentee: {
           id: request.menteeId?._id,
           name: `${request.menteeId?.firstName || ""} ${

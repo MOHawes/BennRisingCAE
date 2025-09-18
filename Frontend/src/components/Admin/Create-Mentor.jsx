@@ -231,7 +231,7 @@ export default function CreateMentor(props) {
             >
               <option value="">Select a category</option>
               <option value="What's in your food">What's in your food</option>
-              <option value="Kid's for science!">Kid's for science!</option>
+              <option value="Kids for science!">Kids for science!</option>
             </select>
           </div>
           <button

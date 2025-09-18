@@ -11,6 +11,14 @@ const CardPreview = (props) => {
   const MENTOR_CHAR_LIMIT = 150;
   const PROGRAM_CHAR_LIMIT = 150;
 
+  // Helper function to clean project category text
+  const cleanProjectCategory = (category) => {
+    if (category === "Kid's for science!") {
+      return "Kids for science!";
+    }
+    return category;
+  };
+
   // handle match request (connect button)
   const handleMatchRequest = async () => {
     if (!mentorAnswer.trim()) {
@@ -164,7 +172,7 @@ const CardPreview = (props) => {
           <p className="font-bold text-lg text-gray-700 mb-1">
             Project Category:{" "}
             <span className="text-blue-500 text-sm">
-              {props.projectCategory?.toUpperCase()}
+              {cleanProjectCategory(props.projectCategory)?.toUpperCase()}
             </span>
           </p>
           {/* Mentor interests */}

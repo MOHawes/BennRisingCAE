@@ -62,4 +62,4 @@ export const API_ADMIN_LIST_ADMINS = `${API}/admin/list-admins`;
 export const API_ADMIN_CHANGE_PASSWORD = `${API}/admin/change-password`;
 
 // Admin consent data endpoint
-export const API_ADMIN_FELLOWS_CONSENT_DATA = `${API}/admin/fellows-consent-data`;
+export const API_ADMIN_FELLOWS_WITH_CONSENT = `${API}/admin/fellows-with-consent`;

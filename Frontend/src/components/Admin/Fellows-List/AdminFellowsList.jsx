@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { API_VIEW_MENTEES, API_ADMIN_MATCH_REQUESTS } from "../../../constants/endpoints";
+import {
+  API_VIEW_MENTEES,
+  API_ADMIN_MATCH_REQUESTS,
+} from "../../../constants/endpoints";
 import { API } from "../../../constants/endpoints";
 
 const AdminFellowsList = (props) => {
@@ -7,8 +10,6 @@ const AdminFellowsList = (props) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const [expandedRows, setExpandedRows] = useState(new Set());
-  const [fellowsWithConsent, setFellowsWithConsent] = useState([]);
-  const [matchRequests, setMatchRequests] = useState([]);
 
   useEffect(() => {
     fetchFellows();
@@ -17,102 +18,99 @@ const AdminFellowsList = (props) => {
   async function fetchFellows() {
     setIsRefreshing(true);
     try {
+      // First, get all mentees
       const response = await fetch(API_VIEW_MENTEES, {
         headers: {
           "Content-Type": "application/json",
           Authorization: props.token,
         },
       });
-      const data = await response.json();
-      setFellows(data.mentees || []);
-      setLastRefreshed(new Date());
 
-      // Fetch match requests to get consent data
-      await fetchMatchRequests(data.mentees || []);
+      const data = await response.json();
+      const menteesList = data.mentees || [];
+
+      // Get match requests to find consent data
+      const matchResponse = await fetch(API_ADMIN_MATCH_REQUESTS, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: props.token,
+        },
+      });
+
+      if (matchResponse.ok) {
+        const matchData = await matchResponse.json();
+
+        // Create a map for quick lookup by mentee ID
+        const consentMap = {};
+
+        // Process each match request
+        matchData.requests.forEach((request) => {
+          if (request.guardianInfo && request.mentee?.id) {
+            // Store the guardian info keyed by mentee ID
+            consentMap[request.mentee.id] = {
+              guardianName: request.guardianInfo.name,
+              guardianEmail: request.guardianInfo.email,
+              guardianPhone: request.guardianInfo.phone,
+              emergencyContact: request.guardianInfo.emergencyContact,
+              consentDate: request.guardianConsentAt,
+              status: request.status,
+              mentorName: request.mentor?.name,
+            };
+          }
+        });
+
+        // Merge consent data with fellows
+        const fellowsWithConsent = menteesList.map((mentee) => {
+          const consent = consentMap[mentee.id] || consentMap[mentee._id];
+          return {
+            ...mentee,
+            consentData: consent || null,
+          };
+        });
+
+        setFellows(fellowsWithConsent);
+      } else {
+        // If match requests fail, just show fellows without consent data
+        setFellows(menteesList);
+      }
+
+      setLastRefreshed(new Date());
     } catch (error) {
-      console.error("Error fetching fellows:", error);
-      alert(
-        "Failed to fetch fellows. Please check if the backend server is running."
-      );
+      console.error("ERROR:", error);
+      alert("Failed to fetch fellows.");
     } finally {
       setIsRefreshing(false);
     }
   }
 
-  // Fetch match requests to extract consent data
-  async function fetchMatchRequests(fellowsList) {
-    try {
-      const response = await fetch(API_ADMIN_MATCH_REQUESTS, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: props.token,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMatchRequests(data.requests || []);
-
-        // Merge consent data from match requests with fellows data
-        const fellowsWithConsentData = fellowsList.map((fellow) => {
-          // Find all match requests for this fellow
-          const fellowRequests = data.requests.filter(
-            (request) => request.mentee?.id === fellow.id
-          );
-
-          // Find a request with guardian info (prioritize confirmed matches)
-          const requestWithConsent = fellowRequests.find(r => r.status === 'confirmed' && r.guardianInfo) ||
-                                    fellowRequests.find(r => r.guardianInfo);
-
-          return {
-            ...fellow,
-            consentData: requestWithConsent ? {
-              guardianName: requestWithConsent.guardianInfo?.name,
-              guardianEmail: requestWithConsent.guardianInfo?.email,
-              guardianPhone: requestWithConsent.guardianInfo?.phone,
-              emergencyContact: requestWithConsent.guardianInfo?.emergencyContact,
-              consentDate: requestWithConsent.guardianConsentAt,
-              status: requestWithConsent.status
-            } : null,
-          };
-        });
-
-        setFellowsWithConsent(fellowsWithConsentData);
-      } else {
-        // If request fails, just use fellows without consent data
-        setFellowsWithConsent(
-          fellowsList.map((fellow) => ({ ...fellow, consentData: null }))
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching match requests for consent data:", error);
-      setFellowsWithConsent(
-        fellowsList.map((fellow) => ({ ...fellow, consentData: null }))
-      );
-    }
-  }
-
   // Reset fellow password
   const handleResetPassword = async (fellowId, fellowName) => {
-    if (!window.confirm(`Are you sure you want to reset the password for ${fellowName}? The new password will be: 0000`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to reset the password for ${fellowName}? The new password will be: 0000`
+      )
+    ) {
       return;
     }
-    
+
     try {
-      const response = await fetch(`${API}/admin/mentee/reset-password/${fellowId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: props.token,
-          "Content-Type": "application/json",
-        },
-      });
-      
+      const response = await fetch(
+        `${API}/admin/mentee/reset-password/${fellowId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: props.token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || "Failed to reset password");
       }
-      
+
       alert(data.message);
     } catch (error) {
       console.error("Error resetting password:", error);
@@ -142,9 +140,9 @@ const AdminFellowsList = (props) => {
     setExpandedRows(newExpanded);
   };
 
-  // New functions for expand/collapse all
+  // Functions for expand/collapse all
   const expandAll = () => {
-    const allFellowIds = new Set(fellowsWithConsent.map((fellow) => fellow.id));
+    const allFellowIds = new Set(fellows.map((fellow) => fellow.id));
     setExpandedRows(allFellowIds);
   };
 
@@ -155,39 +153,39 @@ const AdminFellowsList = (props) => {
   const getMatchStatus = (fellow) => {
     // Check for matched status
     if (fellow.approvedMentors && fellow.approvedMentors.length > 0) {
-      return { 
-        status: "Matched", 
-        color: "bg-green-500", 
+      return {
+        status: "Matched",
+        color: "bg-green-500",
         icon: "✓",
-        description: "Matched with team"
+        description: "Matched with team",
       };
-    } 
+    }
     // Check for pending request
     else if (fellow.requestedMentors && fellow.requestedMentors.length > 0) {
       // Check if we have consent data
-      if (fellow.consentData) {
-        return { 
-          status: "Pending Team", 
-          color: "bg-blue-500", 
+      if (fellow.consentData && fellow.consentData.guardianName) {
+        return {
+          status: "Pending Team",
+          color: "bg-blue-500",
           icon: "⏳",
-          description: "Awaiting team decision"
+          description: "Awaiting team decision",
         };
       } else {
-        return { 
-          status: "Pending Consent", 
-          color: "bg-yellow-500", 
+        return {
+          status: "Pending Consent",
+          color: "bg-yellow-500",
           icon: "📋",
-          description: "Awaiting guardian consent"
+          description: "Awaiting guardian consent",
         };
       }
-    } 
+    }
     // No request made
     else {
-      return { 
-        status: "Not Matched", 
-        color: "bg-gray-500", 
+      return {
+        status: "Not Matched",
+        color: "bg-gray-500",
         icon: "—",
-        description: "No active request"
+        description: "No active request",
       };
     }
   };
@@ -195,7 +193,9 @@ const AdminFellowsList = (props) => {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl text-center py-4 uppercase text-gray-900 dark:text-white">Fellows List</h1>
+        <h1 className="text-4xl text-center py-4 uppercase text-gray-900 dark:text-white">
+          Fellows List
+        </h1>
         <div className="flex items-center gap-4">
           {/* Expand/Collapse All Buttons */}
           <div className="flex gap-2">
@@ -277,7 +277,7 @@ const AdminFellowsList = (props) => {
             </tr>
           </thead>
           <tbody>
-            {fellowsWithConsent.map((fellow) => {
+            {fellows.map((fellow) => {
               const matchStatus = getMatchStatus(fellow);
               return (
                 <React.Fragment key={fellow.id}>
@@ -317,7 +317,12 @@ const AdminFellowsList = (props) => {
                     </td>
                     <td className="px-3 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-center">
                       <button
-                        onClick={() => handleResetPassword(fellow.id, `${fellow.firstName} ${fellow.lastName}`)}
+                        onClick={() =>
+                          handleResetPassword(
+                            fellow.id,
+                            `${fellow.firstName} ${fellow.lastName}`
+                          )
+                        }
                         className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 font-medium text-sm"
                       >
                         Reset Password
@@ -328,17 +333,18 @@ const AdminFellowsList = (props) => {
                         onClick={() => toggleRowExpansion(fellow.id)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm"
                       >
-                        {expandedRows.has(fellow.id)
-                          ? "Hide"
-                          : "Show"}
+                        {expandedRows.has(fellow.id) ? "Hide" : "Show"}
                       </button>
                     </td>
                   </tr>
 
-                  {/* Expanded row with consent form data - FIXED DARK MODE */}
+                  {/* Expanded row with consent form data */}
                   {expandedRows.has(fellow.id) && (
                     <tr className="bg-gray-50 dark:bg-gray-900">
-                      <td colSpan="8" className="px-4 py-4 border-2 border-[#1b0a5f] dark:border-gray-600">
+                      <td
+                        colSpan="8"
+                        className="px-4 py-4 border-2 border-[#1b0a5f] dark:border-gray-600"
+                      >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {/* Fellow Details */}
                           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border dark:border-gray-700">
@@ -434,6 +440,10 @@ const AdminFellowsList = (props) => {
                                         ).toLocaleDateString()
                                       : "Not available"}
                                   </p>
+                                  <p className="text-gray-900 dark:text-gray-100">
+                                    <strong>Matched with:</strong>{" "}
+                                    {fellow.consentData.mentorName || "N/A"}
+                                  </p>
                                 </div>
                               </div>
                             ) : (
@@ -474,7 +484,7 @@ const AdminFellowsList = (props) => {
           </tbody>
         </table>
 
-        {fellowsWithConsent.length === 0 && !isRefreshing && (
+        {fellows.length === 0 && !isRefreshing && (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No fellows found.
           </div>
