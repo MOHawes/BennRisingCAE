@@ -19,6 +19,10 @@ const UprightPage = (props) => {
             Computer coders in the UpRight program built the webpages and team matching program for Bennington Rising. We think they did a superb job and are grateful for their dedication. Take a moment to celebrate their efficient layout and effective functionality.
           </p>
 
+          <p className="text-gray-700 mb-6 text-lg font-semibold">
+            Developed by Nick Russotti and Madeline Hawes
+          </p>
+
           <p className="text-gray-700 mb-8">
             UpRight gives individuals interested in careers in computer coding the real-world, project-based experiences needed to sharpen their skills and advance. ...blurb about UpRight written by UpRight.
           </p>
@@ -69,22 +73,46 @@ const UprightPage = (props) => {
             QR codes for the LinkedIn accounts for the programmers of the Bennington Rising platform
           </p>
 
-          {/* Placeholder for developer info/QR codes */}
+          {/* Developer QR Codes */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-100 p-6 rounded-lg text-center">
-              <div className="w-32 h-32 bg-gray-300 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-gray-500">[QR Code]</span>
+              <div className="w-40 h-40 mx-auto mb-4">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent('http://www.linkedin.com/in/nicholas-russotti-791769348')}`}
+                  alt="Nick Russotti LinkedIn QR Code"
+                  className="w-full h-full"
+                />
               </div>
-              <h3 className="font-semibold">Nick Russotti</h3>
-              <p className="text-sm text-gray-600">LinkedIn Profile</p>
+              <h3 className="font-bold text-xl text-gray-900">Nick Russotti</h3>
+              <p className="text-base text-gray-800 font-semibold mb-2">Full Stack Developer</p>
+              <a 
+                href="http://www.linkedin.com/in/nicholas-russotti-791769348"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1b0a5f] hover:underline font-medium"
+              >
+                View LinkedIn Profile
+              </a>
             </div>
             
             <div className="bg-gray-100 p-6 rounded-lg text-center">
-              <div className="w-32 h-32 bg-gray-300 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-gray-500">[QR Code]</span>
+              <div className="w-40 h-40 mx-auto mb-4">
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent('http://www.linkedin.com/in/madeline-hawes-376314153')}`}
+                  alt="Maddie Hawes LinkedIn QR Code"
+                  className="w-full h-full"
+                />
               </div>
-              <h3 className="font-semibold">Maddie Hawes</h3>
-              <p className="text-sm text-gray-600">LinkedIn Profile</p>
+              <h3 className="font-bold text-xl text-gray-900">Madeline Hawes</h3>
+              <p className="text-base text-gray-800 font-semibold mb-2">Full Stack Developer</p>
+              <a 
+                href="http://www.linkedin.com/in/madeline-hawes-376314153"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#1b0a5f] hover:underline font-medium"
+              >
+                View LinkedIn Profile
+              </a>
             </div>
           </div>
         </div>
