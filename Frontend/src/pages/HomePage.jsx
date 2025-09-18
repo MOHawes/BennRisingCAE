@@ -99,7 +99,7 @@ const HomePage = (props) => {
                     new people, and make an impact in your community!
                     <br />
                     This program requires commitment of approximately{" "}
-                    <u>1 hour</u> per week from now until late December.
+                    <u>1 hour</u> per week from now until late November.
                     <br />
                     Join us in the fun!
                   </p>
@@ -133,16 +133,16 @@ const HomePage = (props) => {
                     “What’s in your food” project statement
                   </h2>
                   <p>
-                    Investigate what's really inside the foods we eat every day.
+                    Join two college students, and investigate what's really inside the foods we eat every day.
                     You'll research food labels, dig into how chemicals affect
                     our health, and turn your findings into something creative
-                    and share your findings with the community. Be a part of
+                    to share with the community at the Bennington Museum. Be a part of
                     hands-on science that helps people make smarter choices.
                   </p>
                 </div>
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
                   <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                    "Kid’s for science!" project statement
+                    "Kids for science!" project statement
                   </h2>
                   <p>
                     Join two college students and co-develop a brief hands-on

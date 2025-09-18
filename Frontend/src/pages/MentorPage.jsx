@@ -26,7 +26,7 @@ const MentorsPage = (props) => {
             You will be part of a three person team including two Bennington
             College Freshman (Team Coordinators) and a local middle or high
             school student (Team Fellow). There will be 16 to 20 teams working
-            on projects in two areas: What's in your food? & Kid's for science!.
+            on projects in two areas: What's in your food? & Kids for science!.
           </p>
 
           <p className="text-gray-700 mb-6">

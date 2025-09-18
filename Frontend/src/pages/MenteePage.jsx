@@ -7,12 +7,10 @@ const MenteePage = (props) => {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#1b0a5f] mb-4">
-
             Bennington Rising Program
           </h1>
           <h1 className="text-4xl font-bold text-[#1b0a5f] mb-4">
             Team Fellows
-
           </h1>
         </div>
         {/* Program Information Section */}
@@ -28,34 +26,41 @@ const MenteePage = (props) => {
             You will be part of a three person team including two Bennington
             College Freshman (Team Coordinators) and a local middle or high
             school student (Team Fellow- that's you!). There will be 16 to 20
-            teams working on projects in two areas: What's in your food? & Kid's
+            teams working on projects in two areas: What's in your food? & Kids
             for science!.
           </p>
 
           <p className="text-gray-700 mb-6">
-            You will need to submit an application to be part of Bennington
-            Rising/ Follow the prompts on the main landing page. Fellows can
-            apply to join your team based upon shared interests or growth
-            opportunities.
+            All MAUHS students are welcome to join. We especially encourage
+            students who are unsure of their abilities to succeed in this
+            program to join and prove to yourself that you are capable. You will
+            have guidance and support (and fun!) every step of the way. Follow
+            the "Instructions for fellows" on the main page to join a team!
           </p>
 
           <p className="text-gray-700 mb-6">
-            The Bennington Rising Program will give you real-world experience in
-            team-based, community programming. Such experience is preferred by
-            employers because it builds teamwork skills, expands communication
-            abilities, and sharpens creative problem solving. This is a unique
-            opportunity to build your resume and deliver real impact in
+            The Bennington Rising Program lets you work in a team while
+            impacting the community. It's a great opportunity for you to learn
+            about college life from your team coordinators. You will also
+            pracrtice important skills like teamwork, communication, and
+            problem-solving. This is a unique opportunity to gain real world
+            experience, build your resume, and deliver tangible impact in
             Bennington.
           </p>
 
           <p className="text-gray-700 mb-6">
-            The program involves two project development events at Bennington
-            College. These events will occur after your school's normal hours .
-            The events will bring your team together for several hours to
-            develop your project. Transportation from your school to Bennington
-            College and back to your school will be provided.
+            The program involves two meetups at Bennington College. These events
+            will be field trips during school. The events will bring your team
+            together to develop your project. Transportation and lunch will be
+            provided. For dates, please visit the{" "}
+            <a
+              href="/important-dates"
+              className="text-[#1b0a5f] hover:underline font-semibold"
+            >
+              "Important dates"
+            </a>{" "}
+            page.
           </p>
-
           <p className="text-gray-700 mb-8">
             The project also involves a community activity, either delivering
             science concepts to an elementary class or presenting at the "What's
@@ -66,56 +71,55 @@ const MenteePage = (props) => {
           <hr className="my-8 border-gray-300" />
 
           <div>
-          <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4">
-            LINKS
-          </h2>
+            <h2 className="text-2xl font-bold text-[#1b0a5f] mb-4">LINKS</h2>
 
-          <ul className="list-disc list-inside space-y-3 text-gray-700">
-            <li>
-              <a 
-                href="/safety-aknowledgement.pdf" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#1b0a5f] hover:underline font-semibold"
-              >
-                Team member safety acknowledgement (PDF)
-              </a>
-            </li>
-            <li>
-              <a 
-                href="/consent-form.pdf" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#1b0a5f] hover:underline font-semibold"
-              >
-                Parent Consent Information Sheet (PDF)
-              </a>
-            </li>
-            <li>Meeting Log - This is mandatory for each team meeting!
-              <ul className="list-disc list-inside ml-6 mt-2">
-                <li>
-                  <a 
-                    href="/meeting-log.xlsx" 
-                    download
-                    className="text-[#1b0a5f] hover:underline font-semibold"
-                  >
-                    Excel format
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="/meeting-log.pdf" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[#1b0a5f] hover:underline font-semibold"
-                  >
-                    PDF format
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
+            <ul className="list-disc list-inside space-y-3 text-gray-700">
+              <li>
+                <a
+                  href="/safety-aknowledgement.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1b0a5f] hover:underline font-semibold"
+                >
+                  Team member safety acknowledgement (PDF)
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/consent-form.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#1b0a5f] hover:underline font-semibold"
+                >
+                  Parent Consent Information Sheet (PDF)
+                </a>
+              </li>
+              <li>
+                Meeting Log - This is mandatory for each team meeting!
+                <ul className="list-disc list-inside ml-6 mt-2">
+                  <li>
+                    <a
+                      href="/meeting-log.xlsx"
+                      download
+                      className="text-[#1b0a5f] hover:underline font-semibold"
+                    >
+                      Excel format
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/meeting-log.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#1b0a5f] hover:underline font-semibold"
+                    >
+                      PDF format
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
 
           {/* Horizontal line separator */}
           <hr className="my-8 border-gray-300" />

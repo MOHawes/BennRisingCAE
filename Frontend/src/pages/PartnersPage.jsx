@@ -110,17 +110,21 @@ const PartnersPage = (props) => {
           </p>
 
           <ul className="list-disc list-inside space-y-3 text-gray-700">
-            <li>Faye MacDonald & Audrey Kim, AmeriCorps VISTAs</li>
+            <li>Faye MacDonald & Audrey Kim - AmeriCorps VISTAs</li>
             <li>Madeline Hawes and Nick Russotti</li>
-            <li>Barbara Alfano, Bennington College</li>
+            <li>Barbara Alfano & Veronika Kostyaeva - Bennington College</li>
             <li>Blake Jones, Bennington College</li>
             <li>Fortune Ononiwu, Bennington College</li>
-            <li>Melissa Senecal, SVSU</li>
+            <li>Melissa Senecal & Holly Anderson - SVSU</li>
             <li>
-              SVMC interns, Clarissa Louis (Williams College) & Iris Nofziger
-              (Colgate University)
+              Clarissa Louis (Williams College) & Iris Nofziger
+              (Colgate University) - SVMC interns
             </li>
             <li>James Trimarchi, SVMC</li>
+            <li>Benjamin Brownell, Bennington Elementary</li>
+            <li>Jordyn Burke, Allison Brigham, Charles Moses, Kelsey Mizell, Amanda Mullen - MAUHS teachers and coordinators</li>
+            <li>John Duval, Lisa Flynn, Arline Mayer, Sarah Thurber - Bennington Elementary</li>
+            <li>Martin Mahoney & Alix Jones - Bennington Museum</li>
           </ul>
         </div>
       </div>

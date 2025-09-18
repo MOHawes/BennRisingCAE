@@ -21,12 +21,11 @@ const ImportantDatesPage = (props) => {
 
           {/* General Program Dates */}
           <ul className="list-disc list-inside space-y-3 text-gray-700 mb-8">
-            <li><strong>9/17-9/23</strong> - Team Coordinator's develop virtual team cards</li>
-            <li><strong>9/22, 12:30-1:30</strong> - Team Coordinator training at Bennington College</li>
-            <li><strong>9/24-10/5</strong> - Open Enrollment for Team Fellows (middle and high school students)</li>
-            <li><strong>Week of 10/13</strong> - (Date TBD) - Kickoff at Bennington College, first team in-person meeting, transportation provided for Fellows, dinner served by Bennington College</li>
-            <li><strong>From 10/13-11/10</strong> - weekly team meetings (minimum 30 minutes) to develop deliverable</li>
-            <li><strong>Week of 11/10</strong> - (Date TBD) - Second Team in-person meeting, transportation provided for Fellows</li>
+            <li><strong>September 17-23</strong> - Team Coordinator's develop team cards online</li>
+            <li><strong>September 22, 12:30-1:30</strong> - Team Coordinator training at Bennington College</li>
+            <li><strong>September 24 - October 10</strong> - Team Fellows sign-up online</li>
+            <li><strong>October 14 - November 14</strong> - Teams meet weekly to develop projects</li>
+            <li><strong>November 14, 12:30-2:00 PM</strong> - Second Team meeting at Bennington College. Transportation and lunch provided.</li>
           </ul>
 
           {/* Horizontal line separator */}
@@ -38,9 +37,9 @@ const ImportantDatesPage = (props) => {
           </h2>
           
           <ul className="list-disc list-inside space-y-3 text-gray-700 mb-8">
-            <li><strong>11/17</strong> - Install What's in my food? posters at Bennington Museum</li>
-            <li><strong>11/20</strong> - What's in my food gala at Bennington Museum</li>
-            <li><strong>11/28</strong> - Remove What's in my food? posters from Bennington Museum</li>
+            <li><strong>November 17</strong> - Gallery of projects opens at Bennington Museum</li>
+            <li><strong>November 20, 5:30 - 7:00 PM</strong> - Gala at Bennington Museum</li>
+            <li><strong>November 28</strong> - Close of gallery</li>
           </ul>
 
           {/* Horizontal line separator */}
@@ -52,7 +51,7 @@ const ImportantDatesPage = (props) => {
           </h2>
           
           <ul className="list-disc list-inside space-y-3 text-gray-700">
-            <li><strong>11/14 through 11/25</strong> - Deliver educational curriculum in Bennington Elementary School classes</li>
+            <li><strong>November 17 - 21</strong> - Deliver educational curriculum in Bennington Elementary School classes</li>
           </ul>
         </div>
       </div>
