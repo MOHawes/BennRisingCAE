@@ -1,15 +1,16 @@
 // showing up on the mentees dashboard
-// TODO: make a match to see if this works
 import React, { useEffect, useState } from "react";
-import { API_VIEW_MENTOR_MATCH } from "../../constants/endpoints";
+import { API_MENTEE_PROFILE_PREVIEW } from "../../constants/endpoints";
 
 const MentorPreview = ({ token }) => {
   const [mentor, setMentor] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMentorData = async () => {
       try {
-        const response = await fetch(API_VIEW_MENTOR_MATCH, {
+        // First get the mentee's profile to find their approved mentors
+        const response = await fetch(API_MENTEE_PROFILE_PREVIEW, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -17,97 +18,122 @@ const MentorPreview = ({ token }) => {
           },
         });
 
-        if (!response.ok) throw new Error("Failed to fetch mentor data");
+        if (!response.ok) throw new Error("Failed to fetch mentee data");
 
         const data = await response.json();
-        console.log("API response:", JSON.stringify(data, null, 2));
+        console.log("Mentee profile data:", data);
 
-        // Example assuming response like { mentor: { name, interest, ... }, mentee: { interest, answer } }
-        if (data.matches && data.matches.length > 0) {
-          setMentor(data.matches[0]); // <-- This match object contains `mentor`, `menteeInterest`, etc.
+        // Check if mentee has approved mentors
+        if (
+          data.user &&
+          data.user.approvedMentors &&
+          data.user.approvedMentors.length > 0
+        ) {
+          // For now, we'll need to get the mentor details from the mentors list
+          // In a real app, you might have a separate endpoint to get mentor details
+          const mentorsResponse = await fetch(
+            "https://bennrisingcae.onrender.com/user/mentor/view-all",
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `${token}`,
+              },
+            }
+          );
+
+          if (mentorsResponse.ok) {
+            const mentorsData = await mentorsResponse.json();
+            const approvedMentorId = data.user.approvedMentors[0];
+            const matchedMentor = mentorsData.mentors.find(
+              (m) => m.id === approvedMentorId
+            );
+
+            if (matchedMentor) {
+              setMentor(matchedMentor);
+            }
+          }
         }
+
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching mentor data:", error);
+        setLoading(false);
       }
     };
 
     if (token) fetchMentorData();
   }, [token]);
 
-  if (!mentor) return <div className="text-center mt-10">Loading...</div>;
+  if (loading)
+    return (
+      <div className="text-center mt-10 text-gray-900 dark:text-white">
+        Loading...
+      </div>
+    );
+
+  if (!mentor) {
+    return (
+      <div className="text-center mt-10 text-gray-900 dark:text-white">
+        <p>No matched team yet</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-          {/* Mentor Info Card */}
-          <div className="bg-sky-50 rounded-2xl p-4 sm:p-6 space-y-1">
-        {/* Mentor's first and last name */}
-        <div className="text-center">
-          <h1
-            className="text-gray-900 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center underline pb-2"
-            style={{ textShadow: "2px 2px 4px rgba(0,0,0,0.15)" }}
-          >
-            {mentor.firstName + " " + mentor.lastName}
-          </h1>
-        </div>
-        <div className="flex items-center justify-center">
-          {/* Project Category */}
-          <p className="font-bold text-xl text-gray-700 mr-2">
-            Project Category:
-          </p>
-          <span className="text-blue-500 text-xl font-bold">
-            {mentor.projectCategory}
-          </span>
-        </div>
-        {/* Profile Photo */}
-        <div className="flex justify-center items-center px-4 pt-6">
+    <div className="space-y-6">
+      {/* Title */}
+      <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+        Your Matched Team
+      </h2>
+
+      {/* Team Coordinators */}
+      <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+        {/* Coordinator 1 */}
+        <div className="flex flex-col items-center">
           <img
             src={
-              mentor.profilePhoto
-                ? mentor.profilePhoto
-                : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              mentor.profilePhoto1 ||
+              mentor.profilePhoto ||
+              "/images/blank-profile-picture-973460_1280.png"
             }
-            alt="Mentor"
-            className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 object-cover rounded-md"
+            alt={`${mentor.firstName}`}
+            className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 shadow-lg"
           />
+          <p className="mt-3 text-lg font-semibold text-gray-900 dark:text-white">
+            {mentor.firstName}
+          </p>
         </div>
-        {/* Interest List */}
-        <div className="flex flex-col items-center text-center py-4">
-          <p className="font-bold text-xl text-gray-700 mb-1">Interests:</p>
-          <ul className="list-disc list-inside text-left text-gray-900 text-lg space-y-1">
-            {mentor.interests.map((interest, index) => (
-              <li key={index}>{interest}</li>
-            ))}
-          </ul>
-        </div>
-        {/* Mentor's question */}
-        <div className="flex flex-col items-center text-center py-4">
-          <p className="font-bold text-xl text-gray-700 mb-1">Question:</p>
-          <span className="text-gray-900 text-xl italic">
-            {mentor.questionToAsk}
-          </span>
+
+        {/* Coordinator 2 */}
+        <div className="flex flex-col items-center">
+          <img
+            src={
+              mentor.profilePhoto2 ||
+              "/images/blank-profile-picture-973460_1280.png"
+            }
+            alt={`${mentor.lastName}`}
+            className="w-32 h-32 rounded-full object-cover border-4 border-blue-500 dark:border-blue-400 shadow-lg"
+          />
+          <p className="mt-3 text-lg font-semibold text-gray-900 dark:text-white">
+            {mentor.lastName}
+          </p>
         </div>
       </div>
-    </>
-    // <div className="px-4 py-6 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-    //   {/* Mentor Name */}
-    //   <h2 className="text-2xl sm:text-3xl font-bold text-purple-700 mb-6 border-b pb-2">
-    //     Matched Mentor: {mentor.firstName} {mentor.lastName}
-    //   </h2>
-    //   <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 space-y-4">
-    //     <div className="flex flex-col sm:flex-row sm:justify-between">
-    //       <span className="font-medium text-gray-700">Interest:</span>
-    //       <span className="text-gray-900">{mentor.interests}</span>
-    //     </div>
-    //     <div className="flex flex-col sm:flex-row sm:justify-between">
-    //       <span className="font-medium text-gray-700">Project:</span>
-    //       <span className="text-gray-900">{mentor.projectCategory}</span>
-    //     </div>
-    //     <div className="flex flex-col sm:flex-row sm:justify-between">
-    //       <span className="font-medium text-gray-700">Question:</span>
-    //       <span className="text-gray-900">{mentor.questionToAsk}</span>
-    //     </div>
-    //   </div>
-    // </div>
+
+      {/* Contact Information */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+          Team Email:
+        </p>
+        <a
+          href={`mailto:${mentor.email}`}
+          className="text-blue-600 dark:text-blue-400 font-medium hover:underline text-lg"
+        >
+          {mentor.email}
+        </a>
+      </div>
+    </div>
   );
 };
 

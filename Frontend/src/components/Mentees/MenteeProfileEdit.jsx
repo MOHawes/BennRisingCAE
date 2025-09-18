@@ -128,15 +128,15 @@ const MenteeProfileEdit = ({
 
   return (
     <>
-      <form className="w-full max-w-5xl bg-sky-50 p-6 rounded-xl mx-auto shadow-lg flex flex-col justify-center items-center">
+      <form className="w-full max-w-5xl bg-sky-50 dark:bg-gray-800 p-6 rounded-xl mx-auto shadow-lg flex flex-col justify-center items-center">
         <fieldset className="fieldset w-full space-y-4">
           {/* Form to update Profile */}
           <div className="flex flex-col items-center w-full">
-            <label className="label-text font-bold text-lg text-center mb-2 mt-2">
+            <label className="label-text font-bold text-lg text-center mb-2 mt-2 text-gray-900 dark:text-white">
               Update First Name Here:
             </label>
             <input
-              className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
+              className="input input-bordered bg-white dark:bg-gray-700 text-black dark:text-white w-full max-w-xl mb-2 mt-2 border-gray-300 dark:border-gray-600"
               value={updatedFirstName}
               onChange={(e) => setUpdatedFirstName(e.target.value)}
               id="firstNameUpdate"
@@ -145,11 +145,11 @@ const MenteeProfileEdit = ({
               type="text"
             />
 
-            <label className="label-text font-bold text-lg text-center mb-2 mt-2">
+            <label className="label-text font-bold text-lg text-center mb-2 mt-2 text-gray-900 dark:text-white">
               Update Last Name Here:
             </label>
             <input
-              className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
+              className="input input-bordered bg-white dark:bg-gray-700 text-black dark:text-white w-full max-w-xl mb-2 mt-2 border-gray-300 dark:border-gray-600"
               value={updatedLastName}
               onChange={(e) => setUpdatedLastName(e.target.value)}
               id="lastNameUpdate"
@@ -158,11 +158,11 @@ const MenteeProfileEdit = ({
               type="text"
             />
 
-            <label className="label-text font-bold text-lg text-center mb-2 mt-2">
+            <label className="label-text font-bold text-lg text-center mb-2 mt-2 text-gray-900 dark:text-white">
               Update Email Here:
             </label>
             <input
-              className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
+              className="input input-bordered bg-white dark:bg-gray-700 text-black dark:text-white w-full max-w-xl mb-2 mt-2 border-gray-300 dark:border-gray-600"
               value={updatedEmail}
               onChange={(e) => setUpdatedEmail(e.target.value)}
               id="emailUpdate"
@@ -171,11 +171,11 @@ const MenteeProfileEdit = ({
               type="text"
             />
 
-            <label className="label-text font-bold text-lg text-center mb-2 mt-2">
+            <label className="label-text font-bold text-lg text-center mb-2 mt-2 text-gray-900 dark:text-white">
               Update Guardian Email Here:
             </label>
             <input
-              className="input input-bordered bg-white text-black w-full max-w-xl mb-2 mt-2"
+              className="input input-bordered bg-white dark:bg-gray-700 text-black dark:text-white w-full max-w-xl mb-2 mt-2 border-gray-300 dark:border-gray-600"
               value={updatedGuardianEmail}
               onChange={(e) => setUpdatedGuardianEmail(e.target.value)}
               id="guardianEmailUpdate"
@@ -186,12 +186,12 @@ const MenteeProfileEdit = ({
 
             {/* collapsible interest section */}
             <div className="w-full max-w-xl mb-4 mt-4">
-              <label className="label-text font-bold text-lg text-center mb-2 block">
+              <label className="label-text font-bold text-lg text-center mb-2 block text-gray-900 dark:text-white">
                 Update Interests (Choose exactly 4):
               </label>
-              <div className="collapse collapse-arrow border border-base-300 bg-white rounded-md">
+              <div className="collapse collapse-arrow border border-base-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md">
                 <input type="checkbox" className="peer" />
-                <div className="collapse-title text-md font-medium">
+                <div className="collapse-title text-md font-medium text-gray-900 dark:text-white">
                   {selectedInterests.length === 0
                     ? "Click to select your interests"
                     : `Selected: ${selectedInterests.length}/4 interests`}
@@ -207,7 +207,9 @@ const MenteeProfileEdit = ({
                             checked={selectedInterests.includes(interest)}
                             onChange={() => handleInterestSelection(interest)}
                           />
-                          <span className="label-text">{interest}</span>
+                          <span className="label-text text-gray-900 dark:text-white">
+                            {interest}
+                          </span>
                         </label>
                       </div>
                     ))}
@@ -216,24 +218,33 @@ const MenteeProfileEdit = ({
               </div>
               {/* Display selected interests outside of collapsible section so they are viewable when collapsed */}
               {selectedInterests.length > 0 && (
-                <div className="mt-2 p-2 bg-blue-100 rounded-md">
-                  <p className="font-semibold">Your selected interests:</p>
+                <div className="mt-2 p-2 bg-blue-100 dark:bg-blue-900/20 rounded-md">
+                  <p className="font-semibold text-gray-900 dark:text-white">
+                    Your selected interests:
+                  </p>
                   <ul className="list-disc pl-5">
                     {selectedInterests.map((interest) => (
-                      <li key={interest}>{interest}</li>
+                      <li
+                        key={interest}
+                        className="text-gray-900 dark:text-gray-200"
+                      >
+                        {interest}
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
               {interestError && (
-                <p className="text-red-500 mt-1">{interestError}</p>
+                <p className="text-red-500 dark:text-red-400 mt-1">
+                  {interestError}
+                </p>
               )}
             </div>
 
             <div className="w-full flex justify-center">
               <button
                 type="button"
-                className="btn btn-soft btn-primary text-lg mt-4"
+                className="btn btn-soft btn-primary text-lg mt-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white"
                 onClick={handleSubmit}
               >
                 Update Profile

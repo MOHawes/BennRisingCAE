@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import SignupButton from "../../custom/SignupButton";
 import { API_LOGIN } from "../../../constants/endpoints";
 
 const Login = (props) => {
@@ -53,10 +52,8 @@ const Login = (props) => {
       // Response Object
       let data = await response.json();
 
-      // Update Token from the App.jsx file
-      console.log(data);
-
       if (data.token) {
+        // Store token
         props.updateToken(data.token);
 
         // Store user info in localStorage for welcome message
@@ -72,7 +69,7 @@ const Login = (props) => {
           );
           setTimeout(() => {
             navigate("/admin");
-          }, 1500); // Navigate after 1.5 seconds
+          }, 1500);
         } else if (data.user.userType === "Mentor") {
           showNotification(
             `Login Successful! as ${data.user.userType}`,

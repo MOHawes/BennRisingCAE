@@ -149,8 +149,8 @@ const HomePage = (props) => {
                     science lesson for elementary school kids. Your team will
                     create an exciting lesson with an activity that sparks
                     curiosity in young learners—while building your skills in
-                    collaborative problem-solving, science communication,
-                    educational design. You and your team will deliver the brief
+                    collaborative problem-solving, science, communication,
+                    and educational design. You and your team will deliver the brief
                     lesson to elementary school kids, showing them that science
                     is fun.
                   </p>

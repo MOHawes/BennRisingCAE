@@ -7,33 +7,57 @@ function Navigationbar(props) {
   const { token } = props;
   const [userName, setUserName] = useState("");
   const [userType, setUserType] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
     if (token) {
       const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        setUserType(user.userType || "");
 
-        if (user.userType === "Mentor") {
-          setUserName(`${user.firstName} & ${user.lastName}`);
-        } else {
-          setUserName(`${user.firstName} ${user.lastName}`);
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          setUserInfo(user);
+          setUserType(user.userType || "");
+
+          if (user.userType === "Mentor") {
+            setUserName(`${user.firstName} & ${user.lastName}`);
+          } else {
+            setUserName(`${user.firstName} ${user.lastName}`);
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
         }
       }
+    } else {
+      // Clear user data when logged out
+      setUserName("");
+      setUserType("");
+      setUserInfo(null);
     }
   }, [token]);
 
   const getProfileLink = () => {
-    if (userType === "Mentor") return "/mentor";
-    if (userType === "Mentee") return "/mentee";
-    if (userType === "Admin") return "/admin";
-    return "/";
+    if (!userInfo || !userInfo.userType) {
+      return "/";
+    }
+
+    const link =
+      userInfo.userType === "Mentor"
+        ? "/mentor"
+        : userInfo.userType === "Mentee"
+        ? "/mentee"
+        : userInfo.userType === "Admin"
+        ? "/admin"
+        : "/";
+
+    return link;
   };
 
   const getProfileButtonText = () => {
-    if (userType === "Admin") return "Admin Dashboard";
+    if (!userInfo || !userInfo.userType) return "My Profile";
+
+    if (userInfo.userType === "Admin") return "Admin Dashboard";
     return "My Profile";
   };
 
@@ -69,7 +93,7 @@ function Navigationbar(props) {
               ))}
               <div className="ml-4 flex items-center space-x-4">
                 {token && userName && (
-                  <span className="text-[#eab246] text-sm normal-case">
+                  <span className="text-[#eab246] text-base normal-case font-semibold">
                     Welcome, {userName}!
                   </span>
                 )}
@@ -119,18 +143,7 @@ function Navigationbar(props) {
             </ul>
           </div>
         </div>
-        <MobileNav
-          token={token}
-          userInfo={
-            userName
-              ? {
-                  firstName: userName.split(" ")[0],
-                  lastName: userName.split(" ").slice(1).join(" "),
-                  userType,
-                }
-              : null
-          }
-        />
+        <MobileNav token={token} userInfo={userInfo} />
       </div>
     </>
   );

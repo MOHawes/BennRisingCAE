@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { API_VIEW_MENTEES } from "../../../constants/endpoints";
+import { API_VIEW_MENTEES, API_ADMIN_MATCH_REQUESTS } from "../../../constants/endpoints";
 import { API } from "../../../constants/endpoints";
 
 const AdminFellowsList = (props) => {
@@ -8,6 +8,7 @@ const AdminFellowsList = (props) => {
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [fellowsWithConsent, setFellowsWithConsent] = useState([]);
+  const [matchRequests, setMatchRequests] = useState([]);
 
   useEffect(() => {
     fetchFellows();
@@ -26,8 +27,8 @@ const AdminFellowsList = (props) => {
       setFellows(data.mentees || []);
       setLastRefreshed(new Date());
 
-      // Also fetch consent form data for fellows
-      fetchConsentData(data.mentees || []);
+      // Fetch match requests to get consent data
+      await fetchMatchRequests(data.mentees || []);
     } catch (error) {
       console.error("Error fetching fellows:", error);
       alert(
@@ -38,10 +39,10 @@ const AdminFellowsList = (props) => {
     }
   }
 
-  // Fetch consent form data for fellows
-  async function fetchConsentData(fellowsList) {
+  // Fetch match requests to extract consent data
+  async function fetchMatchRequests(fellowsList) {
     try {
-        const response = await fetch(`${API}/admin/fellows-consent-data`, {
+      const response = await fetch(API_ADMIN_MATCH_REQUESTS, {
         headers: {
           "Content-Type": "application/json",
           Authorization: props.token,
@@ -49,29 +50,42 @@ const AdminFellowsList = (props) => {
       });
 
       if (response.ok) {
-        const consentData = await response.json();
+        const data = await response.json();
+        setMatchRequests(data.requests || []);
 
-        // Merge consent data with fellows data
+        // Merge consent data from match requests with fellows data
         const fellowsWithConsentData = fellowsList.map((fellow) => {
-          const consentInfo = consentData.find(
-            (consent) => consent.menteeId === fellow.id
+          // Find all match requests for this fellow
+          const fellowRequests = data.requests.filter(
+            (request) => request.mentee?.id === fellow.id
           );
+
+          // Find a request with guardian info (prioritize confirmed matches)
+          const requestWithConsent = fellowRequests.find(r => r.status === 'confirmed' && r.guardianInfo) ||
+                                    fellowRequests.find(r => r.guardianInfo);
+
           return {
             ...fellow,
-            consentData: consentInfo || null,
+            consentData: requestWithConsent ? {
+              guardianName: requestWithConsent.guardianInfo?.name,
+              guardianEmail: requestWithConsent.guardianInfo?.email,
+              guardianPhone: requestWithConsent.guardianInfo?.phone,
+              emergencyContact: requestWithConsent.guardianInfo?.emergencyContact,
+              consentDate: requestWithConsent.guardianConsentAt,
+              status: requestWithConsent.status
+            } : null,
           };
         });
 
         setFellowsWithConsent(fellowsWithConsentData);
       } else {
-        // If consent endpoint doesn't exist yet, just use fellows without consent data
+        // If request fails, just use fellows without consent data
         setFellowsWithConsent(
           fellowsList.map((fellow) => ({ ...fellow, consentData: null }))
         );
       }
     } catch (error) {
-      console.error("Error fetching consent data:", error);
-      // Fallback to just showing fellows without consent data
+      console.error("Error fetching match requests for consent data:", error);
       setFellowsWithConsent(
         fellowsList.map((fellow) => ({ ...fellow, consentData: null }))
       );
@@ -143,7 +157,7 @@ const AdminFellowsList = (props) => {
     if (fellow.approvedMentors && fellow.approvedMentors.length > 0) {
       return { 
         status: "Matched", 
-        color: "bg-green-500", // Reverted to original green
+        color: "bg-green-500", 
         icon: "✓",
         description: "Matched with team"
       };
@@ -154,14 +168,14 @@ const AdminFellowsList = (props) => {
       if (fellow.consentData) {
         return { 
           status: "Pending Team", 
-          color: "bg-blue-500", // Reverted to original blue
+          color: "bg-blue-500", 
           icon: "⏳",
           description: "Awaiting team decision"
         };
       } else {
         return { 
           status: "Pending Consent", 
-          color: "bg-yellow-500", // Reverted to original yellow
+          color: "bg-yellow-500", 
           icon: "📋",
           description: "Awaiting guardian consent"
         };
@@ -171,7 +185,7 @@ const AdminFellowsList = (props) => {
     else {
       return { 
         status: "Not Matched", 
-        color: "bg-gray-500", // Reverted to original gray
+        color: "bg-gray-500", 
         icon: "—",
         description: "No active request"
       };
@@ -181,7 +195,7 @@ const AdminFellowsList = (props) => {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl text-center py-4 uppercase">Fellows List</h1>
+        <h1 className="text-4xl text-center py-4 uppercase text-gray-900 dark:text-white">Fellows List</h1>
         <div className="flex items-center gap-4">
           {/* Expand/Collapse All Buttons */}
           <div className="flex gap-2">
@@ -225,7 +239,7 @@ const AdminFellowsList = (props) => {
           </button>
 
           {lastRefreshed && !isRefreshing && (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               Last updated: {getLastRefreshedText()}
             </span>
           )}
@@ -233,31 +247,31 @@ const AdminFellowsList = (props) => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full bg-white rounded-lg shadow-md">
-          <thead className="sticky top-0 bg-[#1b0a5f]">
-            <tr className="text-left text-white">
-              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+        <table className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <thead className="sticky top-0 bg-[#1b0a5f] dark:bg-gray-700">
+            <tr className="text-left text-white dark:text-gray-200">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                 Fellow Name
               </th>
-              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                 Email
               </th>
-              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                 School
               </th>
-              <th className="px-2 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold text-sm">
+              <th className="px-2 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold text-sm">
                 Project
               </th>
-              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold text-sm">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold text-sm">
                 Guardian Email
               </th>
-              <th className="px-4 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold min-w-[120px]">
+              <th className="px-4 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold min-w-[120px]">
                 Status
               </th>
-              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold">
                 Actions
               </th>
-              <th className="px-3 py-2 border-2 border-[#1b0a5f] text-white text-center font-semibold text-sm">
+              <th className="px-3 py-2 border-2 border-[#1b0a5f] dark:border-gray-600 text-white dark:text-gray-200 text-center font-semibold text-sm">
                 Details
               </th>
             </tr>
@@ -267,17 +281,17 @@ const AdminFellowsList = (props) => {
               const matchStatus = getMatchStatus(fellow);
               return (
                 <React.Fragment key={fellow.id}>
-                  <tr className="hover:bg-blue-100 transition-colors">
-                    <td className="px-3 py-3 border-2 font-bold border-[#1b0a5f]">
+                  <tr className="hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors">
+                    <td className="px-3 py-3 border-2 font-bold border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
                       {fellow.firstName} {fellow.lastName}
                     </td>
-                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-sm">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-sm text-gray-900 dark:text-white">
                       {fellow.email}
                     </td>
-                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-sm">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-sm text-gray-900 dark:text-white">
                       {fellow.school}
                     </td>
-                    <td className="px-2 py-3 border-2 border-[#1b0a5f]">
+                    <td className="px-2 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-gray-900 dark:text-white">
                       <div className="max-w-[100px]">
                         <p
                           className="truncate text-sm"
@@ -287,32 +301,32 @@ const AdminFellowsList = (props) => {
                         </p>
                       </div>
                     </td>
-                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-sm">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-sm text-gray-900 dark:text-white">
                       <div className="max-w-[150px]">
                         <p className="truncate" title={fellow.guardianEmail}>
                           {fellow.guardianEmail}
                         </p>
                       </div>
                     </td>
-                    <td className="px-4 py-3 border-2 border-[#1b0a5f] text-center">
+                    <td className="px-4 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-center">
                       <span
                         className={`px-2 py-1 ${matchStatus.color} text-white rounded-md text-sm`}
                       >
                         {matchStatus.status}
                       </span>
                     </td>
-                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-center">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-center">
                       <button
                         onClick={() => handleResetPassword(fellow.id, `${fellow.firstName} ${fellow.lastName}`)}
-                        className="text-yellow-600 hover:text-yellow-800 font-medium text-sm"
+                        className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 font-medium text-sm"
                       >
                         Reset Password
                       </button>
                     </td>
-                    <td className="px-3 py-3 border-2 border-[#1b0a5f] text-center">
+                    <td className="px-3 py-3 border-2 border-[#1b0a5f] dark:border-gray-600 text-center">
                       <button
                         onClick={() => toggleRowExpansion(fellow.id)}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm"
                       >
                         {expandedRows.has(fellow.id)
                           ? "Hide"
@@ -321,38 +335,38 @@ const AdminFellowsList = (props) => {
                     </td>
                   </tr>
 
-                  {/* Expanded row with consent form data */}
+                  {/* Expanded row with consent form data - FIXED DARK MODE */}
                   {expandedRows.has(fellow.id) && (
-                    <tr className="bg-gray-50">
-                      <td colSpan="8" className="px-4 py-4">
+                    <tr className="bg-gray-50 dark:bg-gray-900">
+                      <td colSpan="8" className="px-4 py-4 border-2 border-[#1b0a5f] dark:border-gray-600">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {/* Fellow Details */}
-                          <div className="bg-white p-4 rounded-lg border">
-                            <h4 className="font-semibold text-gray-900 mb-3 text-lg border-b pb-2">
+                          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border dark:border-gray-700">
+                            <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-lg border-b dark:border-gray-700 pb-2">
                               Fellow Information
                             </h4>
                             <div className="space-y-2">
-                              <p>
+                              <p className="text-gray-900 dark:text-gray-100">
                                 <strong>Full Name:</strong> {fellow.firstName}{" "}
                                 {fellow.lastName}
                               </p>
-                              <p>
+                              <p className="text-gray-900 dark:text-gray-100">
                                 <strong>Email:</strong> {fellow.email}
                               </p>
-                              <p>
+                              <p className="text-gray-900 dark:text-gray-100">
                                 <strong>School:</strong> {fellow.school}
                               </p>
-                              <p>
+                              <p className="text-gray-900 dark:text-gray-100">
                                 <strong>Interests:</strong>{" "}
                                 {fellow.interests
                                   ? fellow.interests.join(", ")
                                   : "None listed"}
                               </p>
-                              <p>
+                              <p className="text-gray-900 dark:text-gray-100">
                                 <strong>Project Interest:</strong>{" "}
                                 {fellow.project || "Not provided"}
                               </p>
-                              <p>
+                              <p className="text-gray-900 dark:text-gray-100">
                                 <strong>Guardian Email:</strong>{" "}
                                 {fellow.guardianEmail}
                               </p>
@@ -360,44 +374,44 @@ const AdminFellowsList = (props) => {
                           </div>
 
                           {/* Consent Form Data */}
-                          <div className="bg-white p-4 rounded-lg border">
-                            <h4 className="font-semibold text-gray-900 mb-3 text-lg border-b pb-2">
+                          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border dark:border-gray-700">
+                            <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-lg border-b dark:border-gray-700 pb-2">
                               Parent Consent Information
                             </h4>
                             {fellow.consentData ? (
                               <div className="space-y-2">
-                                <p>
+                                <p className="text-gray-900 dark:text-gray-100">
                                   <strong>Guardian Name:</strong>{" "}
                                   {fellow.consentData.guardianName ||
                                     "Not provided"}
                                 </p>
-                                <p>
+                                <p className="text-gray-900 dark:text-gray-100">
                                   <strong>Guardian Email:</strong>{" "}
                                   {fellow.consentData.guardianEmail ||
                                     "Not provided"}
                                 </p>
-                                <p>
+                                <p className="text-gray-900 dark:text-gray-100">
                                   <strong>Guardian Phone:</strong>{" "}
                                   {fellow.consentData.guardianPhone ||
                                     "Not provided"}
                                 </p>
 
                                 {fellow.consentData.emergencyContact && (
-                                  <div className="mt-4 pt-3 border-t">
-                                    <h5 className="font-medium text-gray-800 mb-2">
+                                  <div className="mt-4 pt-3 border-t dark:border-gray-700">
+                                    <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
                                       Emergency Contact:
                                     </h5>
-                                    <p>
+                                    <p className="text-gray-900 dark:text-gray-100">
                                       <strong>Name:</strong>{" "}
                                       {fellow.consentData.emergencyContact
                                         .name || "Not provided"}
                                     </p>
-                                    <p>
+                                    <p className="text-gray-900 dark:text-gray-100">
                                       <strong>Phone:</strong>{" "}
                                       {fellow.consentData.emergencyContact
                                         .phone || "Not provided"}
                                     </p>
-                                    <p>
+                                    <p className="text-gray-900 dark:text-gray-100">
                                       <strong>Relationship:</strong>{" "}
                                       {fellow.consentData.emergencyContact
                                         .relation || "Not provided"}
@@ -405,14 +419,14 @@ const AdminFellowsList = (props) => {
                                   </div>
                                 )}
 
-                                <div className="mt-4 pt-3 border-t">
-                                  <p>
+                                <div className="mt-4 pt-3 border-t dark:border-gray-700">
+                                  <p className="text-gray-900 dark:text-gray-100">
                                     <strong>Consent Status:</strong>
                                     <span className="ml-2 px-2 py-1 bg-green-500 text-white rounded text-sm">
                                       Approved
                                     </span>
                                   </p>
-                                  <p>
+                                  <p className="text-gray-900 dark:text-gray-100">
                                     <strong>Consent Date:</strong>{" "}
                                     {fellow.consentData.consentDate
                                       ? new Date(
@@ -424,7 +438,7 @@ const AdminFellowsList = (props) => {
                               </div>
                             ) : (
                               <div className="text-center py-6">
-                                <div className="text-gray-400 mb-2">
+                                <div className="text-gray-400 dark:text-gray-500 mb-2">
                                   <svg
                                     className="w-12 h-12 mx-auto"
                                     fill="none"
@@ -439,10 +453,10 @@ const AdminFellowsList = (props) => {
                                     />
                                   </svg>
                                 </div>
-                                <p className="text-gray-500">
+                                <p className="text-gray-500 dark:text-gray-400">
                                   No consent form data available
                                 </p>
-                                <p className="text-sm text-gray-400 mt-1">
+                                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
                                   Consent form may not have been submitted yet
                                   or fellow may have registered before consent
                                   tracking was implemented.
@@ -461,7 +475,7 @@ const AdminFellowsList = (props) => {
         </table>
 
         {fellowsWithConsent.length === 0 && !isRefreshing && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No fellows found.
           </div>
         )}
