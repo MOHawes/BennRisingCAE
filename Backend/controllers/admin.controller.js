@@ -10,7 +10,10 @@ const Admin = require("../models/admin.model");
 const MatchRequest = require("../models/matchRequest.model");
 
 // Import email service
-const { sendAccountCreatedToMentor } = require("../services/emailService");
+const {
+  sendAccountCreatedToMentor,
+  sendAccountCreatedToAdmin,
+} = require("../services/emailService");
 
 // GET /admin/list-admins - Get all admin accounts
 router.get("/list-admins", validateSession, validateAdmin, async (req, res) => {
@@ -68,6 +71,26 @@ router.post(
 
       await newAdmin.save();
 
+      // Send the account created email
+      try {
+        await sendAccountCreatedToAdmin(
+          email,
+          firstName,
+          password // Send the plain text password before it was hashed
+        );
+        console.log(
+          "Admin account creation email sent successfully to:",
+          email
+        );
+      } catch (emailError) {
+        console.error(
+          "Failed to send admin account creation email:",
+          emailError
+        );
+        // Don't fail the account creation if email fails
+        // But you might want to log this for admin attention
+      }
+
       res.status(201).json({
         message: "Admin created successfully",
         admin: {
@@ -80,6 +103,79 @@ router.post(
       });
     } catch (error) {
       console.error("Error creating admin:", error);
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+// GET /admin/fellows-with-consent - Get all fellows with their consent data
+router.get(
+  "/fellows-with-consent",
+  validateSession,
+  validateAdmin,
+  async (req, res) => {
+    try {
+      // First, get all mentees
+      const mentees = await Mentee.find({});
+
+      // For each mentee, find their match requests to get consent data
+      const menteesWithConsent = await Promise.all(
+        mentees.map(async (mentee) => {
+          // Find all match requests for this mentee
+          const matchRequests = await MatchRequest.find({
+            menteeId: mentee._id,
+          }).populate("mentorId", "firstName lastName projectCategory");
+
+          // Find the most recent confirmed match or any match with guardian info
+          const confirmedMatch = matchRequests.find(
+            (req) => req.status === "confirmed" && req.guardianInfo
+          );
+          const anyMatchWithInfo = matchRequests.find(
+            (req) => req.guardianInfo
+          );
+          const relevantMatch = confirmedMatch || anyMatchWithInfo;
+
+          // Build the mentee object with consent data
+          const menteeData = {
+            id: mentee._id,
+            firstName: mentee.firstName,
+            lastName: mentee.lastName,
+            email: mentee.email,
+            school: mentee.school,
+            interests: mentee.interests || [],
+            project: mentee.project,
+            guardianEmail: mentee.guardianEmail,
+            approvedMentors: mentee.approvedMentors || [],
+            requestedMentors: mentee.requestedMentors || [],
+            ageCheck: mentee.ageCheck,
+            // Add consent data if available
+            consentData:
+              relevantMatch && relevantMatch.guardianInfo
+                ? {
+                    guardianName: relevantMatch.guardianInfo.name,
+                    guardianEmail: relevantMatch.guardianInfo.email,
+                    guardianPhone: relevantMatch.guardianInfo.phone,
+                    emergencyContact:
+                      relevantMatch.guardianInfo.emergencyContact,
+                    consentDate: relevantMatch.guardianConsentAt,
+                    matchStatus: relevantMatch.status,
+                    mentorName: relevantMatch.mentorId
+                      ? `${relevantMatch.mentorId.firstName} ${relevantMatch.mentorId.lastName}`
+                      : "Unknown",
+                  }
+                : null,
+          };
+
+          return menteeData;
+        })
+      );
+
+      res.status(200).json({
+        message: "Fellows with consent data retrieved successfully",
+        mentees: menteesWithConsent,
+      });
+    } catch (error) {
+      console.error("Error fetching fellows with consent data:", error);
       res.status(500).json({ message: error.message });
     }
   }

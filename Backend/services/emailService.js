@@ -55,6 +55,63 @@ const sendEmail = async (to, subject, html) => {
   }
 };
 
+// Email for newly created admin account
+const sendAccountCreatedToAdmin = async (
+  adminEmail,
+  adminFirstName,
+  temporaryPassword,
+  loginUrl = "https://bennrisinglive.vercel.app/login"
+) => {
+  const subject = "Your Bennington Rising Admin Account Has Been Created";
+
+  const html = `
+    <p>Dear ${adminFirstName},</p>
+    
+    <p>An administrator account has been created for you on the Bennington Rising platform. You have been granted admin privileges for the Bennington Rising Program.</p>
+    
+    <p>Please follow the link below to sign in to your account:</p>
+    
+    <div style="background-color: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center;">
+      <h3 style="color: #1976d2; margin-bottom: 15px;">Your Login Information</h3>
+      <p style="margin-bottom: 10px;"><strong>Email:</strong> ${adminEmail}</p>
+      <p style="margin-bottom: 15px;"><strong>Temporary Password:</strong> ${temporaryPassword}</p>
+      <a href="${loginUrl}" style="display: inline-block; background-color: #1976d2; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Sign In Now</a>
+    </div>
+    
+    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0;"><strong>Important Security Notice:</strong> Please change your password immediately after logging in for the first time. As an admin, you have access to sensitive information and system controls.</p>
+    </div>
+    
+    <p><strong>Admin Responsibilities:</strong></p>
+    <ul>
+      <li>Manage Team Coordinator (Mentor) accounts</li>
+      <li>Manage Team Fellow (Mentee) accounts</li>
+      <li>Monitor match requests and program progress</li>
+      <li>Reset passwords for users</li>
+      <li>Create additional admin accounts if needed</li>
+    </ul>
+    
+    <p><strong>Next Steps:</strong></p>
+    <ol>
+      <li>Click the link above or go to ${loginUrl}</li>
+      <li>Sign in with your email and temporary password</li>
+      <li>Change your password immediately for security</li>
+      <li>Familiarize yourself with the admin dashboard</li>
+    </ol>
+    
+    <p>If you have any questions about your admin role or encounter any issues logging in, please contact the system administrator.</p>
+    
+    <p>Welcome to the Bennington Rising administrative team!</p>
+    
+    <p>Best regards,<br>
+    The Bennington Rising Team<br>
+    <a href="mailto:VISTA.svhealthcare@gmail.com">VISTA.svhealthcare@gmail.com</a><br>
+    <a href="mailto:james.trimarchi@svhealthcare.org">james.trimarchi@svhealthcare.org</a></p>
+  `;
+
+  return await sendEmail(adminEmail, subject, html);
+};
+
 // Email for newly created team coordinator account
 const sendAccountCreatedToMentor = async (
   mentorEmail,
@@ -648,6 +705,12 @@ const sendTestEmailSuite = async () => {
     programAnswer: "I want to develop leadership skills",
   };
 
+  const testAdmin = {
+    email: "admin@example.com",
+    firstName: "Sarah",
+    lastName: "Johnson",
+  };
+
   // Send all email types
   const results = [];
 
@@ -657,6 +720,13 @@ const sendTestEmailSuite = async () => {
       testMentor.email,
       testMentor.firstName,
       "TempPass123!"
+    )
+  );
+  results.push(
+    await sendAccountCreatedToAdmin(
+      testAdmin.email,
+      testAdmin.firstName,
+      "AdminPass123!"
     )
   );
   results.push(
@@ -732,6 +802,7 @@ const sendTestEmailSuite = async () => {
 
 module.exports = {
   sendWelcomeEmail,
+  sendAccountCreatedToAdmin,
   sendAccountCreatedToMentor,
   sendMatchUnderReviewToMentor,
   sendConsentNeededToMentee,
