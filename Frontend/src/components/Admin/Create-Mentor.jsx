@@ -7,13 +7,18 @@ export default function CreateMentor(props) {
   const [projectCategory, setProjectCategory] = useState("");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  
+
   // Default password that will be set for all new teams
   const DEFAULT_PASSWORD = "BennRising";
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log("Form submitted:", { firstName, lastName, email, password: DEFAULT_PASSWORD });
+    console.log("Form submitted:", {
+      firstName,
+      lastName,
+      email,
+      password: DEFAULT_PASSWORD,
+    });
     createMentor();
   }
 
@@ -230,10 +235,11 @@ export default function CreateMentor(props) {
               </div>
             </div>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              All teams start with this default password. Teams can update it after logging in.
+              All teams start with this default password. Teams can update it
+              after logging in.
             </p>
           </div>
-          {/* Project Category - UPDATED */}
+          {/* Project Category - FIXED WITH APOSTROPHE */}
           <div>
             <label
               htmlFor="projectCategory"
@@ -250,7 +256,7 @@ export default function CreateMentor(props) {
             >
               <option value="">Select a category</option>
               <option value="What's in your food">What's in your food</option>
-              <option value="Kids for science!">Kids for science!</option>
+              <option value="Kid's for science!">Kid's for science!</option>
             </select>
           </div>
           <button
