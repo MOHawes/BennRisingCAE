@@ -9,6 +9,9 @@ const AdminManagement = ({ token }) => {
   const [fetchError, setFetchError] = useState(false);
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(true);
 
+  // Default password for new admin accounts
+  const DEFAULT_ADMIN_PASSWORD = "Admin2025";
+
   // Password change form state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -23,7 +26,6 @@ const AdminManagement = ({ token }) => {
     firstName: "",
     lastName: "",
     email: "",
-    password: "",
   });
 
   // Fetch all admins
@@ -103,7 +105,10 @@ const AdminManagement = ({ token }) => {
           Authorization: token,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newAdmin),
+        body: JSON.stringify({
+          ...newAdmin,
+          password: DEFAULT_ADMIN_PASSWORD, // Use default password
+        }),
       });
 
       const data = await response.json();
@@ -118,9 +123,11 @@ const AdminManagement = ({ token }) => {
         throw new Error(data.message || "Failed to create admin");
       }
 
-      alert("Admin created successfully!");
+      alert(
+        `Admin created successfully! Default password is: ${DEFAULT_ADMIN_PASSWORD}`
+      );
       setShowCreateForm(false);
-      setNewAdmin({ firstName: "", lastName: "", email: "", password: "" });
+      setNewAdmin({ firstName: "", lastName: "", email: "" });
       fetchAdmins(); // Refresh the list
     } catch (error) {
       console.error("Error creating admin:", error);
@@ -438,20 +445,34 @@ const AdminManagement = ({ token }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Password
+                Default Password
               </label>
-              <input
-                type="password"
-                required
-                minLength="4"
-                value={newAdmin.password}
-                onChange={(e) =>
-                  setNewAdmin({ ...newAdmin, password: e.target.value })
-                }
-                className="w-full p-2 border rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={DEFAULT_ADMIN_PASSWORD}
+                  readOnly
+                  className="w-full p-2 border rounded-md bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Minimum 4 characters
+                All new admin accounts start with this password. The admin
+                should change it after first login.
               </p>
             </div>
             <button
@@ -545,9 +566,9 @@ const AdminManagement = ({ token }) => {
 
       <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
         <p className="text-sm text-blue-700 dark:text-blue-300">
-          <strong>Note:</strong> Reset passwords are "0000" for mentors/fellows
-          and "Admin0000" for admins. Users should change their password after
-          logging in with the reset password.
+          <strong>Note:</strong> Reset passwords are "0000" for mentors/fellows,
+          "Admin0000" for admin resets, and "{DEFAULT_ADMIN_PASSWORD}" for new
+          admin accounts. Users should change their password after logging in.
         </p>
       </div>
     </div>
