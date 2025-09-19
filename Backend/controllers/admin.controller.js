@@ -118,8 +118,13 @@ router.get(
       // Get all mentees - consent data is now stored directly on mentee
       const mentees = await Mentee.find({});
 
+      // Log to debug
+      console.log(`Found ${mentees.length} mentees`);
+      const menteesWithConsent = mentees.filter(m => m.hasParentConsent);
+      console.log(`${menteesWithConsent.length} have parent consent`);
+
       // Format the response
-      const menteesWithConsent = mentees.map((mentee) => {
+      const menteesWithConsentFormatted = mentees.map((mentee) => {
         // Build the mentee object with consent data
         const menteeData = {
           id: mentee._id,
@@ -135,17 +140,7 @@ router.get(
           ageCheck: mentee.ageCheck,
           hasParentConsent: mentee.hasParentConsent || false,
           // Add consent data if available
-          consentData:
-            mentee.hasParentConsent && mentee.parentConsentData
-              ? {
-                  guardianName: mentee.parentConsentData.guardianName,
-                  guardianEmail: mentee.parentConsentData.guardianEmail,
-                  guardianPhone: mentee.parentConsentData.guardianPhone,
-                  emergencyContact: mentee.parentConsentData.emergencyContact,
-                  consentDate: mentee.parentConsentData.consentDate,
-                  matchedMentorName: mentee.parentConsentData.matchedMentorName,
-                }
-              : null,
+          consentData: mentee.parentConsentData || null
         };
 
         return menteeData;
@@ -153,7 +148,7 @@ router.get(
 
       res.status(200).json({
         message: "Fellows with consent data retrieved successfully",
-        mentees: menteesWithConsent,
+        mentees: menteesWithConsentFormatted,
       });
     } catch (error) {
       console.error("Error fetching fellows with consent data:", error);
@@ -594,5 +589,6 @@ router.get(
     }
   }
 );
+
 // Export the router
 module.exports = router;

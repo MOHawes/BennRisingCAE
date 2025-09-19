@@ -335,7 +335,7 @@ router.post("/consent/:matchRequestId", async (req, res) => {
       matchRequest.guardianConsentAt = new Date();
       matchRequest.guardianConsentReceived = true;
 
-      // Store guardian and emergency contact information
+      // Store guardian and emergency contact information in MatchRequest
       matchRequest.guardianInfo = {
         name: guardianName,
         email: guardianEmail,
@@ -349,10 +349,12 @@ router.post("/consent/:matchRequestId", async (req, res) => {
 
       await matchRequest.save();
 
-      // Update the mentee with consent data
+      // Update the mentee with consent data - Use findOneAndUpdate with specific options
       const mentorName = `${matchRequest.mentorId.firstName} ${matchRequest.mentorId.lastName}`;
 
-      await Mentee.findByIdAndUpdate(matchRequest.menteeId._id, {
+      // Log what we're trying to update
+      console.log("Updating mentee:", matchRequest.menteeId._id);
+      console.log("With consent data:", {
         hasParentConsent: true,
         parentConsentData: {
           guardianName: guardianName,
@@ -367,6 +369,39 @@ router.post("/consent/:matchRequestId", async (req, res) => {
           consentFormId: matchRequest._id,
           matchedMentorName: mentorName,
         },
+      });
+
+      const updatedMentee = await Mentee.findOneAndUpdate(
+        { _id: matchRequest.menteeId._id },
+        {
+          $set: {
+            hasParentConsent: true,
+            parentConsentData: {
+              guardianName: guardianName,
+              guardianEmail: guardianEmail,
+              guardianPhone: guardianPhone,
+              emergencyContact: {
+                name: emergencyContactName,
+                phone: emergencyContactPhone,
+                relation: emergencyContactRelation,
+              },
+              consentDate: new Date(),
+              consentFormId: matchRequest._id,
+              matchedMentorName: mentorName,
+            },
+          },
+        },
+        {
+          new: true,
+          runValidators: false,
+          strict: false, // Allow fields not in schema temporarily
+        }
+      );
+
+      console.log("Updated mentee result:", updatedMentee);
+      console.log("Has consent fields?", {
+        hasParentConsent: updatedMentee?.hasParentConsent,
+        hasParentConsentData: !!updatedMentee?.parentConsentData,
       });
 
       // Send email #7 to mentee - Consent Approved

@@ -23,10 +23,6 @@ const MenteeSchema = new mongoose.Schema({
     default: "Mentee",
     immutable: true,
   },
-  // ! arrays for tracking matches and requests
-  // ref allows .populate() to be used in controllers - tells mongoose which model to use
-
-  // Mentee specific fields:
   requestedMentors: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -41,7 +37,7 @@ const MenteeSchema = new mongoose.Schema({
   ],
   age: {
     type: Number,
-    required: false, // Initially false for basic signup, but is required for profile completion
+    required: false,
   },
   interests: [
     {
@@ -82,49 +78,48 @@ const MenteeSchema = new mongoose.Schema({
     enum: ["What's in your food", "Kid's for science!"],
     required: false,
   },
-  // Make sure user is over age of 13
   ageCheck: {
     type: Boolean,
     required: true,
     default: false,
   },
-  // Add consent data fields
+  // Consent fields - Make sure they're at the root level
   hasParentConsent: {
     type: Boolean,
     default: false,
   },
   parentConsentData: {
-    guardianName: {
-      type: String,
-    },
-    guardianEmail: {
-      type: String,
-    },
-    guardianPhone: {
-      type: String,
-    },
-    emergencyContact: {
-      name: {
-        type: String,
+    type: {
+      guardianName: { type: String },
+      guardianEmail: { type: String },
+      guardianPhone: { type: String },
+      emergencyContact: {
+        name: { type: String },
+        phone: { type: String },
+        relation: { type: String }
       },
-      phone: {
-        type: String,
+      consentDate: { type: Date },
+      consentFormId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "MatchRequest",
       },
-      relation: {
-        type: String,
-      }
+      matchedMentorName: { type: String }
     },
-    consentDate: {
-      type: Date,
-    },
-    consentFormId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "MatchRequest",
-    },
-    matchedMentorName: {
-      type: String,
-    }
-  },
+    default: null
+  }
+}, {
+  // Add these options to ensure all fields are saved
+  strict: false,
+  timestamps: true
+});
+
+// Add a pre-save hook to log what's being saved
+MenteeSchema.pre('save', function(next) {
+  console.log('Saving mentee with consent fields:', {
+    hasParentConsent: this.hasParentConsent,
+    hasParentConsentData: !!this.parentConsentData
+  });
+  next();
 });
 
 module.exports = mongoose.model("Mentee", MenteeSchema);

@@ -4,14 +4,16 @@ export default function CreateMentor(props) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [projectCategory, setProjectCategory] = useState("");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  
+  // Default password that will be set for all new teams
+  const DEFAULT_PASSWORD = "BennRising";
 
   function handleSubmit(event) {
     event.preventDefault();
-    console.log("Form submitted:", { firstName, lastName, email, password });
+    console.log("Form submitted:", { firstName, lastName, email, password: DEFAULT_PASSWORD });
     createMentor();
   }
 
@@ -34,7 +36,7 @@ export default function CreateMentor(props) {
         firstName: firstName,
         lastName: lastName,
         email: email,
-        password: password,
+        password: DEFAULT_PASSWORD, // Always use the default password
         userType: "Mentor",
         projectCategory: projectCategory,
       });
@@ -67,7 +69,6 @@ export default function CreateMentor(props) {
       setFirstName("");
       setLastName("");
       setEmail("");
-      setPassword("");
       setProjectCategory("");
 
       // Refresh list of mentors
@@ -196,23 +197,41 @@ export default function CreateMentor(props) {
               className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] dark:focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
             />
           </div>
-          {/* Password */}
+          {/* Password - Read Only */}
           <div>
             <label
               htmlFor="password"
               className="block text-sm font-medium text-[#1b0a5f] dark:text-gray-200"
             >
-              Password:
+              Default Password:
             </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Password"
-              className="w-full mt-1 p-2 border border-[#6c50e1] dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-[#6c50e1] dark:focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                id="password"
+                value={DEFAULT_PASSWORD}
+                readOnly
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-500 rounded-md bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              All teams start with this default password. Teams can update it after logging in.
+            </p>
           </div>
           {/* Project Category - UPDATED */}
           <div>

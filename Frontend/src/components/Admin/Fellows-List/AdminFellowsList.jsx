@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  API_VIEW_MENTEES,
-  API_ADMIN_MATCH_REQUESTS,
-} from "../../../constants/endpoints";
+import { API_VIEW_MENTEES } from "../../../constants/endpoints";
 import { API } from "../../../constants/endpoints";
 
 const AdminFellowsList = (props) => {
@@ -18,9 +15,8 @@ const AdminFellowsList = (props) => {
   async function fetchFellows() {
     setIsRefreshing(true);
     try {
-      console.log("=== STARTING FETCH FELLOWS ===");
-
-      // First, get all mentees
+      console.log("=== FETCHING ALL FELLOWS ===");
+      
       const response = await fetch(API_VIEW_MENTEES, {
         headers: {
           "Content-Type": "application/json",
@@ -28,104 +24,30 @@ const AdminFellowsList = (props) => {
         },
       });
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch fellows");
+      }
+
       const data = await response.json();
-      console.log("Mentees response:", data);
-      const menteesList = data.mentees || [];
-      console.log(`Found ${menteesList.length} mentees`);
-
-      // Get match requests to find consent data
-      const matchResponse = await fetch(API_ADMIN_MATCH_REQUESTS, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: props.token,
-        },
-      });
-
-      if (matchResponse.ok) {
-        const matchData = await matchResponse.json();
-        console.log("Match requests response:", matchData);
-        console.log(`Found ${matchData.requests.length} match requests`);
-
-        // Log requests with guardian info
-        const requestsWithGuardianInfo = matchData.requests.filter(
-          (r) => r.guardianInfo
-        );
-        console.log(
-          `${requestsWithGuardianInfo.length} requests have guardian info`
-        );
-
-        if (requestsWithGuardianInfo.length > 0) {
-          console.log(
-            "Sample guardian info:",
-            requestsWithGuardianInfo[0].guardianInfo
-          );
+      console.log("Fellows response:", data);
+      
+      if (data.mentees) {
+        setFellows(data.mentees);
+        console.log(`Found ${data.mentees.length} fellows`);
+        
+        // Log how many have consent data
+        const fellowsWithConsent = data.mentees.filter(f => f.hasParentConsent);
+        console.log(`${fellowsWithConsent.length} fellows have parent consent`);
+        
+        // Log a sample of consent data if available
+        if (fellowsWithConsent.length > 0) {
+          console.log("Sample consent data:", fellowsWithConsent[0].consentData);
         }
-
-        // Create a map for quick lookup by mentee ID
-        const consentMap = {};
-
-        // Process each match request
-        matchData.requests.forEach((request) => {
-          console.log("Processing request:", {
-            id: request.id,
-            menteeId: request.mentee?.id,
-            hasGuardianInfo: !!request.guardianInfo,
-            status: request.status,
-          });
-
-          if (request.guardianInfo && request.mentee?.id) {
-            console.log(`Mapping consent for mentee ${request.mentee.id}`);
-            // Store the guardian info keyed by mentee ID
-            consentMap[request.mentee.id] = {
-              guardianName: request.guardianInfo.name,
-              guardianEmail: request.guardianInfo.email,
-              guardianPhone: request.guardianInfo.phone,
-              emergencyContact: request.guardianInfo.emergencyContact,
-              consentDate: request.guardianConsentAt,
-              status: request.status,
-              mentorName: request.mentor?.name,
-            };
-          }
-        });
-
-        console.log("Consent map:", consentMap);
-        console.log(
-          `Consent map has ${Object.keys(consentMap).length} entries`
-        );
-
-        // Merge consent data with fellows
-        const fellowsWithConsent = menteesList.map((mentee) => {
-          const menteeId = mentee.id || mentee._id;
-          const consent = consentMap[menteeId];
-
-          if (consent) {
-            console.log(
-              `Found consent for mentee ${mentee.firstName} ${mentee.lastName}`
-            );
-          }
-
-          return {
-            ...mentee,
-            consentData: consent || null,
-          };
-        });
-
-        console.log("Fellows with consent:", fellowsWithConsent);
-        console.log(
-          `${
-            fellowsWithConsent.filter((f) => f.consentData).length
-          } fellows have consent data`
-        );
-
-        setFellows(fellowsWithConsent);
-      } else {
-        console.error("Match requests response not OK:", matchResponse.status);
-        setFellows(menteesList);
       }
 
       setLastRefreshed(new Date());
     } catch (error) {
-      console.error("ERROR:", error);
+      console.error("Error fetching fellows:", error);
       alert("Failed to fetch fellows.");
     } finally {
       setIsRefreshing(false);
@@ -212,7 +134,7 @@ const AdminFellowsList = (props) => {
     // Check for pending request
     else if (fellow.requestedMentors && fellow.requestedMentors.length > 0) {
       // Check if we have consent data
-      if (fellow.consentData && fellow.consentData.guardianName) {
+      if (fellow.hasParentConsent) {
         return {
           status: "Pending Team",
           color: "bg-blue-500",
@@ -329,15 +251,6 @@ const AdminFellowsList = (props) => {
               const matchStatus = getMatchStatus(fellow);
               const isExpanded = expandedRows.has(fellow.id);
 
-              console.log(
-                `Rendering fellow ${fellow.firstName} ${fellow.lastName}:`,
-                {
-                  hasConsentData: !!fellow.consentData,
-                  consentData: fellow.consentData,
-                  isExpanded: isExpanded,
-                }
-              );
-
               return (
                 <React.Fragment key={fellow.id}>
                   <tr className="hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors">
@@ -423,7 +336,7 @@ const AdminFellowsList = (props) => {
                               </p>
                               <p className="text-gray-900 dark:text-gray-100">
                                 <strong>Interests:</strong>{" "}
-                                {fellow.interests
+                                {fellow.interests && fellow.interests.length > 0
                                   ? fellow.interests.join(", ")
                                   : "None listed"}
                               </p>
@@ -443,7 +356,7 @@ const AdminFellowsList = (props) => {
                             <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-lg border-b dark:border-gray-700 pb-2">
                               Parent Consent Information
                             </h4>
-                            {fellow.consentData ? (
+                            {fellow.hasParentConsent && fellow.consentData ? (
                               <div className="space-y-2">
                                 <p className="text-gray-900 dark:text-gray-100">
                                   <strong>Guardian Name:</strong>{" "}
@@ -501,7 +414,7 @@ const AdminFellowsList = (props) => {
                                   </p>
                                   <p className="text-gray-900 dark:text-gray-100">
                                     <strong>Matched with:</strong>{" "}
-                                    {fellow.consentData.mentorName || "N/A"}
+                                    {fellow.consentData.matchedMentorName || "N/A"}
                                   </p>
                                 </div>
                               </div>
@@ -527,8 +440,6 @@ const AdminFellowsList = (props) => {
                                 </p>
                                 <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
                                   Consent form may not have been submitted yet
-                                  or fellow may have registered before consent
-                                  tracking was implemented.
                                 </p>
                               </div>
                             )}

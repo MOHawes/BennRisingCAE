@@ -56,12 +56,12 @@ router.post("/register", async (req, res) => {
             "You must confirm that you are over 13 years old to register as a mentee",
         });
       }
-      // // Check for guardian email
-      // if (!guardianEmail) {
-      //   return res.status(400).json({
-      //     message: "Guardian email is required",
-      //   });
-      // }
+      // Check for guardian email
+      if (!guardianEmail) {
+        return res.status(400).json({
+          message: "Guardian email is required",
+        });
+      }
       // Check for valid school selection
       const validSchools = [
         "Grace Christian School",
@@ -103,6 +103,7 @@ router.post("/register", async (req, res) => {
           : "",
       });
     } else {
+      // IMPORTANT: Create mentee with ALL fields including consent fields
       user = new Mentee({
         firstName: firstName,
         lastName: lastName,
@@ -115,10 +116,39 @@ router.post("/register", async (req, res) => {
         project: project,
         approvedMentors: [], // empty array to push accepted mentor into
         requestedMentors: [], // empty array to keep track of match request
+        // EXPLICITLY SET CONSENT FIELDS
+        hasParentConsent: false,
+        parentConsentData: null,
+      });
+
+      // Log what we're creating
+      console.log("Creating new mentee with fields:", {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        hasParentConsent: user.hasParentConsent,
+        parentConsentData: user.parentConsentData,
       });
     }
     //  Save the new user in the database and store the response in a variable (saved user)
     const newUser = await user.save();
+
+    // Log the saved mentee to verify fields
+    if (userType === "Mentee") {
+      console.log("Saved mentee document:", {
+        id: newUser._id,
+        hasParentConsent: newUser.hasParentConsent,
+        hasParentConsentData: !!newUser.parentConsentData,
+      });
+
+      // Verify by fetching the document again
+      const verifyMentee = await Mentee.findById(newUser._id);
+      console.log("Verification - Mentee from DB:", {
+        id: verifyMentee._id,
+        hasParentConsent: verifyMentee.hasParentConsent,
+        hasParentConsentData: !!verifyMentee.parentConsentData,
+      });
+    }
 
     // Send welcome email to new mentees
     if (userType === "Mentee") {
@@ -798,11 +828,9 @@ router.put(
 
       // error if update was unsuccessful
       if (!updatedMentee) {
-        return res
-          .status(404)
-          .json({
-            message: "Error updating mentee profile - please try again",
-          });
+        return res.status(404).json({
+          message: "Error updating mentee profile - please try again",
+        });
       }
       // success
       res.status(200).json({
