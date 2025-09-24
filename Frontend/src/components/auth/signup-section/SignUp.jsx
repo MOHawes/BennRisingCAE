@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { API_REGISTER } from "../../../constants/endpoints";
 
 const SignUp = (props) => {
@@ -11,6 +12,14 @@ const SignUp = (props) => {
   const [guardianEmail, setGuardianEmail] = useState("");
   const [school, setSchool] = useState("");
   const [ageCheck, setAgeCheck] = useState(false);
+
+  // Navigation hook
+  const navigate = useNavigate();
+
+  // Notification states
+  const [showMessage, setShowMessage] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   // Interest selection related states
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -33,6 +42,18 @@ const SignUp = (props) => {
     "Politics",
     "Movies",
   ];
+
+  // Function to show notification and auto hide
+  const showNotification = (msg, type = "success") => {
+    setMessage(msg);
+    setMessageType(type);
+    setShowMessage(true);
+
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      setShowMessage(false);
+    }, 3000);
+  };
 
   // Handle when user clicks on an interest checkbox
   const handleInterestSelection = (interest) => {
@@ -101,22 +122,59 @@ const SignUp = (props) => {
 
       // Handle response
       if (data.token) {
+        // Store token
         props.updateToken(data.token);
-        window.location.href = "/mentee";
-        alert(`You were successfully registered! Welcome, ${firstName}!`);
+
+        // Store user info in localStorage (same as login)
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        // Show success notification
+        showNotification(
+          `You were successfully registered! Welcome, ${firstName}!`,
+          "success"
+        );
+
+        // Redirect to mentee dashboard after 1.5 seconds
+        setTimeout(() => {
+          navigate("/mentee");
+        }, 1500);
       } else {
-        alert(
+        showNotification(
           data.message ||
-            "Registration failed. Please make sure required fields are filled out and try again."
+            "Registration failed. Please make sure required fields are filled out and try again.",
+          "error"
         );
       }
     } catch (error) {
       console.error(error);
+      showNotification(
+        "An error occurred during registration. Please try again.",
+        "error"
+      );
     }
   };
 
   return (
     <>
+      {/* Notification Message */}
+      {showMessage && (
+        <div
+          className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-opacity duration-500 ${
+            showMessage ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <div
+            className={`px-6 py-3 rounded-md shadow-lg text-white ${
+              messageType === "success" ? "bg-green-600" : "bg-red-600"
+            }`}
+          >
+            {message}
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-center items-center p-4">
         <div className="bg-sky-100 w-full max-w-[34.375rem] p-8 rounded-sm flex flex-col justify-center items-center shadow-2xl text-black">
           {" "}
@@ -303,7 +361,7 @@ const SignUp = (props) => {
         </div>
       </div>
     </>
-  );
+  );git
 };
 
 export default SignUp;
