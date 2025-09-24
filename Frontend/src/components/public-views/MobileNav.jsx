@@ -55,68 +55,84 @@ const MobileNav = ({ token, userInfo }) => {
       <div
         className={
           nav
-            ? "flex flex-col items-center justify-center fixed bg-[#1b0a5f] top-0 left-0 w-full h-full z-20"
+            ? "flex flex-col items-center fixed bg-[#1b0a5f] top-0 left-0 w-full h-full z-20 overflow-y-auto"
             : "hidden"
         }
       >
-        <h2 className="text-white text-4xl text-center py-12">
-          Benn Rising Mentorship Program
-        </h2>
+        <div className="w-full max-w-lg mx-auto py-8 px-4">
+          <h2 className="text-white text-3xl text-center mb-6">
+            Benn Rising Mentorship Program
+          </h2>
 
-        {token && userInfo && (
-          <p className="text-[#eab246] text-xl font-medium normal-case mb-4">
-            {getWelcomeMessage()}
-          </p>
-        )}
-
-        <ul className="w-full flex flex-col items-center justify-center gap-4 text-white text-2xl font-semibold">
-          {navMenu.map((menu) => (
-            <a
-              key={menu.name}
-              className="py-8 w-full hover:opacity-30 text-center"
-              href={menu.href}
-              onClick={() => setNav(false)}
-            >
-              <li>{menu.name}</li>
-            </a>
-          ))}
-
-          {token ? (
-            <>
-              <a
-                className="py-8 w-full hover:opacity-30 text-center"
-                href={getProfileLink()}
-                onClick={() => setNav(false)}
-              >
-                <li>{getProfileButtonText()}</li>
-              </a>
-              <a
-                className="py-8 w-full hover:opacity-30 text-center"
-                href="/logout"
-                onClick={() => setNav(false)}
-              >
-                <li>Logout</li>
-              </a>
-            </>
-          ) : (
-            <>
-              <a
-                className="py-8 w-full hover:opacity-30 text-center"
-                href="/signup"
-                onClick={() => setNav(false)}
-              >
-                <li>Sign Up</li>
-              </a>
-              <a
-                className="py-8 w-full hover:opacity-30 text-center"
-                href="/login"
-                onClick={() => setNav(false)}
-              >
-                <li>Login</li>
-              </a>
-            </>
+          {token && userInfo && (
+            <p className="text-[#eab246] text-lg font-medium normal-case mb-6 text-center">
+              {getWelcomeMessage()}
+            </p>
           )}
-        </ul>
+
+          <ul className="w-full flex flex-col items-center gap-2 text-white text-xl font-semibold">
+            {navMenu.map((menu) => (
+              <li key={menu.name} className="w-full">
+                <a
+                  className="block py-4 w-full hover:bg-white hover:bg-opacity-10 text-center transition-colors"
+                  href={menu.href}
+                  onClick={() => setNav(false)}
+                >
+                  {menu.name}
+                </a>
+              </li>
+            ))}
+
+            {/* Divider */}
+            <li className="w-full my-2">
+              <hr className="border-t border-white opacity-20" />
+            </li>
+
+            {token ? (
+              <>
+                <li className="w-full">
+                  <a
+                    className="block py-4 w-full hover:bg-white hover:bg-opacity-10 text-center transition-colors"
+                    href={getProfileLink()}
+                    onClick={() => setNav(false)}
+                  >
+                    {getProfileButtonText()}
+                  </a>
+                </li>
+                <li className="w-full">
+                  <a
+                    className="block py-4 w-full hover:bg-white hover:bg-opacity-10 text-center transition-colors"
+                    href="/logout"
+                    onClick={() => setNav(false)}
+                  >
+                    Logout
+                  </a>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="w-full">
+                  <a
+                    className="block py-4 w-full bg-[#eab246] hover:bg-[#d4a03d] text-white text-center transition-colors rounded-md"
+                    href="/signup"
+                    onClick={() => setNav(false)}
+                  >
+                    Sign Up
+                  </a>
+                </li>
+                <li className="w-full">
+                  <a
+                    className="block py-4 w-full bg-[#eab246] hover:bg-[#d4a03d] text-white text-center transition-colors rounded-md"
+                    href="/login"
+                    onClick={() => setNav(false)}
+                  >
+                    Login
+                  </a>
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
       </div>
     </div>
   );

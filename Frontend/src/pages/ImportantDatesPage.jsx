@@ -24,6 +24,7 @@ const ImportantDatesPage = (props) => {
             <li><strong>September 17-23</strong> - Team Coordinator's develop team cards online</li>
             <li><strong>September 22, 12:30-1:30</strong> - Team Coordinator training at Bennington College</li>
             <li><strong>September 24 - October 10</strong> - Team Fellows sign-up online</li>
+            <li><strong>October 14, 12:30-2:00 PM</strong> - First team meeting at Bennington College. Transportation and lunch provided.</li>
             <li><strong>October 14 - November 14</strong> - Teams meet weekly to develop projects</li>
             <li><strong>November 14, 12:30-2:00 PM</strong> - Second Team meeting at Bennington College. Transportation and lunch provided.</li>
           </ul>
