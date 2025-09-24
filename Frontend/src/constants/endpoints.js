@@ -63,3 +63,10 @@ export const API_ADMIN_CHANGE_PASSWORD = `${API}/admin/change-password`;
 
 // Admin consent data endpoint
 export const API_ADMIN_FELLOWS_WITH_CONSENT = `${API}/admin/fellows-with-consent`;
+
+// Page content/editing endpoints
+export const API_CONTENT_GET = `${API}/content`;
+export const API_CONTENT_UPDATE = `${API}/content`;
+export const API_CONTENT_BULK = `${API}/content`;
+export const API_CONTENT_HISTORY = `${API}/content`;
+export const API_CONTENT_REVERT = `${API}/content`;

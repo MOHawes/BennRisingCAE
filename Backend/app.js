@@ -6,6 +6,7 @@ const app = express();
 const userController = require("./controllers/user.controller");
 const matchController = require("./controllers/match.controller");
 const adminController = require("./controllers/admin.controller");
+const contentController = require("./controllers/content.controller");
 const { sendTestEmailSuite } = require("./services/emailService");
 
 // ! Connecting to the Database
@@ -49,6 +50,7 @@ app.options('*', cors(corsOptions));
 app.use("/user", userController);
 app.use("/match", matchController);
 app.use("/admin", adminController);
+app.use("/content", contentController);
 
 // Use PORT from environment variable (Render provides this) or fallback to 4000
 const PORT = process.env.PORT || 4000;

@@ -4,13 +4,14 @@ import AdminMentorList from "./Mentor-List/AdminMentorList";
 import AdminFellowsList from "./Fellows-List/AdminFellowsList";
 import MatchRequestsTable from "./Match-Requests/MatchRequestsTable";
 import AdminManagement from "./Admin-Management/AdminManagement";
+import ContentEditor from "./ContentEditor/ContentEditor";
 
 const AdminDashboard = (props) => {
   // use state to refresh mentor list component when mentor is added from create-mentor form
   const [refreshMentors, setRefreshMentors] = useState(false);
 
   // State for switching between different admin views
-  const [activeView, setActiveView] = useState("mentors"); // "mentors", "fellows", "requests", "create", "admins"
+  const [activeView, setActiveView] = useState("mentors"); // "mentors", "fellows", "requests", "create", "admins", "content"
 
   const handleToggleForm = () => {
     if (activeView === "create") {
@@ -42,6 +43,8 @@ const AdminDashboard = (props) => {
         return <MatchRequestsTable token={props.token} />;
       case "admins":
         return <AdminManagement token={props.token} />;
+      case "content":
+        return <ContentEditor token={props.token} />;
       case "mentors":
       default:
         return (
@@ -105,9 +108,20 @@ const AdminDashboard = (props) => {
             >
               Admin Accounts
             </button>
+
+            <button
+              onClick={() => setActiveView("content")}
+              className={`px-6 py-3 text-lg font-medium rounded-md transition-colors ${
+                activeView === "content"
+                  ? "bg-[#1b0a5f] text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              Content Management
+            </button>
           </div>
 
-          {/* Create button centered below - hide when on admin accounts view */}
+          {/* Create button centered below - hide when on admin accounts or content views */}
           <div className="flex justify-center mb-4">
             <button
               onClick={handleToggleForm}
@@ -116,7 +130,7 @@ const AdminDashboard = (props) => {
                   ? "bg-[#eab246] text-[#1b0a5f]"
                   : "bg-[#1b0a5f] text-white hover:bg-[#6c50e1]"
               }`}
-              style={{ display: activeView === "admins" ? "none" : "block" }}
+              style={{ display: (activeView === "admins" || activeView === "content") ? "none" : "block" }}
             >
               {activeView === "create" ? "Hide Create Form" : "Create New Team"}
             </button>
@@ -135,6 +149,8 @@ const AdminDashboard = (props) => {
                   ? "Match Requests"
                   : activeView === "admins"
                   ? "Admin Accounts"
+                  : activeView === "content"
+                  ? "Content Management"
                   : "Create New Team"}
               </span>
             </span>

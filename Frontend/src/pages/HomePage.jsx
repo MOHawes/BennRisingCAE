@@ -1,16 +1,26 @@
 // Home Page
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { interests } from "../constants/data";
 import MentorDirectory from "../components/public-views/MentorDirectory";
 import SignUp from "../components/auth/signup-section/SignUp";
 import HomepageCardDisplay from "../components/public-views/HomepageCardDisplay";
+import EditableText from "../components/shared/EditableText";
 
 const HomePage = (props) => {
-  // set referencess for dynamic column adjustments
+  // Check if user is admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // set references for dynamic column adjustments
   const rightColumnRef = useRef(null);
   const leftColumnRef = useRef(null);
   const dropdownRef = useRef(null);
   const cardsContainerRef = useRef(null);
+
+  useEffect(() => {
+    // Check admin status
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    setIsAdmin(user.userType === "Admin");
+  }, [props.token]);
 
   useEffect(() => {
     const matchColumnHeights = () => {
@@ -36,43 +46,41 @@ const HomePage = (props) => {
     return () => window.removeEventListener("resize", matchColumnHeights);
   }, []);
 
-  // const interests = ["Music (listening and/or dancing, singing)", "Technology", "Sports", "Outdoors activities (hiking, camping, fishing, etc.)", "Books and writing", "Art", "Exercising", "Food", "Gaming", "Pets and animals", "Gardening", "Cars, motorcycles, boats, power equipment", "Politics"];
-
   return (
     <>
       <div className="bg-[url('https://images.unsplash.com/photo-1531101930610-1b86e66d5fd7?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] relative z-0 bg-cover bg-no-repeat w-full min-h-screen after:content-[''] after:absolute after:inset-0 after:bg-black after:opacity-50">
         <div className="relative z-10 flex flex-col items-center justify-center px-6 pt-12 text-center text-white">
-          <h2 className="mb-4 text-4xl font-bold uppercase md:text-6xl text-shadow-lg">
-             Bennington Rising Program 
-          </h2>
-          <p className="pt-6 mb-6 text-2xl text-shadow-sm">
-            Bennington Rising brings together local youth and Bennington College
-            students to collaborate on real-world projects that strengthen
-            community connections, build practical skills, and support
-            well-being. Through creative, hands-on work, participants develop
-            confidence, curiosity, and a sense of purpose.
-          </p>
+          <EditableText
+            pageId="homepage"
+            sectionKey="hero_title"
+            defaultContent="Bennington Rising Program"
+            isAdmin={isAdmin}
+            token={props.token}
+            className="mb-4 text-4xl font-bold uppercase md:text-6xl text-shadow-lg"
+            tag="h2"
+            contentType="text"
+          />
+
+          <EditableText
+            pageId="homepage"
+            sectionKey="hero_subtitle"
+            defaultContent="Bennington Rising brings together local youth and Bennington College students to collaborate on real-world projects that strengthen community connections, build practical skills, and support well-being. Through creative, hands-on work, participants develop confidence, curiosity, and a sense of purpose."
+            isAdmin={isAdmin}
+            token={props.token}
+            className="pt-6 mb-6 text-2xl text-shadow-sm"
+            tag="p"
+            contentType="text"
+          />
+
           <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-4">
             <div
               ref={leftColumnRef}
               className="flex flex-col col-span-1 p-4 md:col-span-2"
             >
-              <div ref={dropdownRef}>
-                {/* <label className="uppercase">Sort by Interests</label>
-                <select className="w-full border-4 border-[#1b0a5f] p-2 rounded-md" name="interests" id="interests">
-                  <option value="" disabled selected>
-                    Select an option
-                  </option>
-                  {interests.map((interest, index) => (
-                    <option key={index} value={interest} className="text-black">
-                      {interest}
-                    </option>
-                  ))}
-                </select> */}
-              </div>
+              <div ref={dropdownRef}></div>
               {/* Important Dates Button - Outside scrollable area */}
               <div className="flex justify-center mb-4">
-                <a 
+                <a
                   href="/important-dates"
                   className="bg-[#ff0000] hover:bg-[#f19494] text-white font-bold py-3 px-8 rounded-md text-lg uppercase shadow-md"
                 >
@@ -80,7 +88,6 @@ const HomePage = (props) => {
                 </a>
               </div>
               <div ref={cardsContainerRef} className="mt-2 overflow-y-auto">
-              
                 <div className="py-2">
                   <HomepageCardDisplay token={props.token} />
                 </div>
@@ -88,72 +95,100 @@ const HomePage = (props) => {
             </div>
             <div ref={rightColumnRef} className="col-span-1 md:col-span-2">
               <div className="flex flex-col items-center justify-between h-full gap-4">
+                {/* Welcome Box */}
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
-                  <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                    Welcome!
-                  </h2>
-                  <p>
-                    We're glad you're here. Whether you're interested in
-                    science, food, or just trying something new, Bennington
-                    Rising is your chance to build something meaningful, meet
-                    new people, and make an impact in your community!
-                    <br />
-                    This program requires commitment of approximately{" "}
-                    <u>1 hour</u> per week from now until late November.
-                    <br />
-                    Join us in the fun!
-                  </p>
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="welcome_heading"
+                    defaultContent="Welcome!"
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white"
+                    tag="h2"
+                    contentType="text"
+                  />
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="welcome_text"
+                    defaultContent="We're glad you're here. Whether you're interested in science, food, or just trying something new, Bennington Rising is your chance to build something meaningful, meet new people, and make an impact in your community!<br />This program requires commitment of approximately <u>1 hour</u> per week from now until late November.<br />Join us in the fun!"
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className=""
+                    tag="div"
+                    contentType="html"
+                  />
                 </div>
-                <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
-                  <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
 
-                    Instructions for fellows
+                {/* Instructions Box */}
+                <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="instructions_heading"
+                    defaultContent="Instructions for fellows"
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white"
+                    tag="h2"
+                    contentType="text"
+                  />
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="instructions_content"
+                    defaultContent='<div class="text-left"><ul class="list-disc list-inside space-y-2 text-white"><li>Scroll through the teams. Each team indicates which project they are a part of.</li><li>Click a team to learn more.</li><li>Pick your favorite team.</li><li>You will be asked to fill out a quick application form.</li><li>Ask your parent/guardian to check their email for a consent form.</li></ul></div>'
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className=""
+                    tag="div"
+                    contentType="html"
+                  />
+                </div>
 
-                  </h2>
-                  <div className="text-left">
-                    <ul className="list-disc list-inside space-y-2 text-white">
-                      <li>
-                        Scroll through the teams. Each team indicates which
-                        project they are a part of.
-                      </li>
-                      <li>Click a team to learn more.</li>
-                      <li>Pick your favorite team.</li>
-                      <li>
-                        You will be asked to fill out a quick application form.
-                      </li>
-                      <li>
-                        Ask your parent/guardian to check their email for a
-                        consent form.
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                {/* Project 1 Box */}
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
-                  <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                    “What’s in your food” project statement
-                  </h2>
-                  <p>
-                    Join two college students, and investigate what's really inside the foods we eat every day.
-                    You'll research food labels, dig into how chemicals affect
-                    our health, and turn your findings into something creative
-                    to share with the community at the Bennington Museum. Be a part of
-                    hands-on science that helps people make smarter choices.
-                  </p>
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="project1_heading"
+                    defaultContent="What's in your food project statement"
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white"
+                    tag="h2"
+                    contentType="text"
+                  />
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="project1_content"
+                    defaultContent="Join two college students, and investigate what's really inside the foods we eat every day. You'll research food labels, dig into how chemicals affect our health, and turn your findings into something creative to share with the community at the Bennington Museum. Be a part of hands-on science that helps people make smarter choices."
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className=""
+                    tag="p"
+                    contentType="text"
+                  />
                 </div>
+
+                {/* Project 2 Box */}
                 <div className="bg-[#1b0a5f] rounded-lg p-4 w-full h-full flex flex-col justify-center items-center">
-                  <h2 className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white">
-                    "Kids for science!" project statement
-                  </h2>
-                  <p>
-                    Join two college students and co-develop a brief hands-on
-                    science lesson for elementary school kids. Your team will
-                    create an exciting lesson with an activity that sparks
-                    curiosity in young learners—while building your skills in
-                    collaborative problem-solving, science, communication,
-                    and educational design. You and your team will deliver the brief
-                    lesson to elementary school kids, showing them that science
-                    is fun.
-                  </p>
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="project2_heading"
+                    defaultContent='"Kids for science!" project statement'
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className="w-full pb-1 mb-3 text-xl font-bold text-center uppercase border-b-2 border-white"
+                    tag="h2"
+                    contentType="text"
+                  />
+                  <EditableText
+                    pageId="homepage"
+                    sectionKey="project2_content"
+                    defaultContent="Join two college students and co-develop a brief hands-on science lesson for elementary school kids. Your team will create an exciting lesson with an activity that sparks curiosity in young learners—while building your skills in collaborative problem-solving, science, communication, and educational design. You and your team will deliver the brief lesson to elementary school kids, showing them that science is fun."
+                    isAdmin={isAdmin}
+                    token={props.token}
+                    className=""
+                    tag="p"
+                    contentType="text"
+                  />
                 </div>
               </div>
             </div>
